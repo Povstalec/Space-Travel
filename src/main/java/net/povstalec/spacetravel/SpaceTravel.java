@@ -12,6 +12,9 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.povstalec.spacetravel.common.init.CommandInit;
+import net.povstalec.spacetravel.common.init.PacketHandlerInit;
+import net.povstalec.spacetravel.common.init.WorldGenInit;
 
 @Mod(SpaceTravel.MODID)
 public class SpaceTravel
@@ -26,12 +29,18 @@ public class SpaceTravel
 		
 		modEventBus.addListener(this::commonSetup);
 		
+        WorldGenInit.register(modEventBus);
+		
 		MinecraftForge.EVENT_BUS.register(this);
+		MinecraftForge.EVENT_BUS.addListener(CommandInit::registerCommands);
 	}
 	
 	private void commonSetup(final FMLCommonSetupEvent event)
 	{
-		// TODO Use this I guess?
+		event.enqueueWork(() -> 
+    	{
+            PacketHandlerInit.register();
+    	});
 	}
 	
 	// You can use EventBusSubscriber to automatically register all static methods in the class annotated with @SubscribeEvent
