@@ -1,4 +1,4 @@
-package net.povstalec.spacetravel.client;
+package net.povstalec.spacetravel.client.space_object;
 
 import javax.annotation.Nullable;
 
@@ -10,6 +10,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 
 import net.minecraft.client.Camera;
 import net.minecraft.client.multiplayer.ClientLevel;
+import net.povstalec.spacetravel.client.ViewCenter;
 import net.povstalec.spacetravel.common.util.SpaceCoords;
 
 public interface RenderableSpaceObject
@@ -43,8 +44,7 @@ public interface RenderableSpaceObject
 	 * @param parentVector
 	 */
 	public void render(ViewCenter viewCenter, ClientLevel level, float partialTicks, PoseStack stack, Camera camera, 
-			Matrix4f projectionMatrix, boolean isFoggy, Runnable setupFog, BufferBuilder bufferbuilder, 
-			Vector3f parentVector);
+			Matrix4f projectionMatrix, boolean isFoggy, Runnable setupFog, BufferBuilder bufferbuilder, Vector3f parentVector);
 	
 	/**
 	 * Method used for rendering the sky from some Space Object's point of view

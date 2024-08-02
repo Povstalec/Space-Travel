@@ -1,4 +1,4 @@
-package net.povstalec.spacetravel.client;
+package net.povstalec.spacetravel.client.render;
 
 import org.joml.Matrix4f;
 import org.joml.Vector3f;

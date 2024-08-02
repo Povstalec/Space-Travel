@@ -27,6 +27,8 @@ import net.minecraft.world.phys.Vec3;
 import net.povstalec.spacetravel.SpaceTravel;
 import net.povstalec.spacetravel.client.effects.FogEffects;
 import net.povstalec.spacetravel.client.effects.SkyEffects;
+import net.povstalec.spacetravel.client.render.SpaceRenderer;
+import net.povstalec.spacetravel.client.space_object.RenderableSpaceObject;
 import net.povstalec.spacetravel.common.space.objects.SpaceObject;
 import net.povstalec.spacetravel.common.util.AxisRotation;
 import net.povstalec.spacetravel.common.util.SpaceCoords;
@@ -34,9 +36,9 @@ import net.povstalec.spacetravel.common.util.SpaceCoords;
 public class ViewCenter
 {
 	@Nullable
-	private ResourceKey<SpaceObject> viewCenterKey;
+	private ResourceKey<RenderableSpaceObject> viewCenterKey;
 	@Nullable
-	private RenderableSpaceObject viewCenter;
+	public RenderableSpaceObject viewCenter;
 	
 	private Minecraft minecraft = Minecraft.getInstance();
 	@Nullable
@@ -45,9 +47,9 @@ public class ViewCenter
 	private VertexBuffer darkBuffer = SkyEffects.createDarkSky();
 	
 	private SpaceCoords coords;
-	private AxisRotation axisRotation; //TODO Is this really necessary? I'd say the viewCenter axis rotation could be used here instead
+	private AxisRotation axisRotation = new AxisRotation(); //TODO Is this really necessary? I'd say the viewCenter axis rotation could be used here instead
 	
-	public ViewCenter(Optional<ResourceKey<SpaceObject>> viewCenterKey, AxisRotation axisRotation)
+	public ViewCenter(Optional<ResourceKey<RenderableSpaceObject>> viewCenterKey)
 	{
 		if(viewCenterKey.isPresent())
 			this.viewCenterKey = viewCenterKey.get();
@@ -70,7 +72,7 @@ public class ViewCenter
 		return true;
 	}
 	
-	public Optional<ResourceKey<SpaceObject>> getViewCenterKey()
+	public Optional<ResourceKey<RenderableSpaceObject>> getViewCenterKey()
 	{
 		if(viewCenterKey != null)
 			return Optional.of(viewCenterKey);
@@ -135,7 +137,7 @@ public class ViewCenter
 	public void renderSkyObjects(RenderableSpaceObject masterParent, ClientLevel level, float partialTicks, PoseStack stack, Camera camera, 
 			Matrix4f projectionMatrix, boolean isFoggy, Runnable setupFog, BufferBuilder bufferbuilder)
 	{
-		//TODO Space.render(this, masterParent, level, camera, partialTicks, stack, projectionMatrix, isFoggy, setupFog, bufferbuilder);
+		SpaceRenderer.render(this, masterParent, level, camera, partialTicks, stack, projectionMatrix, isFoggy, setupFog, bufferbuilder);
 	}
 	
 	public boolean renderSky(ClientLevel level, int ticks, float partialTicks, PoseStack stack, Camera camera, Matrix4f projectionMatrix, boolean isFoggy, Runnable setupFog)
@@ -168,7 +170,7 @@ public class ViewCenter
 			
 			renderSkyObjectsFrom(level, camera, partialTicks, stack, projectionMatrix, setupFog, bufferbuilder);
 	        
-	        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+			RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 	        RenderSystem.disableBlend();
 	        
 	        RenderSystem.setShaderColor(0.0F, 0.0F, 0.0F, 1.0F);
@@ -188,6 +190,7 @@ public class ViewCenter
 	        else
 	        	RenderSystem.setShaderColor(skyX, skyY, skyZ, 1.0F);
 	        
+	        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 	        RenderSystem.depthMask(true);
 		}
 		

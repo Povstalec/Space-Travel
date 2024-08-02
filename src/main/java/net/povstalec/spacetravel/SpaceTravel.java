@@ -12,6 +12,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.povstalec.spacetravel.client.SpaceTravelDimensionSpecialEffects;
 import net.povstalec.spacetravel.common.init.CommandInit;
 import net.povstalec.spacetravel.common.init.PacketHandlerInit;
 import net.povstalec.spacetravel.common.init.WorldGenInit;
@@ -50,7 +51,7 @@ public class SpaceTravel
 		@SubscribeEvent
 		public static void registerDimensionalEffects(RegisterDimensionSpecialEffectsEvent event)
 		{
-			//SpaceDimensionSpecialEffects.registerSkyEffects(event);
+			SpaceTravelDimensionSpecialEffects.register(event);
 		}
 	}
 }
