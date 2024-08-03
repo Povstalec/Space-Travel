@@ -1,16 +1,10 @@
 package net.povstalec.spacetravel.client;
 
-import java.util.ArrayList;
-import java.util.Optional;
-
 import javax.annotation.Nullable;
 
 import org.joml.Matrix4f;
-import org.joml.Vector3f;
 
-import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.Tesselator;
 
 import net.minecraft.client.Camera;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -20,10 +14,6 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.client.event.RegisterDimensionSpecialEffectsEvent;
 import net.povstalec.spacetravel.SpaceTravel;
 import net.povstalec.spacetravel.client.render.SpaceRenderer;
-import net.povstalec.spacetravel.client.space_object.ClientGalaxy;
-import net.povstalec.spacetravel.common.util.AxisRotation;
-import net.povstalec.spacetravel.common.util.SpaceCoords;
-import net.povstalec.spacetravel.common.util.TextureLayer;
 
 public class SpaceTravelDimensionSpecialEffects extends DimensionSpecialEffects
 {

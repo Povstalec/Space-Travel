@@ -12,7 +12,7 @@ import net.povstalec.spacetravel.common.util.TextureLayer;
 
 public class Galaxy
 {
-	public static class SpiralGalaxy extends StarField
+	public static class SpiralGalaxy extends AbstractStarField
 	{
 		public static final ResourceLocation SPIRAL_GALAXY_LOCATION = new ResourceLocation(SpaceTravel.MODID, "spiral_galaxy");
 		
@@ -47,7 +47,7 @@ public class Galaxy
 			this.armThickness = armThickness;
 		}
 		
-		public int getNumberOfArms()
+		public short getNumberOfArms()
 		{
 			return numberOfArms;
 		}

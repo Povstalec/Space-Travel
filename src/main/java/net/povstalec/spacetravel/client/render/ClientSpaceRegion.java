@@ -14,9 +14,8 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.povstalec.spacetravel.SpaceTravel;
 import net.povstalec.spacetravel.client.RenderCenter;
-import net.povstalec.spacetravel.client.space_object.ClientGalaxy;
-import net.povstalec.spacetravel.client.space_object.ClientSpaceObject;
-import net.povstalec.spacetravel.client.space_object.RenderableSpaceObject;
+import net.povstalec.spacetravel.client.render.space_objects.GalaxyRenderer;
+import net.povstalec.spacetravel.client.render.space_objects.SpaceObjectRenderer;
 import net.povstalec.spacetravel.common.space.SpaceRegion.Position;
 import net.povstalec.spacetravel.common.space.objects.Galaxy;
 import net.povstalec.spacetravel.common.space.objects.SpaceObject;
@@ -27,7 +26,7 @@ public final class ClientSpaceRegion
 	
 	private Position pos;
 	
-	protected ArrayList<RenderableSpaceObject> children = new ArrayList<RenderableSpaceObject>();
+	protected ArrayList<SpaceObjectRenderer<?>> children = new ArrayList<SpaceObjectRenderer<?>>();
 	
 	public ClientSpaceRegion(Position pos, CompoundTag childrenTag)
 	{
@@ -50,12 +49,12 @@ public final class ClientSpaceRegion
 		return pos;
 	}
 	
-	public ArrayList<RenderableSpaceObject> getChildren()
+	public ArrayList<SpaceObjectRenderer<?>> getChildren()
 	{
 		return children;
 	}
 	
-	public boolean addChild(RenderableSpaceObject child)
+	public boolean addChild(SpaceObjectRenderer<?> child)
 	{
 		if(this.children.contains(child))
 			return false;
@@ -64,9 +63,9 @@ public final class ClientSpaceRegion
 		return true;
 	}
 	
-	public void render(RenderCenter viewCenter, RenderableSpaceObject masterParent, ClientLevel level, Camera camera, float partialTicks, PoseStack stack, Matrix4f projectionMatrix, boolean isFoggy, Runnable setupFog, BufferBuilder bufferbuilder)
+	public void render(RenderCenter viewCenter, SpaceObjectRenderer<?> masterParent, ClientLevel level, Camera camera, float partialTicks, PoseStack stack, Matrix4f projectionMatrix, boolean isFoggy, Runnable setupFog, BufferBuilder bufferbuilder)
 	{
-		for(RenderableSpaceObject spaceObject : children)
+		for(SpaceObjectRenderer<?> spaceObject : children)
 		{
 			if(spaceObject != masterParent) // Makes sure the master parent (usually galaxy) is rendered last, that way stars from other galaxies don't get rendered over planets
 				spaceObject.render(viewCenter, level, partialTicks, stack, camera, projectionMatrix, isFoggy, setupFog, bufferbuilder, NULL_VECTOR);
@@ -78,50 +77,55 @@ public final class ClientSpaceRegion
 	private void deserializeChildren(CompoundTag childrenTag)
 	{
 		SpaceTravel.LOGGER.info("Deserializing region children");
-    	for(String childId : childrenTag.getAllKeys())
-    	{
-    		SpaceTravel.LOGGER.info("Deserializing " + childId);
-    		
-    		CompoundTag childTag = childrenTag.getCompound(childId);
-    		String objectTypeString = childTag.getString(SpaceObject.OBJECT_TYPE);
-    		
-    		if(objectTypeString != null && ResourceLocation.isValidResourceLocation(objectTypeString))
-    		{
-        		SpaceTravel.LOGGER.info("Type: " + objectTypeString);
-    			RenderableSpaceObject spaceObject = null;
-    			ResourceLocation objectType = new ResourceLocation(objectTypeString);
-    			
-    			// Deserializes object based on its type specified in the object_type
-    			if(objectType.equals(SpaceObject.SPACE_OBJECT_LOCATION))
-    				spaceObject = deserializeSpaceObject(childTag);
-    			else if(objectType.equals(Galaxy.SpiralGalaxy.SPIRAL_GALAXY_LOCATION))
-    				spaceObject = deserializeSpiralGalaxy(childTag);
-    			
-    			//TODO Add event for leftover object types
-    			
-    			if(spaceObject != null && spaceObject.isInitialized())
-    			{
-
-    		    	if(addChild(spaceObject))
-    		    		SpaceTravel.LOGGER.info("Added " + childId);
-    			}
-    		}
-    	}
+		for(String childId : childrenTag.getAllKeys())
+		{
+			SpaceTravel.LOGGER.info("Deserializing " + childId);
+			
+			CompoundTag childTag = childrenTag.getCompound(childId);
+			String objectTypeString = childTag.getString(SpaceObject.OBJECT_TYPE);
+			
+			if(objectTypeString != null && ResourceLocation.isValidResourceLocation(objectTypeString))
+			{
+				SpaceTravel.LOGGER.info("Type: " + objectTypeString);
+				SpaceObjectRenderer<?> spaceObjectRenderer = null;
+				ResourceLocation objectType = new ResourceLocation(objectTypeString);
+				
+				// Deserializes object based on its type specified in the object_type
+				if(objectType.equals(SpaceObject.SPACE_OBJECT_LOCATION))
+					spaceObjectRenderer = deserializeSpaceObject(childTag);
+				else if(objectType.equals(Galaxy.SpiralGalaxy.SPIRAL_GALAXY_LOCATION))
+					spaceObjectRenderer = deserializeSpiralGalaxy(childTag);
+				
+				//TODO Add event for leftover object types
+				
+				if(spaceObjectRenderer != null)
+				{
+					if(addChild(spaceObjectRenderer))
+						SpaceTravel.LOGGER.info("Added " + childId);
+				}
+			}
+		}
 	}
 	
-	private RenderableSpaceObject deserializeSpaceObject(CompoundTag childTag)
+	private SpaceObjectRenderer<SpaceObject> deserializeSpaceObject(CompoundTag childTag)
 	{
-		ClientSpaceObject spaceObject = new ClientSpaceObject();
+		SpaceObject spaceObject = new SpaceObject();
 		spaceObject.deserializeNBT(childTag);
-		System.out.println(spaceObject == null);
-    	return spaceObject;
+    	
+    	if(spaceObject.isInitialized())
+    		return new SpaceObjectRenderer<SpaceObject>(spaceObject);
+		
+    	return null;
 	}
 	
-	private RenderableSpaceObject deserializeSpiralGalaxy(CompoundTag childTag)
+	private GalaxyRenderer.SpiralGalaxy deserializeSpiralGalaxy(CompoundTag childTag)
 	{
-		ClientGalaxy.ClientSpiralGalaxy spiralGalaxy = new ClientGalaxy.ClientSpiralGalaxy();
+		Galaxy.SpiralGalaxy spiralGalaxy = new Galaxy.SpiralGalaxy();
     	spiralGalaxy.deserializeNBT(childTag);
     	
-    	return spiralGalaxy;
+    	if(spiralGalaxy.isInitialized())
+    		return new GalaxyRenderer.SpiralGalaxy(spiralGalaxy);
+    	
+    	return null;
 	}
 }

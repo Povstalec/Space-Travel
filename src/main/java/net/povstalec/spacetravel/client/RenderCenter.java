@@ -1,8 +1,5 @@
 package net.povstalec.spacetravel.client;
 
-import java.util.HashMap;
-import java.util.Optional;
-
 import javax.annotation.Nullable;
 
 import org.joml.Matrix4f;
@@ -21,24 +18,21 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.FogRenderer;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.ShaderInstance;
-import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.phys.Vec3;
-import net.povstalec.spacetravel.SpaceTravel;
 import net.povstalec.spacetravel.client.effects.FogEffects;
 import net.povstalec.spacetravel.client.effects.SkyEffects;
 import net.povstalec.spacetravel.client.render.SpaceRenderer;
-import net.povstalec.spacetravel.client.space_object.RenderableSpaceObject;
+import net.povstalec.spacetravel.client.render.space_objects.SpaceObjectRenderer;
 import net.povstalec.spacetravel.common.space.objects.SpaceObject;
 import net.povstalec.spacetravel.common.util.AxisRotation;
 import net.povstalec.spacetravel.common.util.SpaceCoords;
 
 public class RenderCenter
 {
+	/*@Nullable
+	private ResourceKey<RenderableSpaceObject> viewCenterKey;*/
 	@Nullable
-	private ResourceKey<RenderableSpaceObject> viewCenterKey;
-	@Nullable
-	public RenderableSpaceObject viewCenter;
+	public SpaceObjectRenderer<?> viewCenter;
 	
 	private Minecraft minecraft = Minecraft.getInstance();
 	@Nullable
@@ -49,13 +43,13 @@ public class RenderCenter
 	private SpaceCoords coords;
 	private AxisRotation axisRotation = new AxisRotation(); //TODO Is this really necessary? I'd say the viewCenter axis rotation could be used here instead
 	
-	public RenderCenter(Optional<ResourceKey<RenderableSpaceObject>> viewCenterKey)
+	public RenderCenter(/*Optional<ResourceKey<RenderableSpaceObject>> viewCenterKey*/)
 	{
-		if(viewCenterKey.isPresent())
-			this.viewCenterKey = viewCenterKey.get();
+		//if(viewCenterKey.isPresent())
+		//	this.viewCenterKey = viewCenterKey.get();
 	}
 	
-	public boolean setViewCenterObject(HashMap<ResourceLocation, RenderableSpaceObject> spaceObjects)
+	/*public boolean setViewCenterObject(HashMap<ResourceLocation, RenderableSpaceObject> spaceObjects)
 	{
 		if(viewCenterKey != null)
 		{
@@ -78,7 +72,7 @@ public class RenderCenter
 			return Optional.of(viewCenterKey);
 		
 		return Optional.empty();
-	}
+	}*/
 	
 	public SpaceCoords getCoords()
 	{
@@ -108,7 +102,7 @@ public class RenderCenter
 	public boolean objectEquals(SpaceObject spaceObject)
 	{
 		if(this.viewCenter != null)
-			return spaceObject == this.viewCenter;
+			return spaceObject == this.viewCenter.spaceObject;
 		
 		return false;
 	}
@@ -118,7 +112,7 @@ public class RenderCenter
 		if(viewCenter == null)
 			return false;
 		
-		coords = viewCenter.getCoords();
+		coords = viewCenter.spaceObject.getSpaceCoords();
 		
 		stack.pushPose();
 		
@@ -134,7 +128,7 @@ public class RenderCenter
 		return true;
 	}
 	
-	public void renderSkyObjects(RenderableSpaceObject masterParent, ClientLevel level, float partialTicks, PoseStack stack, Camera camera, 
+	public void renderSkyObjects(SpaceObjectRenderer<?> masterParent, ClientLevel level, float partialTicks, PoseStack stack, Camera camera, 
 			Matrix4f projectionMatrix, boolean isFoggy, Runnable setupFog, BufferBuilder bufferbuilder)
 	{
 		SpaceRenderer.render(this, masterParent, level, camera, partialTicks, stack, projectionMatrix, isFoggy, setupFog, bufferbuilder);

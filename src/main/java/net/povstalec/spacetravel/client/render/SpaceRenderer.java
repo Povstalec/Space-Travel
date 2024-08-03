@@ -11,7 +11,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Camera;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.povstalec.spacetravel.client.RenderCenter;
-import net.povstalec.spacetravel.client.space_object.RenderableSpaceObject;
+import net.povstalec.spacetravel.client.render.space_objects.SpaceObjectRenderer;
 import net.povstalec.spacetravel.common.space.SpaceRegion;
 
 public class SpaceRenderer
@@ -37,7 +37,7 @@ public class SpaceRenderer
 		SPACE_REGIONS.remove(regionPos);
 	}
 	
-	public static void render(RenderCenter viewCenter, RenderableSpaceObject masterParent, ClientLevel level, Camera camera, float partialTicks, PoseStack stack, Matrix4f projectionMatrix, boolean isFoggy, Runnable setupFog, BufferBuilder bufferbuilder)
+	public static void render(RenderCenter viewCenter, SpaceObjectRenderer<?> masterParent, ClientLevel level, Camera camera, float partialTicks, PoseStack stack, Matrix4f projectionMatrix, boolean isFoggy, Runnable setupFog, BufferBuilder bufferbuilder)
 	{
 		for(Map.Entry<SpaceRegion.Position, ClientSpaceRegion> spaceRegionEntry : SPACE_REGIONS.entrySet())
 		{

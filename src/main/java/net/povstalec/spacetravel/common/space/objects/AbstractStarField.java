@@ -12,22 +12,20 @@ import net.povstalec.spacetravel.common.util.SpaceCoords;
 import net.povstalec.spacetravel.common.util.StarInfo;
 import net.povstalec.spacetravel.common.util.TextureLayer;
 
-public abstract class StarField extends SpaceObject
+public abstract class AbstractStarField extends SpaceObject
 {
 	public static final String SEED = "seed";
 	public static final String DIAMETER = "diameter";
 	public static final String STARS = "stars";
-	
-	protected StarInfo starInfo;
 	
 	protected long seed;
 	
 	protected int diameter;
 	protected int stars;
 	
-	public StarField() {}
+	public AbstractStarField() {}
 	
-	public StarField(ResourceLocation objectType, Optional<String> parentName, SpaceCoords coords, AxisRotation axisRotation,
+	public AbstractStarField(ResourceLocation objectType, Optional<String> parentName, SpaceCoords coords, AxisRotation axisRotation,
 			List<TextureLayer> textureLayers, long seed, int diameter, int numberOfStars)
 	{
 		super(objectType, parentName, coords, axisRotation, textureLayers);

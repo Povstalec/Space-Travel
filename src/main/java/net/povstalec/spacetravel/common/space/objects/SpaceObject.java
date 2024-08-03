@@ -89,6 +89,11 @@ public class SpaceObject implements INBTSerializable<CompoundTag>
 		return this.coords;
 	}
 	
+	public SpaceCoords addSpaceCoords(SpaceCoords other)
+	{
+		return this.coords.add(other);
+	}
+	
 	public Vector3f getPosition(long ticks)
 	{
 		return new Vector3f();

@@ -11,7 +11,7 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.Level;
 import net.povstalec.spacetravel.client.render.ClientSpaceRegion;
 import net.povstalec.spacetravel.client.render.SpaceRenderer;
-import net.povstalec.spacetravel.client.space_object.ClientSpaceObject;
+import net.povstalec.spacetravel.client.render.space_objects.SpaceObjectRenderer;
 import net.povstalec.spacetravel.common.space.objects.SpaceObject;
 import net.povstalec.spacetravel.common.util.AxisRotation;
 import net.povstalec.spacetravel.common.util.SpaceCoords;
@@ -55,8 +55,10 @@ public class ClientAccess
     	
     	//spaceRegion.addChild(testCenter);
 		
-    	ClientSpaceObject testCenter = new ClientSpaceObject(SpaceObject.SPACE_OBJECT_LOCATION, Optional.empty(), new SpaceCoords(), new AxisRotation(), new ArrayList<TextureLayer>());
-		SpaceRenderer.viewCenter = new RenderCenter(Optional.empty());
-		SpaceRenderer.viewCenter.viewCenter = testCenter;
+    	SpaceObject testCenter = new SpaceObject(SpaceObject.SPACE_OBJECT_LOCATION, Optional.empty(), new SpaceCoords(), new AxisRotation(), new ArrayList<TextureLayer>());
+    	SpaceObjectRenderer.Generic testRenderer = new SpaceObjectRenderer.Generic(testCenter);
+    	
+		SpaceRenderer.viewCenter = new RenderCenter();
+		SpaceRenderer.viewCenter.viewCenter = testRenderer;
     }
 }
