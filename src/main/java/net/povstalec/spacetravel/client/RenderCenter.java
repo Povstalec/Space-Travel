@@ -33,7 +33,7 @@ import net.povstalec.spacetravel.common.space.objects.SpaceObject;
 import net.povstalec.spacetravel.common.util.AxisRotation;
 import net.povstalec.spacetravel.common.util.SpaceCoords;
 
-public class ViewCenter
+public class RenderCenter
 {
 	@Nullable
 	private ResourceKey<RenderableSpaceObject> viewCenterKey;
@@ -49,7 +49,7 @@ public class ViewCenter
 	private SpaceCoords coords;
 	private AxisRotation axisRotation = new AxisRotation(); //TODO Is this really necessary? I'd say the viewCenter axis rotation could be used here instead
 	
-	public ViewCenter(Optional<ResourceKey<RenderableSpaceObject>> viewCenterKey)
+	public RenderCenter(Optional<ResourceKey<RenderableSpaceObject>> viewCenterKey)
 	{
 		if(viewCenterKey.isPresent())
 			this.viewCenterKey = viewCenterKey.get();

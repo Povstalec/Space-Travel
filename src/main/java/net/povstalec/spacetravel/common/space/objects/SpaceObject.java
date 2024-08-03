@@ -25,6 +25,8 @@ public class SpaceObject implements INBTSerializable<CompoundTag>
 {
 	public static final float DEFAULT_DISTANCE = 100.0F;
 	
+	public static final String OBJECT_TYPE = "object_type";
+	
 	public static final String PARENT_NAME = "parent_name";
 	
 	public static final String SPACE_OBJECT_CHILDREN = "space_object_children";
@@ -40,6 +42,8 @@ public class SpaceObject implements INBTSerializable<CompoundTag>
 	public static final ResourceLocation SPACE_OBJECT_LOCATION = new ResourceLocation(SpaceTravel.MODID, "space_object");
 	public static final ResourceKey<Registry<SpaceObject>> REGISTRY_KEY = ResourceKey.createRegistryKey(SPACE_OBJECT_LOCATION);
 	public static final Codec<ResourceKey<SpaceObject>> RESOURCE_KEY_CODEC = ResourceKey.codec(REGISTRY_KEY);
+	
+	private ResourceLocation objectType;
 	
 	@Nullable
 	protected String parentName;
@@ -57,8 +61,10 @@ public class SpaceObject implements INBTSerializable<CompoundTag>
 	
 	public SpaceObject(){}
 	
-	public SpaceObject(Optional<String> parentName, SpaceCoords coords, AxisRotation axisRotation, List<TextureLayer> textureLayers)
+	public SpaceObject(ResourceLocation objectType, Optional<String> parentName, SpaceCoords coords, AxisRotation axisRotation, List<TextureLayer> textureLayers)
 	{
+		this.objectType = objectType;
+		
 		if(parentName.isPresent())
 				this.parentName = parentName.get();
 		
@@ -66,6 +72,16 @@ public class SpaceObject implements INBTSerializable<CompoundTag>
 		this.axisRotation = axisRotation;
 		
 		this.textureLayers = new ArrayList<TextureLayer>(textureLayers);
+	}
+	
+	public ResourceLocation getObjectType()
+	{
+		return objectType;
+	}
+	
+	public boolean isInitialized()
+	{
+		return objectType != null && coords != null && axisRotation != null && textureLayers != null;
 	}
 	
 	public SpaceCoords getSpaceCoords()
@@ -138,25 +154,9 @@ public class SpaceObject implements INBTSerializable<CompoundTag>
 	//*************************************Saving and Loading*************************************
 	//============================================================================================
 	
-	/*@Override
-	public CompoundTag serializeNBT()
-	{
-		CompoundTag tag = new CompoundTag();
-		tag.putLong(LY, ly);
-		tag.putDouble(KM, km);
-		
-		return tag;
-	}
-	
-	@Override
-	public void deserializeNBT(CompoundTag tag)
-	{
-		ly = tag.getLong(LY);
-		km = tag.getDouble(KM);
-	}*/
-	
 	public void writeToBuffer(FriendlyByteBuf buffer)
 	{
+		buffer.writeResourceLocation(objectType);
 		buffer.writeOptional(Optional.ofNullable(parentName), (buf, key) -> buf.writeUtf(key));
 		coords.writeToBuffer(buffer);
 		axisRotation.writeToBuffer(buffer);
@@ -165,13 +165,15 @@ public class SpaceObject implements INBTSerializable<CompoundTag>
 	
 	public static SpaceObject readFromBuffer(FriendlyByteBuf buffer)
 	{
-		return new SpaceObject(buffer.readOptional((buf) -> buf.readUtf()), SpaceCoords.readFromBuffer(buffer), AxisRotation.readFromBuffer(buffer), new ArrayList<TextureLayer>()); // TODO Read texture layers
+		return new SpaceObject(buffer.readResourceLocation(), buffer.readOptional((buf) -> buf.readUtf()), SpaceCoords.readFromBuffer(buffer), AxisRotation.readFromBuffer(buffer), new ArrayList<TextureLayer>()); // TODO Read texture layers
 	}
 
 	@Override
 	public CompoundTag serializeNBT()
 	{
 		CompoundTag tag = new CompoundTag();
+		
+		tag.putString(OBJECT_TYPE, objectType.toString());
 		
 		if(parentName != null)
 			tag.putString(PARENT_NAME, parentName);
@@ -194,17 +196,19 @@ public class SpaceObject implements INBTSerializable<CompoundTag>
 	@Override
 	public void deserializeNBT(CompoundTag tag)
 	{
+		objectType = new ResourceLocation(tag.getString(OBJECT_TYPE));
+		
 		if(tag.contains(PARENT_NAME))
 			this.parentName = tag.getString(PARENT_NAME);
 	
-	SpaceCoords coords = new SpaceCoords();
-	coords.deserializeNBT(tag.getCompound(COORDS));
-	this.coords = coords;
-	
-	AxisRotation axisRotation = new AxisRotation();
-	axisRotation.deserializeNBT(tag.getCompound(AXIS_ROTATION));
-	this.axisRotation = axisRotation;
-	
-	this.textureLayers = new ArrayList<TextureLayer>();
+		SpaceCoords coords = new SpaceCoords();
+		coords.deserializeNBT(tag.getCompound(COORDS));
+		this.coords = coords;
+		
+		AxisRotation axisRotation = new AxisRotation();
+		axisRotation.deserializeNBT(tag.getCompound(AXIS_ROTATION));
+		this.axisRotation = axisRotation;
+		
+		this.textureLayers = new ArrayList<TextureLayer>();
 	}
 }

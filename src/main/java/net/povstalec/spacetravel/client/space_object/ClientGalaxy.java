@@ -23,9 +23,10 @@ import net.minecraft.client.Camera;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.FogRenderer;
 import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
 import net.povstalec.spacetravel.SpaceTravel;
-import net.povstalec.spacetravel.client.ViewCenter;
+import net.povstalec.spacetravel.client.RenderCenter;
 import net.povstalec.spacetravel.client.render.StarBuffer;
 import net.povstalec.spacetravel.client.render.shaders.SpaceTravelShaders;
 import net.povstalec.spacetravel.common.space.objects.Galaxy.SpiralGalaxy;
@@ -48,10 +49,12 @@ public class ClientGalaxy
 
 		protected ArrayList<RenderableSpaceObject> clientChildren = new ArrayList<RenderableSpaceObject>();
 		
-		public ClientSpiralGalaxy(Optional<String> parentName, SpaceCoords coords, AxisRotation axisRotation,
+		public ClientSpiralGalaxy() {}
+		
+		public ClientSpiralGalaxy(ResourceLocation objectType, Optional<String> parentName, SpaceCoords coords, AxisRotation axisRotation,
 				List<TextureLayer> textureLayers, long seed, int diameter, int numberOfArms, double armThickness, int starsPerArm)
 		{
-			super(parentName, coords, axisRotation, textureLayers, seed, diameter, numberOfArms, armThickness, starsPerArm);
+			super(objectType, parentName, coords, axisRotation, textureLayers, seed, diameter, numberOfArms, armThickness, starsPerArm);
 		}
 		
 		public boolean requiresSetup()
@@ -226,7 +229,7 @@ public class ClientGalaxy
 		}
 		
 		@Override
-		public void render(ViewCenter viewCenter, ClientLevel level, float partialTicks, PoseStack stack, Camera camera, Matrix4f projectionMatrix, boolean isFoggy, Runnable setupFog, BufferBuilder bufferbuilder, Vector3f parentVector)
+		public void render(RenderCenter viewCenter, ClientLevel level, float partialTicks, PoseStack stack, Camera camera, Matrix4f projectionMatrix, boolean isFoggy, Runnable setupFog, BufferBuilder bufferbuilder, Vector3f parentVector)
 		{
 			if(requiresSetup())
 				setupBuffer(viewCenter.getCoords().sub(this.coords));

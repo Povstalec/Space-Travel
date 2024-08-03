@@ -10,7 +10,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 
 import net.minecraft.client.Camera;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.povstalec.spacetravel.client.ViewCenter;
+import net.povstalec.spacetravel.client.RenderCenter;
 import net.povstalec.spacetravel.common.util.SpaceCoords;
 
 public interface RenderableSpaceObject
@@ -30,6 +30,8 @@ public interface RenderableSpaceObject
 	
 	public Vector3f getPos(long ticks);
 	
+	public boolean isInitialized();
+	
 	/**
 	 * Method for rendering a Space Object in the sky
 	 * @param viewCenter
@@ -43,7 +45,7 @@ public interface RenderableSpaceObject
 	 * @param bufferbuilder
 	 * @param parentVector
 	 */
-	public void render(ViewCenter viewCenter, ClientLevel level, float partialTicks, PoseStack stack, Camera camera, 
+	public void render(RenderCenter viewCenter, ClientLevel level, float partialTicks, PoseStack stack, Camera camera, 
 			Matrix4f projectionMatrix, boolean isFoggy, Runnable setupFog, BufferBuilder bufferbuilder, Vector3f parentVector);
 	
 	/**
@@ -58,7 +60,7 @@ public interface RenderableSpaceObject
 	 * @param setupFog
 	 * @param bufferbuilder
 	 */
-	public default void renderFrom(ViewCenter viewCenter, ClientLevel level, float partialTicks, PoseStack stack, Camera camera, 
+	public default void renderFrom(RenderCenter viewCenter, ClientLevel level, float partialTicks, PoseStack stack, Camera camera, 
 			Matrix4f projectionMatrix, boolean isFoggy, Runnable setupFog, BufferBuilder bufferbuilder)
 	{
 		viewCenter.addCoords(getPos(level.getDayTime()));

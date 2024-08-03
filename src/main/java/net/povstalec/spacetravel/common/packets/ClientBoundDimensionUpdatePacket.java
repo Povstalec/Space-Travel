@@ -39,6 +39,8 @@ public class ClientBoundDimensionUpdatePacket
         {
         	ClientAccess.updateDimensions(keys, add);
         });
+        
+        ctx.get().setPacketHandled(true);
         return true;
     }
 }

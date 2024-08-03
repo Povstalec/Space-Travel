@@ -74,21 +74,17 @@ public class SpaceTravelDimensionSpecialEffects extends DimensionSpecialEffects
 	
 	public static class Space extends SpaceTravelDimensionSpecialEffects
 	{
-		ClientGalaxy.ClientSpiralGalaxy milkyWay = new ClientGalaxy.ClientSpiralGalaxy(Optional.empty(), new SpaceCoords(), new AxisRotation(), new ArrayList<TextureLayer>(), 10842, 90000, 4, 2.5, 1500);
-		ViewCenter viewCenter = new ViewCenter(Optional.empty());
-		
 		public Space()
 		{
 			super(Float.NaN, false, DimensionSpecialEffects.SkyType.NONE, false, false);
-			
-			SpaceRenderer.addSpaceObject(milkyWay);
-			SpaceRenderer.viewCenter = new ViewCenter(Optional.empty());
-			SpaceRenderer.viewCenter.viewCenter = milkyWay;
 		}
 		
 		@Override
 	    public boolean renderSky(ClientLevel level, int ticks, float partialTicks, PoseStack poseStack, Camera camera, Matrix4f projectionMatrix, boolean isFoggy, Runnable setupFog)
 	    {
+			if(SpaceRenderer.viewCenter == null)
+				return false;
+			
 			return SpaceRenderer.viewCenter.renderSky(level, ticks, partialTicks, poseStack, camera, projectionMatrix, isFoggy, setupFog);
 	    }
 	}

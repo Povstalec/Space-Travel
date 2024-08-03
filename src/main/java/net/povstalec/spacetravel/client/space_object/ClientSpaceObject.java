@@ -16,8 +16,9 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Camera;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.resources.ResourceLocation;
 import net.povstalec.spacetravel.SpaceTravel;
-import net.povstalec.spacetravel.client.ViewCenter;
+import net.povstalec.spacetravel.client.RenderCenter;
 import net.povstalec.spacetravel.client.render.SpaceObjectRenderer;
 import net.povstalec.spacetravel.common.space.objects.SpaceObject;
 import net.povstalec.spacetravel.common.util.AxisRotation;
@@ -34,9 +35,9 @@ public class ClientSpaceObject extends SpaceObject implements RenderableSpaceObj
 	
 	public ClientSpaceObject(){}
 	
-	public ClientSpaceObject(Optional<String> parentName, SpaceCoords coords, AxisRotation axisRotation, List<TextureLayer> textureLayers)
+	public ClientSpaceObject(ResourceLocation objectType, Optional<String> parentName, SpaceCoords coords, AxisRotation axisRotation, List<TextureLayer> textureLayers)
 	{
-		super(parentName, coords, axisRotation, textureLayers);
+		super(objectType, parentName, coords, axisRotation, textureLayers);
 	}
 
 	@Override
@@ -111,7 +112,7 @@ public class ClientSpaceObject extends SpaceObject implements RenderableSpaceObj
 	}
 	
 	@Override
-	public void render(ViewCenter viewCenter, ClientLevel level, float partialTicks, PoseStack stack, Camera camera, 
+	public void render(RenderCenter viewCenter, ClientLevel level, float partialTicks, PoseStack stack, Camera camera, 
 			Matrix4f projectionMatrix, boolean isFoggy, Runnable setupFog, BufferBuilder bufferbuilder, 
 			Vector3f parentVector)
 	{

@@ -3,26 +3,24 @@ package net.povstalec.spacetravel.common.space.objects;
 import java.util.List;
 import java.util.Optional;
 
-import org.joml.Vector3d;
-
-import com.mojang.blaze3d.vertex.BufferBuilder;
-import com.mojang.blaze3d.vertex.BufferBuilder.RenderedBuffer;
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
-import com.mojang.blaze3d.vertex.VertexFormat;
-
-import net.minecraft.util.RandomSource;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceLocation;
+import net.povstalec.spacetravel.SpaceTravel;
 import net.povstalec.spacetravel.common.util.AxisRotation;
 import net.povstalec.spacetravel.common.util.SpaceCoords;
-import net.povstalec.spacetravel.common.util.SphericalCoords;
-import net.povstalec.spacetravel.common.util.StarInfo;
 import net.povstalec.spacetravel.common.util.TextureLayer;
 
 public class Galaxy
 {
 	public static class SpiralGalaxy extends StarField
 	{
-		protected final double armThickness;
-		protected final short numberOfArms;
+		public static final ResourceLocation SPIRAL_GALAXY_LOCATION = new ResourceLocation(SpaceTravel.MODID, "spiral_galaxy");
+		
+		public static final String ARM_THICKNESS = "arm_thickness";
+		public static final String NUMBER_OF_ARMS = "number_of_arms";
+		
+		protected double armThickness;
+		protected short numberOfArms;
 		
 		/*public static final Codec<SpiralGalaxy> CODEC = RecordCodecBuilder.create(instance -> instance.group(
 				RESOURCE_KEY_CODEC.optionalFieldOf("parent").forGetter(SpiralGalaxy::getParentKey),
@@ -38,10 +36,12 @@ public class Galaxy
 				Codec.intRange(1, 30000).fieldOf("stars_per_arm").forGetter(SpiralGalaxy::getStars)
 				).apply(instance, SpiralGalaxy::new));*/
 		
-		public SpiralGalaxy(Optional<String> parentName, SpaceCoords coords, AxisRotation axisRotation,
+		public SpiralGalaxy() {}
+		
+		public SpiralGalaxy(ResourceLocation objectType, Optional<String> parentName, SpaceCoords coords, AxisRotation axisRotation,
 				List<TextureLayer> textureLayers, long seed, int diameter, int numberOfArms, double armThickness, int starsPerArm)
 		{
-			super(parentName, coords, axisRotation, textureLayers, seed, diameter, starsPerArm);
+			super(objectType, parentName, coords, axisRotation, textureLayers, seed, diameter, starsPerArm);
 			
 			this.numberOfArms = (short) numberOfArms;
 			this.armThickness = armThickness;
@@ -56,15 +56,35 @@ public class Galaxy
 		{
 			return armThickness;
 		}
+
+		@Override
+		public CompoundTag serializeNBT()
+		{
+			CompoundTag tag = super.serializeNBT();
+			
+			tag.putDouble(ARM_THICKNESS, armThickness);
+			tag.putShort(NUMBER_OF_ARMS, numberOfArms);
+			
+			return tag;
+		}
+
+		@Override
+		public void deserializeNBT(CompoundTag tag)
+		{
+			super.deserializeNBT(tag);
+			
+			armThickness = tag.getDouble(ARM_THICKNESS);
+			numberOfArms = tag.getShort(NUMBER_OF_ARMS);
+		}
 	}
 	
-	public static class EllipticalGalaxy extends StarField
+	/*public static class EllipticalGalaxy extends StarField
 	{
 		private final double xStretch;
 		private final double yStretch;
 		private final double zStretch;
 		
-		/*public static final Codec<EllipticalGalaxy> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+		public static final Codec<EllipticalGalaxy> CODEC = RecordCodecBuilder.create(instance -> instance.group(
 				RESOURCE_KEY_CODEC.optionalFieldOf("parent").forGetter(EllipticalGalaxy::getParentKey),
 				SpaceCoords.CODEC.fieldOf("coords").forGetter(EllipticalGalaxy::getCoords),
 				AxisRotation.CODEC.fieldOf("axis_rotation").forGetter(EllipticalGalaxy::getAxisRotation),
@@ -78,7 +98,7 @@ public class Galaxy
 				Codec.DOUBLE.fieldOf("x_stretch").forGetter(EllipticalGalaxy::xStretch),
 				Codec.DOUBLE.fieldOf("y_stretch").forGetter(EllipticalGalaxy::yStretch),
 				Codec.DOUBLE.fieldOf("z_stretch").forGetter(EllipticalGalaxy::zStretch)
-				).apply(instance, EllipticalGalaxy::new));*/
+				).apply(instance, EllipticalGalaxy::new));
 		
 		public EllipticalGalaxy(Optional<String> parentName, SpaceCoords coords, AxisRotation axisRotation,
 				List<TextureLayer> textureLayers, long seed, int diameter, int starsPerArm, double xStretch, double yStretch, double zStretch)
@@ -152,5 +172,5 @@ public class Galaxy
 			}
 			return bufferBuilder.end();
 		}
-	}
+	}*/
 }
