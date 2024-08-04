@@ -16,8 +16,8 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.common.util.INBTSerializable;
 import net.povstalec.spacetravel.SpaceTravel;
 import net.povstalec.spacetravel.common.space.objects.Galaxy;
-import net.povstalec.spacetravel.common.space.objects.SpaceObject;
 import net.povstalec.spacetravel.common.space.objects.Galaxy.SpiralGalaxy;
+import net.povstalec.spacetravel.common.space.objects.SpaceObject;
 import net.povstalec.spacetravel.common.util.AxisRotation;
 import net.povstalec.spacetravel.common.util.Color;
 import net.povstalec.spacetravel.common.util.SpaceCoords;
@@ -59,8 +59,18 @@ public class Universe implements INBTSerializable<CompoundTag>
 	public SpaceRegion getRegionAt(long x, long y, long z)
 	{
 		SpaceRegion.Position pos = new SpaceRegion.Position(x, y, z);
-		
-		return spaceRegions.computeIfAbsent(pos, position -> new SpaceRegion(position));
+
+		return spaceRegions.computeIfAbsent(pos, position -> SpaceRegion.generateRegion(position, 10428)); // TODO Handle seeds
+	}
+	
+	/**
+	 * Method that fetches space regions in a certain radius
+	 * @param regionPos
+	 * @return Returns a map of space region position + space region of regions in some range around coords
+	 */
+	public Map<SpaceRegion.Position, SpaceRegion> getRegionsAt(SpaceRegion.Position regionPos, int radius)
+	{
+		return getRegionsAt(regionPos.x(), regionPos.y(), regionPos.z(), radius);
 	}
 	
 	/**
@@ -74,11 +84,11 @@ public class Universe implements INBTSerializable<CompoundTag>
 	{
 		HashMap<SpaceRegion.Position, SpaceRegion> spaceRegions = new HashMap<SpaceRegion.Position, SpaceRegion>();
 		
-		for(long x = -radius + xCenter; x <= radius; x++)
+		for(long x = -radius + xCenter; x <= radius + xCenter; x++)
 		{
-			for(long y = -radius + yCenter; y <= radius; y++)
+			for(long y = -radius + yCenter; y <= radius + yCenter; y++)
 			{
-				for(long z = -radius + zCenter; z <= radius; z++)
+				for(long z = -radius + zCenter; z <= radius + zCenter; z++)
 				{
 					SpaceRegion spaceRegion = getRegionAt(x, y, z);
 					spaceRegions.put(spaceRegion.getRegionPos(), spaceRegion);

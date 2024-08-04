@@ -17,6 +17,7 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.common.util.INBTSerializable;
 import net.povstalec.spacetravel.SpaceTravel;
+import net.povstalec.spacetravel.common.space.SpaceObjectDeserializer;
 import net.povstalec.spacetravel.common.util.AxisRotation;
 import net.povstalec.spacetravel.common.util.SpaceCoords;
 import net.povstalec.spacetravel.common.util.TextureLayer;
@@ -185,7 +186,8 @@ public class SpaceObject implements INBTSerializable<CompoundTag>
 		
 		tag.put(COORDS, coords.serializeNBT());
 		tag.put(AXIS_ROTATION, axisRotation.serializeNBT());
-		
+
+		// Serialize Texture Layers
 		CompoundTag textureLayerTag = new CompoundTag();
 		int i = 0;
 		for(TextureLayer textureLayer : textureLayers)
@@ -194,7 +196,8 @@ public class SpaceObject implements INBTSerializable<CompoundTag>
 			i++;
 		}
 		tag.put(TEXTURE_LAYERS, textureLayerTag);
-		
+
+		// Serialize Children
 		CompoundTag childrenTag = new CompoundTag();
 		int j = 0;
 		for(SpaceObject spaceObject : children)
@@ -223,17 +226,23 @@ public class SpaceObject implements INBTSerializable<CompoundTag>
 		axisRotation.deserializeNBT(tag.getCompound(AXIS_ROTATION));
 		this.axisRotation = axisRotation;
 		
+		// Deserialize Texture Layers
 		CompoundTag textureLayerTag = tag.getCompound(TEXTURE_LAYERS);
 		for(int i = 0; i < textureLayerTag.size(); i++)
 		{
 			textureLayers.add(TextureLayer.deserialize(textureLayerTag.getCompound(String.valueOf(i))));
 		}
 		
+		// Deserialize Children
 		CompoundTag childrenTag = tag.getCompound(CHILDREN);
 		for(int j = 0; j < childrenTag.size(); j++)
 		{
 			CompoundTag childTag = childrenTag.getCompound(String.valueOf(j));
-			//TODO Finish child deserialization
+			
+			SpaceObject spaceObject = SpaceObjectDeserializer.deserialize(childTag.getString(SpaceObject.OBJECT_TYPE), childTag);
+			
+			if(spaceObject != null && spaceObject.isInitialized())
+				addChild(spaceObject);
 		}
 	}
 }

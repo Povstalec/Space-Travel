@@ -24,10 +24,8 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.progress.ChunkProgressListener;
 import net.minecraft.world.RandomSequences;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.biome.MultiNoiseBiomeSource;
 import net.minecraft.world.level.border.BorderChangeListener;
 import net.minecraft.world.level.dimension.LevelStem;
-import net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator;
 import net.minecraft.world.level.storage.DerivedLevelData;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import net.minecraft.world.level.storage.WorldData;
@@ -37,7 +35,6 @@ import net.povstalec.spacetravel.SpaceTravel;
 import net.povstalec.spacetravel.common.init.PacketHandlerInit;
 import net.povstalec.spacetravel.common.init.WorldGenInit;
 import net.povstalec.spacetravel.common.packets.ClientBoundDimensionUpdatePacket;
-import net.povstalec.spacetravel.common.space.objects.SpaceObject;
 import net.povstalec.spacetravel.common.worldgen.SpaceChunkGenerator;
 
 public class DimensionUtil

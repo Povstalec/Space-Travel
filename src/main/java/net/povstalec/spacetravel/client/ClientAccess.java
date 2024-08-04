@@ -10,6 +10,7 @@ import net.minecraft.world.level.Level;
 import net.povstalec.spacetravel.client.render.ClientSpaceRegion;
 import net.povstalec.spacetravel.client.render.SpaceRenderer;
 import net.povstalec.spacetravel.client.render.space_objects.SpaceObjectRenderer;
+import net.povstalec.spacetravel.common.space.SpaceRegion;
 import net.povstalec.spacetravel.common.space.Spaceship;
 
 public class ClientAccess
@@ -52,26 +53,31 @@ public class ClientAccess
     		SpaceRenderer.renderCenter = new RenderCenter();
     		SpaceRenderer.renderCenter.viewCenter = testRenderer;
     	}
-    	else
+    }
+    
+    public static void updateSpaceship(CompoundTag spaceshipTag)
+    {
+    	if(SpaceRenderer.renderCenter != null && SpaceRenderer.renderCenter.viewCenter != null &&
+    			SpaceRenderer.renderCenter.viewCenter.spaceObject instanceof Spaceship spaceship)
     	{
-    		if(SpaceRenderer.renderCenter.viewCenter.spaceObject instanceof Spaceship ship)
-    		{
-    			ship.toggleSpeed();
-    		}
+    		spaceship.deserializeNBT(spaceshipTag);
     	}
     }
     
-    public static void updateSpaceRegion(long x, long y, long z, CompoundTag childrenTag)
+    public static void clearSpaceRegion()
+    {
+		SpaceRenderer.clear();
+    }
+    
+    public static void loadSpaceRegion(long x, long y, long z, CompoundTag childrenTag)
     {
     	ClientSpaceRegion spaceRegion = new ClientSpaceRegion(x, y, z, childrenTag);
 		SpaceRenderer.addSpaceRegion(spaceRegion);
-    	
-    	//spaceRegion.addChild(testCenter);
-		
-    	//SpaceObject testCenter = new SpaceObject(SpaceObject.SPACE_OBJECT_LOCATION, Optional.empty(), new SpaceCoords(), new AxisRotation(), new ArrayList<TextureLayer>());
-    	//SpaceObjectRenderer.Generic testRenderer = new SpaceObjectRenderer.Generic(testCenter);
-    	
-		//SpaceRenderer.renderCenter = new RenderCenter();
-		//SpaceRenderer.renderCenter.viewCenter = testRenderer;
+    }
+    
+    public static void unloadSpaceRegion(long x, long y, long z)
+    {
+    	SpaceRegion.Position spaceRegionPos = new SpaceRegion.Position(x, y, z);
+		SpaceRenderer.removeSpaceRegion(spaceRegionPos);
     }
 }

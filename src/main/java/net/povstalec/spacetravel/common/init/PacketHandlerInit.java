@@ -13,7 +13,10 @@ import net.minecraftforge.network.simple.SimpleChannel;
 import net.povstalec.spacetravel.SpaceTravel;
 import net.povstalec.spacetravel.common.packets.ClientBoundDimensionUpdatePacket;
 import net.povstalec.spacetravel.common.packets.ClientBoundRenderCenterUpdatePacket;
-import net.povstalec.spacetravel.common.packets.ClientBoundSpaceRegionUpdatePacket;
+import net.povstalec.spacetravel.common.packets.ClientBoundSpaceRegionClearPacket;
+import net.povstalec.spacetravel.common.packets.ClientBoundSpaceRegionLoadPacket;
+import net.povstalec.spacetravel.common.packets.ClientBoundSpaceRegionUnloadPacket;
+import net.povstalec.spacetravel.common.packets.ClientBoundSpaceshipUpdatePacket;
 
 public final class PacketHandlerInit
 {
@@ -31,22 +34,22 @@ public final class PacketHandlerInit
     	PacketHandlerInit.INSTANCE.send(PacketDistributor.ALL.noArg(), message);
     }
 
-    public static void sendPacketToDimension(ResourceKey<Level> level, Object message)
+    public static void sendPacketToDimension(ResourceKey<Level> levelKey, Object message)
     {
-        INSTANCE.send(PacketDistributor.DIMENSION.with(() -> level), message);
+        INSTANCE.send(PacketDistributor.DIMENSION.with(() -> levelKey), message);
     }
 
-    public static void sendToTracking(Entity e, Object message)
+    public static void sendToTracking(Entity entity, Object message)
     {
-        INSTANCE.send(PacketDistributor.TRACKING_ENTITY_AND_SELF.with(() -> e), message);
+        INSTANCE.send(PacketDistributor.TRACKING_ENTITY_AND_SELF.with(() -> entity), message);
     }
 
-    public static void sendToTracking(BlockEntity tile, Object message)
+    public static void sendToTracking(BlockEntity blockEntity, Object message)
     {
-        INSTANCE.send(PacketDistributor.TRACKING_CHUNK.with(() -> tile.getLevel().getChunkAt(tile.getBlockPos())), message);
+        INSTANCE.send(PacketDistributor.TRACKING_CHUNK.with(() -> blockEntity.getLevel().getChunkAt(blockEntity.getBlockPos())), message);
     }
 
-    public static void sendTo(ServerPlayer player, Object message)
+    public static void sendToPlayer(ServerPlayer player, Object message)
     {
         INSTANCE.send(PacketDistributor.PLAYER.with(() -> player), message);
     }
@@ -75,16 +78,34 @@ public final class PacketHandlerInit
 		.consumerMainThread(ClientBoundDimensionUpdatePacket::handle)
 		.add();
 		
-		INSTANCE.messageBuilder(ClientBoundSpaceRegionUpdatePacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
-		.encoder(ClientBoundSpaceRegionUpdatePacket::encode)
-		.decoder(ClientBoundSpaceRegionUpdatePacket::new)
-		.consumerMainThread(ClientBoundSpaceRegionUpdatePacket::handle)
+		INSTANCE.messageBuilder(ClientBoundSpaceRegionClearPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
+		.encoder(ClientBoundSpaceRegionClearPacket::encode)
+		.decoder(ClientBoundSpaceRegionClearPacket::new)
+		.consumerMainThread(ClientBoundSpaceRegionClearPacket::handle)
+		.add();
+		
+		INSTANCE.messageBuilder(ClientBoundSpaceRegionLoadPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
+		.encoder(ClientBoundSpaceRegionLoadPacket::encode)
+		.decoder(ClientBoundSpaceRegionLoadPacket::new)
+		.consumerMainThread(ClientBoundSpaceRegionLoadPacket::handle)
+		.add();
+		
+		INSTANCE.messageBuilder(ClientBoundSpaceRegionUnloadPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
+		.encoder(ClientBoundSpaceRegionUnloadPacket::encode)
+		.decoder(ClientBoundSpaceRegionUnloadPacket::new)
+		.consumerMainThread(ClientBoundSpaceRegionUnloadPacket::handle)
 		.add();
 		
 		INSTANCE.messageBuilder(ClientBoundRenderCenterUpdatePacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
 		.encoder(ClientBoundRenderCenterUpdatePacket::encode)
 		.decoder(ClientBoundRenderCenterUpdatePacket::new)
 		.consumerMainThread(ClientBoundRenderCenterUpdatePacket::handle)
+		.add();
+		
+		INSTANCE.messageBuilder(ClientBoundSpaceshipUpdatePacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
+		.encoder(ClientBoundSpaceshipUpdatePacket::encode)
+		.decoder(ClientBoundSpaceshipUpdatePacket::new)
+		.consumerMainThread(ClientBoundSpaceshipUpdatePacket::handle)
 		.add();
 	}
 }

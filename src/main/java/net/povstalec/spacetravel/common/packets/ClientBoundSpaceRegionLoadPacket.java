@@ -8,14 +8,14 @@ import net.minecraftforge.network.NetworkEvent;
 import net.povstalec.spacetravel.client.ClientAccess;
 import net.povstalec.spacetravel.common.space.SpaceRegion;
 
-public class ClientBoundSpaceRegionUpdatePacket
+public class ClientBoundSpaceRegionLoadPacket
 {
 	public final long x;
 	public final long y;
 	public final long z;
 	public final CompoundTag childrenTag;
 	
-	private ClientBoundSpaceRegionUpdatePacket(long x, long y, long z, CompoundTag childrenTag)
+	private ClientBoundSpaceRegionLoadPacket(long x, long y, long z, CompoundTag childrenTag)
     {
 		this.x = x;
 		this.y = y;
@@ -23,12 +23,12 @@ public class ClientBoundSpaceRegionUpdatePacket
         this.childrenTag = childrenTag;
     }
 	
-	public ClientBoundSpaceRegionUpdatePacket(SpaceRegion spaceRegion)
+	public ClientBoundSpaceRegionLoadPacket(SpaceRegion spaceRegion)
     {
 		this(spaceRegion.getRegionPos().x(), spaceRegion.getRegionPos().y(), spaceRegion.getRegionPos().z(), spaceRegion.getChildrenTag());
     }
 
-    public ClientBoundSpaceRegionUpdatePacket(FriendlyByteBuf buffer)
+    public ClientBoundSpaceRegionLoadPacket(FriendlyByteBuf buffer)
     {
         this(buffer.readLong(), buffer.readLong(), buffer.readLong(), buffer.readNbt());
     }
@@ -45,7 +45,7 @@ public class ClientBoundSpaceRegionUpdatePacket
     {
         ctx.get().enqueueWork(() ->
         {
-        	ClientAccess.updateSpaceRegion(x, y, z, childrenTag);
+        	ClientAccess.loadSpaceRegion(x, y, z, childrenTag);
         });
         
         ctx.get().setPacketHandled(true);

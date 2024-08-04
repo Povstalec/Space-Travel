@@ -82,10 +82,13 @@ public abstract class StarFieldRenderer<StarField extends AbstractStarField> ext
 	@Override
 	public void render(RenderCenter viewCenter, ClientLevel level, float partialTicks, PoseStack stack, Camera camera, Matrix4f projectionMatrix, boolean isFoggy, Runnable setupFog, BufferBuilder bufferbuilder, Vector3f parentVector)
 	{
+		SpaceCoords difference = viewCenter.getCoords().sub(spaceObject.getSpaceCoords());
+		//System.out.println(this + " " + spaceObject.getSpaceCoords());
+		
 		if(requiresSetup())
-			setupBuffer(viewCenter.getCoords().sub(spaceObject.getSpaceCoords()));
+			setupBuffer(difference);
 		else
-			setStarBuffer(viewCenter.getCoords().sub(spaceObject.getSpaceCoords())); // This could be viable with fewer stars
+			setStarBuffer(difference); // This could be viable with fewer stars
 		
 		float starBrightness = getStarBrightness(level, camera, partialTicks);
 		
@@ -121,9 +124,9 @@ public abstract class StarFieldRenderer<StarField extends AbstractStarField> ext
 	 */
 	public static float getStarBrightness(ClientLevel level, Camera camera, float partialTicks)
 	{
-		float rain = 1.0F - level.getRainLevel(partialTicks);
-		float starBrightness = level.getStarBrightness(partialTicks) * rain;
+		//float rain = 1.0F - level.getRainLevel(partialTicks);
+		//float starBrightness = level.getStarBrightness(partialTicks) * rain;
 		
-		return starBrightness;
+		return 1;//starBrightness; //TODO Change this back
 	}
 }

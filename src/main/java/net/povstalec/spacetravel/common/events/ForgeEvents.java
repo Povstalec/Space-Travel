@@ -2,9 +2,12 @@ package net.povstalec.spacetravel.common.events;
 
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.common.capabilities.RegisterCapabilitiesEvent;
+import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
+import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.server.ServerStartingEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -24,6 +27,23 @@ public class ForgeEvents
 		MinecraftServer server = event.getServer();
 		
 		Multiverse.get(server).setupUniverse();
+	}
+	
+	@SubscribeEvent
+	public static void onTick(TickEvent.LevelTickEvent event)
+	{
+		Level level = event.level;
+		
+		if(event.phase.equals(TickEvent.Phase.START) && level != null && !level.isClientSide())
+		{
+			LazyOptional<SpaceshipCapability> spaceshipCapability = level.getCapability(SpaceshipCapabilityProvider.SPACESHIP);
+			
+			spaceshipCapability.ifPresent(cap -> 
+			{
+				if(cap != null)
+					cap.spaceship.tick((ServerLevel) level);
+			});
+		}
 	}
 	
 	@SubscribeEvent

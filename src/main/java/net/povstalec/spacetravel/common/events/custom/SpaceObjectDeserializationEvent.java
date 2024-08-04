@@ -8,13 +8,20 @@ import net.povstalec.spacetravel.common.space.objects.SpaceObject;
 public class SpaceObjectDeserializationEvent extends Event
 {
 	private final ResourceLocation objectType;
-	private final CompoundTag tag;
+	private final CompoundTag spaceObjectTag;
 	private SpaceObject spaceObject;
 	
-	public SpaceObjectDeserializationEvent(ResourceLocation objectType, CompoundTag tag)
+	/**
+	 * Fires when a Space Object with an unknown type is being deserialized
+	 * You can subscribe to this event and use custom deserialize your custom objects yourself and then set them
+	 * @param objectType
+	 * @param tag
+	 * @return
+	 */
+	public SpaceObjectDeserializationEvent(ResourceLocation objectType, CompoundTag spaceObjectTag)
 	{
 		this.objectType = objectType;
-		this.tag = tag;
+		this.spaceObjectTag = spaceObjectTag;
 	}
 	
 	public ResourceLocation getObjectType()
@@ -22,9 +29,9 @@ public class SpaceObjectDeserializationEvent extends Event
 		return this.objectType;
 	}
 	
-	public CompoundTag getTag()
+	public CompoundTag getSpaceObjectTag()
 	{
-		return this.tag;
+		return this.spaceObjectTag;
 	}
 	
 	public void setSpaceObject(SpaceObject spaceObject)

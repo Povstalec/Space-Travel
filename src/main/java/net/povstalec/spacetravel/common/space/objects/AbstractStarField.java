@@ -49,20 +49,6 @@ public abstract class AbstractStarField extends SpaceObject
 	{
 		return stars;
 	}
-	
-	/**
-	 * @param level The Level the Player is currently in
-	 * @param camera Player Camera
-	 * @param partialTicks
-	 * @return
-	 */
-	public static float getStarBrightness(ClientLevel level, Camera camera, float partialTicks)
-	{
-		float rain = 1.0F - level.getRainLevel(partialTicks);
-		float starBrightness = level.getStarBrightness(partialTicks) * rain;
-		
-		return starBrightness;
-	}
 
 	@Override
 	public CompoundTag serializeNBT()
