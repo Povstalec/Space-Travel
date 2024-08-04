@@ -12,6 +12,7 @@ import net.minecraftforge.network.PacketDistributor;
 import net.minecraftforge.network.simple.SimpleChannel;
 import net.povstalec.spacetravel.SpaceTravel;
 import net.povstalec.spacetravel.common.packets.ClientBoundDimensionUpdatePacket;
+import net.povstalec.spacetravel.common.packets.ClientBoundRenderCenterUpdatePacket;
 import net.povstalec.spacetravel.common.packets.ClientBoundSpaceRegionUpdatePacket;
 
 public final class PacketHandlerInit
@@ -78,6 +79,12 @@ public final class PacketHandlerInit
 		.encoder(ClientBoundSpaceRegionUpdatePacket::encode)
 		.decoder(ClientBoundSpaceRegionUpdatePacket::new)
 		.consumerMainThread(ClientBoundSpaceRegionUpdatePacket::handle)
+		.add();
+		
+		INSTANCE.messageBuilder(ClientBoundRenderCenterUpdatePacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
+		.encoder(ClientBoundRenderCenterUpdatePacket::encode)
+		.decoder(ClientBoundRenderCenterUpdatePacket::new)
+		.consumerMainThread(ClientBoundRenderCenterUpdatePacket::handle)
 		.add();
 	}
 }

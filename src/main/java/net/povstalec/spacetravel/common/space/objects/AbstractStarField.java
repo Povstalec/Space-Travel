@@ -9,7 +9,6 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.povstalec.spacetravel.common.util.AxisRotation;
 import net.povstalec.spacetravel.common.util.SpaceCoords;
-import net.povstalec.spacetravel.common.util.StarInfo;
 import net.povstalec.spacetravel.common.util.TextureLayer;
 
 public abstract class AbstractStarField extends SpaceObject

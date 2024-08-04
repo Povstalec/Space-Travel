@@ -1,7 +1,5 @@
 package net.povstalec.spacetravel.client;
 
-import java.util.ArrayList;
-import java.util.Optional;
 import java.util.Set;
 
 import net.minecraft.client.Minecraft;
@@ -12,10 +10,7 @@ import net.minecraft.world.level.Level;
 import net.povstalec.spacetravel.client.render.ClientSpaceRegion;
 import net.povstalec.spacetravel.client.render.SpaceRenderer;
 import net.povstalec.spacetravel.client.render.space_objects.SpaceObjectRenderer;
-import net.povstalec.spacetravel.common.space.objects.SpaceObject;
-import net.povstalec.spacetravel.common.util.AxisRotation;
-import net.povstalec.spacetravel.common.util.SpaceCoords;
-import net.povstalec.spacetravel.common.util.TextureLayer;
+import net.povstalec.spacetravel.common.space.Spaceship;
 
 public class ClientAccess
 {
@@ -47,18 +42,36 @@ public class ClientAccess
         }
     }
     
+    public static void updateRenderCenter(CompoundTag tag)
+    {
+    	if(SpaceRenderer.renderCenter == null)
+    	{
+        	Spaceship ship = new Spaceship();
+        	SpaceObjectRenderer.Generic testRenderer = new SpaceObjectRenderer.Generic(ship);
+        	
+    		SpaceRenderer.renderCenter = new RenderCenter();
+    		SpaceRenderer.renderCenter.viewCenter = testRenderer;
+    	}
+    	else
+    	{
+    		if(SpaceRenderer.renderCenter.viewCenter.spaceObject instanceof Spaceship ship)
+    		{
+    			ship.toggleSpeed();
+    		}
+    	}
+    }
+    
     public static void updateSpaceRegion(long x, long y, long z, CompoundTag childrenTag)
     {
-    	
     	ClientSpaceRegion spaceRegion = new ClientSpaceRegion(x, y, z, childrenTag);
 		SpaceRenderer.addSpaceRegion(spaceRegion);
     	
     	//spaceRegion.addChild(testCenter);
 		
-    	SpaceObject testCenter = new SpaceObject(SpaceObject.SPACE_OBJECT_LOCATION, Optional.empty(), new SpaceCoords(), new AxisRotation(), new ArrayList<TextureLayer>());
-    	SpaceObjectRenderer.Generic testRenderer = new SpaceObjectRenderer.Generic(testCenter);
+    	//SpaceObject testCenter = new SpaceObject(SpaceObject.SPACE_OBJECT_LOCATION, Optional.empty(), new SpaceCoords(), new AxisRotation(), new ArrayList<TextureLayer>());
+    	//SpaceObjectRenderer.Generic testRenderer = new SpaceObjectRenderer.Generic(testCenter);
     	
-		SpaceRenderer.viewCenter = new RenderCenter();
-		SpaceRenderer.viewCenter.viewCenter = testRenderer;
+		//SpaceRenderer.renderCenter = new RenderCenter();
+		//SpaceRenderer.renderCenter.viewCenter = testRenderer;
     }
 }

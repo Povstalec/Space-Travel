@@ -18,6 +18,7 @@ import net.povstalec.spacetravel.client.render.space_objects.GalaxyRenderer;
 import net.povstalec.spacetravel.client.render.space_objects.SpaceObjectRenderer;
 import net.povstalec.spacetravel.common.space.SpaceRegion.Position;
 import net.povstalec.spacetravel.common.space.objects.Galaxy;
+import net.povstalec.spacetravel.common.space.objects.OrbitingObject;
 import net.povstalec.spacetravel.common.space.objects.SpaceObject;
 
 public final class ClientSpaceRegion
@@ -76,21 +77,20 @@ public final class ClientSpaceRegion
 
 	private void deserializeChildren(CompoundTag childrenTag)
 	{
-		SpaceTravel.LOGGER.info("Deserializing region children");
 		for(String childId : childrenTag.getAllKeys())
 		{
-			SpaceTravel.LOGGER.info("Deserializing " + childId);
 			
 			CompoundTag childTag = childrenTag.getCompound(childId);
 			String objectTypeString = childTag.getString(SpaceObject.OBJECT_TYPE);
 			
 			if(objectTypeString != null && ResourceLocation.isValidResourceLocation(objectTypeString))
 			{
-				SpaceTravel.LOGGER.info("Type: " + objectTypeString);
 				SpaceObjectRenderer<?> spaceObjectRenderer = null;
 				ResourceLocation objectType = new ResourceLocation(objectTypeString);
 				
 				// Deserializes object based on its type specified in the object_type
+				if(objectType.equals(OrbitingObject.ORBITING_OBJECT_LOCATION))
+					spaceObjectRenderer = deserializeOrbitingObject(childTag);
 				if(objectType.equals(SpaceObject.SPACE_OBJECT_LOCATION))
 					spaceObjectRenderer = deserializeSpaceObject(childTag);
 				else if(objectType.equals(Galaxy.SpiralGalaxy.SPIRAL_GALAXY_LOCATION))
@@ -99,10 +99,7 @@ public final class ClientSpaceRegion
 				//TODO Add event for leftover object types
 				
 				if(spaceObjectRenderer != null)
-				{
-					if(addChild(spaceObjectRenderer))
-						SpaceTravel.LOGGER.info("Added " + childId);
-				}
+					addChild(spaceObjectRenderer);
 			}
 		}
 	}
@@ -114,6 +111,17 @@ public final class ClientSpaceRegion
     	
     	if(spaceObject.isInitialized())
     		return new SpaceObjectRenderer<SpaceObject>(spaceObject);
+		
+    	return null;
+	}
+	
+	private SpaceObjectRenderer<OrbitingObject> deserializeOrbitingObject(CompoundTag childTag)
+	{
+		OrbitingObject orbitingObject = new OrbitingObject();
+		orbitingObject.deserializeNBT(childTag);
+    	
+    	if(orbitingObject.isInitialized())
+    		return new SpaceObjectRenderer<OrbitingObject>(orbitingObject);
 		
     	return null;
 	}

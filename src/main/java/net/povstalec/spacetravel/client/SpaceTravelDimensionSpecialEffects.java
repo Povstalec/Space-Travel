@@ -72,10 +72,10 @@ public class SpaceTravelDimensionSpecialEffects extends DimensionSpecialEffects
 		@Override
 	    public boolean renderSky(ClientLevel level, int ticks, float partialTicks, PoseStack poseStack, Camera camera, Matrix4f projectionMatrix, boolean isFoggy, Runnable setupFog)
 	    {
-			if(SpaceRenderer.viewCenter == null)
+			if(SpaceRenderer.renderCenter == null)
 				return false;
 			
-			return SpaceRenderer.viewCenter.renderSky(level, ticks, partialTicks, poseStack, camera, projectionMatrix, isFoggy, setupFog);
+			return SpaceRenderer.renderCenter.renderSky(level, ticks, partialTicks, poseStack, camera, projectionMatrix, isFoggy, setupFog);
 	    }
 	}
 }

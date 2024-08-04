@@ -18,7 +18,7 @@ public class SpaceRenderer
 {
 	private static final HashMap<SpaceRegion.Position, ClientSpaceRegion> SPACE_REGIONS = new HashMap<SpaceRegion.Position, ClientSpaceRegion>();
 	
-	public static RenderCenter viewCenter;
+	public static RenderCenter renderCenter;
 	
 	
 	

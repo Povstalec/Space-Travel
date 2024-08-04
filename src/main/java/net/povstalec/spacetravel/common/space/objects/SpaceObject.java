@@ -29,7 +29,7 @@ public class SpaceObject implements INBTSerializable<CompoundTag>
 	
 	public static final String PARENT_NAME = "parent_name";
 	
-	public static final String SPACE_OBJECT_CHILDREN = "space_object_children";
+	public static final String CHILDREN = "children";
 	//TODO Other children types
 	
 	public static final String COORDS = "coords";
@@ -55,7 +55,7 @@ public class SpaceObject implements INBTSerializable<CompoundTag>
 	protected SpaceCoords coords; // Absolute coordinates of the center (not necessarily the object itself, since it can be orbiting some other object for example)
 	protected AxisRotation axisRotation;
 	
-	private ArrayList<TextureLayer> textureLayers;
+	private ArrayList<TextureLayer> textureLayers = new ArrayList<TextureLayer>();
 	
 	public String name;
 	
@@ -183,17 +183,26 @@ public class SpaceObject implements INBTSerializable<CompoundTag>
 		if(parentName != null)
 			tag.putString(PARENT_NAME, parentName);
 		
-		/*CompoundTag spaceObjectChildren = new CompoundTag();
-		//CompoundTag starChildren = new CompoundTag();
-		
-		for(SpaceObject spaceObject : children)
-		{
-			//TODO Use instanceof to serialize it under the proper name, so it can be easily deserialized to its correct type
-			spaceObjectChildren.put(SPACE_OBJECT_CHILDREN, spaceObject.serializeNBT());
-		}*/
-		
 		tag.put(COORDS, coords.serializeNBT());
 		tag.put(AXIS_ROTATION, axisRotation.serializeNBT());
+		
+		CompoundTag textureLayerTag = new CompoundTag();
+		int i = 0;
+		for(TextureLayer textureLayer : textureLayers)
+		{
+			textureLayerTag.put(String.valueOf(i), textureLayer.serialize());
+			i++;
+		}
+		tag.put(TEXTURE_LAYERS, textureLayerTag);
+		
+		CompoundTag childrenTag = new CompoundTag();
+		int j = 0;
+		for(SpaceObject spaceObject : children)
+		{
+			childrenTag.put(String.valueOf(j), spaceObject.serializeNBT());
+			j++;
+		}
+		tag.put(CHILDREN, childrenTag);
 		
 		return tag;
 	}
@@ -214,6 +223,17 @@ public class SpaceObject implements INBTSerializable<CompoundTag>
 		axisRotation.deserializeNBT(tag.getCompound(AXIS_ROTATION));
 		this.axisRotation = axisRotation;
 		
-		this.textureLayers = new ArrayList<TextureLayer>();
+		CompoundTag textureLayerTag = tag.getCompound(TEXTURE_LAYERS);
+		for(int i = 0; i < textureLayerTag.size(); i++)
+		{
+			textureLayers.add(TextureLayer.deserialize(textureLayerTag.getCompound(String.valueOf(i))));
+		}
+		
+		CompoundTag childrenTag = tag.getCompound(CHILDREN);
+		for(int j = 0; j < childrenTag.size(); j++)
+		{
+			CompoundTag childTag = childrenTag.getCompound(String.valueOf(j));
+			//TODO Finish child deserialization
+		}
 	}
 }

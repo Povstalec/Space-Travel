@@ -2,6 +2,7 @@ package net.povstalec.spacetravel.common.data;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import javax.annotation.Nonnull;
 
@@ -13,9 +14,9 @@ import net.minecraft.world.level.storage.DimensionDataStorage;
 import net.povstalec.spacetravel.SpaceTravel;
 import net.povstalec.spacetravel.common.space.Universe;
 
-public class Space extends SavedData
+public class Multiverse extends SavedData
 {
-	private static final String FILE_NAME = SpaceTravel.MODID + "-space";
+	private static final String FILE_NAME = SpaceTravel.MODID + "-multiverse";
 
 	private static final String UNIVERSES = "universes";
 
@@ -47,6 +48,14 @@ public class Space extends SavedData
 		}
 		
 		this.setDirty();
+	}
+	
+	public Optional<Universe> getUniverse(String name)
+	{
+		if(!universes.containsKey(name))
+			return Optional.empty();
+		
+		return Optional.of(universes.get(name));
 	}
 
 	//============================================================================================
@@ -105,19 +114,19 @@ public class Space extends SavedData
 	//********************************************Data********************************************
 	//============================================================================================
 
-	public Space(MinecraftServer server)
+	public Multiverse(MinecraftServer server)
 	{
 		this.server = server;
 	}
 	
-	public static Space create(MinecraftServer server)
+	public static Multiverse create(MinecraftServer server)
 	{
-		return new Space(server);
+		return new Multiverse(server);
 	}
 	
-	public static Space load(MinecraftServer server, CompoundTag tag)
+	public static Multiverse load(MinecraftServer server, CompoundTag tag)
 	{
-		Space data = create(server);
+		Multiverse data = create(server);
 
 		data.server = server;
 		data.deserialize(tag);
@@ -133,16 +142,16 @@ public class Space extends SavedData
 	}
 	
 	@Nonnull
-	public static Space get(Level level)
+	public static Multiverse get(Level level)
 	{
 		if(level.isClientSide())
 			throw new RuntimeException("Don't access this client-side!");
 		
-		return Space.get(level.getServer());
+		return Multiverse.get(level.getServer());
 	}
 	
 	@Nonnull
-	public static Space get(MinecraftServer server)
+	public static Multiverse get(MinecraftServer server)
 	{
 		DimensionDataStorage storage = server.overworld().getDataStorage();
 		

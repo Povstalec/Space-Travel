@@ -1,7 +1,11 @@
 package net.povstalec.spacetravel.common.space;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
+
+import org.joml.Vector3f;
 
 import com.mojang.serialization.Codec;
 
@@ -11,6 +15,14 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.common.util.INBTSerializable;
 import net.povstalec.spacetravel.SpaceTravel;
+import net.povstalec.spacetravel.common.space.objects.Galaxy;
+import net.povstalec.spacetravel.common.space.objects.SpaceObject;
+import net.povstalec.spacetravel.common.space.objects.Galaxy.SpiralGalaxy;
+import net.povstalec.spacetravel.common.util.AxisRotation;
+import net.povstalec.spacetravel.common.util.Color;
+import net.povstalec.spacetravel.common.util.SpaceCoords;
+import net.povstalec.spacetravel.common.util.TextureLayer;
+import net.povstalec.spacetravel.common.util.UV;
 
 public class Universe implements INBTSerializable<CompoundTag>
 {
@@ -24,6 +36,17 @@ public class Universe implements INBTSerializable<CompoundTag>
 	public Universe()
 	{
 		spaceRegions = new HashMap<SpaceRegion.Position, SpaceRegion>();
+		
+		//TODO Don't keep these here forever
+		Galaxy.SpiralGalaxy milkyWay = new Galaxy.SpiralGalaxy(SpiralGalaxy.SPIRAL_GALAXY_LOCATION, Optional.empty(), new SpaceCoords(), new AxisRotation(), new ArrayList<TextureLayer>(), 10842, 90000, 4, 2.5, 1500);
+		
+		getRegionAt(0, 0, 0).addChild(milkyWay);
+    	
+    	ArrayList<TextureLayer> texture = new ArrayList<TextureLayer>();
+    	texture.add(new TextureLayer(new ResourceLocation("textures/environment/sun.png"), new Color.IntRGBA(255, 255, 255, 255), true, 100, 10, true, 0, new UV.Quad(false)));
+    	SpaceObject sun = new SpaceObject(SpiralGalaxy.SPACE_OBJECT_LOCATION, Optional.empty(), new SpaceCoords().add(new Vector3f(1, 0, 0)), new AxisRotation(), texture);
+
+		getRegionAt(0, 0, 0).addChild(sun);
 	}
 	
 	/**
@@ -90,10 +113,11 @@ public class Universe implements INBTSerializable<CompoundTag>
 	@Override
 	public void deserializeNBT(CompoundTag tag)
 	{
-		for(String keyString : tag.getAllKeys())
+		CompoundTag spaceRegionsTag =  tag.getCompound(SPACE_REGIONS);
+		for(String keyString : spaceRegionsTag.getAllKeys())
 		{
 			SpaceRegion spaceRegion = new SpaceRegion();
-			spaceRegion.deserializeNBT(tag.getCompound(keyString));
+			spaceRegion.deserializeNBT(spaceRegionsTag.getCompound(keyString));
 			// Take Space Region's deserialized pos and put it in the map
 			spaceRegions.put(spaceRegion.getRegionPos(), spaceRegion);
 		}

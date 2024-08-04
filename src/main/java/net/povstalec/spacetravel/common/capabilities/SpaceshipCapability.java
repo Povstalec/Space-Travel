@@ -1,23 +1,21 @@
 package net.povstalec.spacetravel.common.capabilities;
 
 import net.minecraft.nbt.CompoundTag;
-import net.minecraftforge.common.util.INBTSerializable;
 
 /**
  * TODO Explain what this is for
  */
-public class SpaceshipCapability implements INBTSerializable<CompoundTag>
+public class SpaceshipCapability
 {
 	
-
-	@Override
-	public CompoundTag serializeNBT()
+	
+	
+	public void saveData(CompoundTag tag)
 	{
-		return new CompoundTag();
+		
 	}
-
-	@Override
-	public void deserializeNBT(CompoundTag nbt)
+	
+	public void loadData(CompoundTag tag)
 	{
 		
 	}

@@ -13,6 +13,8 @@ public final class SpaceRegion implements INBTSerializable<CompoundTag>
 	public static final String X = "x";
 	public static final String Y = "y";
 	public static final String Z = "z";
+
+	public static final String CHILDREN = "children";
 	
 	private Position pos;
 	
@@ -56,14 +58,27 @@ public final class SpaceRegion implements INBTSerializable<CompoundTag>
 	public CompoundTag serializeNBT()
 	{
 		CompoundTag tag = new CompoundTag();
-		
+
 		tag.putLong(X, pos.x());
 		tag.putLong(Y, pos.y());
 		tag.putLong(Z, pos.z());
 		
-		//TODO Children
+		tag.put(CHILDREN, getChildrenTag());
 		
 		return tag;
+	}
+	
+	public CompoundTag getChildrenTag()
+	{
+		CompoundTag childrenTag = new CompoundTag();
+		int i = 0;
+		for(SpaceObject spaceObject : children)
+		{
+			childrenTag.put(String.valueOf(i), spaceObject.serializeNBT());
+			i++;
+		}
+		
+		return childrenTag;
 	}
 
 	@Override
@@ -71,7 +86,17 @@ public final class SpaceRegion implements INBTSerializable<CompoundTag>
 	{
 		pos = new Position(tag.getLong(X), tag.getLong(Y), tag.getLong(Z));
 		
-		//TODO Children
+		//TODO Deserialize children
+		CompoundTag childrenTag = tag.getCompound(CHILDREN);
+		for(int i = 0; i < childrenTag.size(); i++)
+		{
+			CompoundTag childTag = childrenTag.getCompound(String.valueOf(i));
+			
+			SpaceObject spaceObject = SpaceObjectDeserializer.deserialize(childTag.getString(SpaceObject.OBJECT_TYPE), childTag);
+			
+			if(spaceObject != null && spaceObject.isInitialized())
+				addChild(spaceObject);
+		}
 	}
 	
 	/**
@@ -123,7 +148,7 @@ public final class SpaceRegion implements INBTSerializable<CompoundTag>
 		@Override
 		public String toString()
 		{
-			return "region_x" + x + "_y" + y + "_z" + z;
+			return "{x: " + x + ", y: " + y + ", z: " + z + "}";
 		}
 		
 		public static final Position fromSpaceCoords(SpaceCoords coords)

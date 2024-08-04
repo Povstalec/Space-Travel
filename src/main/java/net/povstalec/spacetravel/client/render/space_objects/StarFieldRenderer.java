@@ -84,8 +84,8 @@ public abstract class StarFieldRenderer<StarField extends AbstractStarField> ext
 	{
 		if(requiresSetup())
 			setupBuffer(viewCenter.getCoords().sub(spaceObject.getSpaceCoords()));
-		//else
-		//	setStarBuffer(viewCenter.getCoords().sub(this.coords)); // This could be viable with fewer stars
+		else
+			setStarBuffer(viewCenter.getCoords().sub(spaceObject.getSpaceCoords())); // This could be viable with fewer stars
 		
 		float starBrightness = getStarBrightness(level, camera, partialTicks);
 		
