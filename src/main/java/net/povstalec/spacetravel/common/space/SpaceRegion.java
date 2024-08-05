@@ -1,7 +1,6 @@
 package net.povstalec.spacetravel.common.space;
 
 import java.util.ArrayList;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Random;
 
@@ -69,11 +68,19 @@ public final class SpaceRegion implements INBTSerializable<CompoundTag>
 		
 		int chance = random.nextInt(0, 100);
 		
-		if(chance > 25)
+		if(chance >= 20)
 		{
-			long x = random.nextLong(0, LY_PER_REGION) + pos.x() * LY_PER_REGION;
-			long y = random.nextLong(0, LY_PER_REGION) + pos.y() * LY_PER_REGION;
-			long z = random.nextLong(0, LY_PER_REGION) + pos.z() * LY_PER_REGION;
+
+			long randomX = random.nextLong(0, LY_PER_REGION);
+			long randomY = random.nextLong(0, LY_PER_REGION);
+			long randomZ = random.nextLong(0, LY_PER_REGION);
+			
+			long x = randomX + pos.x() * LY_PER_REGION;
+			long y = randomY + pos.y() * LY_PER_REGION;
+			long z = randomZ + pos.z() * LY_PER_REGION;
+
+			System.out.println("Pos: " + pos.toString() + " Hash:" + pos.hashCode() + " X: " + randomX + " Y: " + randomY + " Z: " + randomZ);
+			//System.out.println(x + " " + y + " " + z);
 			
 			double xRot = random.nextDouble(0, 360);
 			double yRot = random.nextDouble(0, 360);
@@ -189,7 +196,10 @@ public final class SpaceRegion implements INBTSerializable<CompoundTag>
 		@Override
 		public final int hashCode()
 		{
-			return Objects.hash(x, y, z);
+			int result = (int) x;
+			result = 31 * result + (int) y;
+			result = 31 * result + (int) z;
+			return result;
 		}
 		
 		@Override

@@ -39,12 +39,9 @@ public class Spaceship extends OrbitingObject
 		spaceRegionPos = new SpaceRegion.Position(this.getSpaceCoords());
 	}
 	
-	public void toggleSpeed()
+	public void setSpeed(int speed)
 	{
-		if(speed == 0)
-			speed = 10000;
-		else
-			speed = 0;
+		this.speed = speed;
 	}
 	
 	public void travel(ServerLevel level)

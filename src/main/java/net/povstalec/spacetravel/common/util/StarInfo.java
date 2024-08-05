@@ -102,8 +102,8 @@ public class StarInfo
 		// Makes stars less bright the further away they are
 		short minAlpha = (short) ((alpha - 0xAA) * 2 / 3);
 		
-		if(distance > 40)
-			alpha -= 2 * (int) Math.round(distance); //TODO Change this so it works with new distances
+		//if(distance > 40)
+		//	alpha -= 2 * (int) Math.round(distance); //TODO Change this so it works with new distances
 		
 		if(alpha < minAlpha)
 			alpha = minAlpha;

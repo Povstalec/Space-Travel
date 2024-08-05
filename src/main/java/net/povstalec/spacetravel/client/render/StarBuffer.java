@@ -5,6 +5,8 @@ import java.nio.ByteBuffer;
 import javax.annotation.Nullable;
 
 import org.joml.Matrix4f;
+import org.lwjgl.opengl.GL31C;
+import org.lwjgl.opengl.GL40;
 
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.platform.Window;
@@ -28,7 +30,6 @@ public class StarBuffer implements AutoCloseable
 	   private VertexFormat.IndexType indexType;
 	   private int indexCount;
 	   private VertexFormat.Mode mode;
-	   private ByteBuffer byteBuffer;
 
 	   public StarBuffer()
 	   {
@@ -48,7 +49,6 @@ public class StarBuffer implements AutoCloseable
 	            this.indexCount = bufferbuilder$drawstate.indexCount();
 	            this.indexType = bufferbuilder$drawstate.indexType();
 	            this.mode = bufferbuilder$drawstate.mode();
-	            this.byteBuffer = p_231222_.indexBuffer();
 	         } finally {
 	            p_231222_.release();
 	         }
@@ -109,7 +109,7 @@ public class StarBuffer implements AutoCloseable
 		   RenderSystem.drawElements(this.mode.asGLMode, this.indexCount, this.getIndexType().asGLType);
 		   // Custom
 		   //RenderSystem.assertOnRenderThread();
-		   //GL31.glDrawElementsInstanced(this.mode.asGLMode, this.indexCount, this.getIndexType().asGLType, 0L, this.indexCount);
+		   //GL31C.glDrawArraysInstanced(GL40.GL_PATCHES, 0, indexCount, 1);
 	   }
 
 	   private VertexFormat.IndexType getIndexType() {

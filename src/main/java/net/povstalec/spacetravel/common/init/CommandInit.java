@@ -5,6 +5,8 @@ import java.util.Optional;
 
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.arguments.DoubleArgumentType;
+import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
@@ -48,7 +50,8 @@ public class CommandInit
 		
 		dispatcher.register(Commands.literal(SpaceTravel.MODID)
 				.then(Commands.literal("spaceship")
-					.then(Commands.literal("toggle").executes(CommandInit::toggleSpaceship))
+					.then(Commands.literal("speed")
+							.then(Commands.argument("speed", IntegerArgumentType.integer()).executes(CommandInit::setSpaceshipSpeed)))
 					.requires(commandSourceStack -> commandSourceStack.hasPermission(2))));
 		
 		// Client commands
@@ -114,9 +117,10 @@ public class CommandInit
 		return Command.SINGLE_SUCCESS;
 	}
 	
-	private static int toggleSpaceship(CommandContext<CommandSourceStack> context) throws CommandSyntaxException
+	private static int setSpaceshipSpeed(CommandContext<CommandSourceStack> context) throws CommandSyntaxException
 	{
 		ServerLevel level = context.getSource().getLevel();
+		int speed = IntegerArgumentType.getInteger(context, "speed");
 		
 		if(level != null)
 		{
@@ -125,7 +129,7 @@ public class CommandInit
 			spaceshipCapability.ifPresent(cap -> 
 			{
 				if(cap != null)
-					cap.spaceship.toggleSpeed();
+					cap.spaceship.setSpeed(speed);
 			});
 		}
 		
