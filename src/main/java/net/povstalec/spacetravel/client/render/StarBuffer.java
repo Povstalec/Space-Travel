@@ -7,11 +7,6 @@ import javax.annotation.Nullable;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.lwjgl.opengl.GL15C;
-import org.lwjgl.opengl.GL20C;
-import org.lwjgl.opengl.GL31C;
-import org.lwjgl.opengl.GL33C;
-import org.lwjgl.opengl.GL40;
-import org.lwjgl.system.NativeType;
 
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.platform.Window;
@@ -70,7 +65,7 @@ public class StarBuffer implements AutoCloseable
 	
 	private VertexFormat uploadVertexBuffer(BufferBuilder.DrawState drawState, ByteBuffer vertexBuffer)
 	{
-		boolean flag = false;
+		boolean formatEquals = false;
 		if(!drawState.format().equals(this.format))
 		{
 			if(this.format != null)
@@ -78,12 +73,12 @@ public class StarBuffer implements AutoCloseable
 			
 			GlStateManager._glBindBuffer(GL15C.GL_ARRAY_BUFFER, this.vertexBufferId);
 			drawState.format().setupBufferState();
-			flag = true;
+			formatEquals = true;
 		}
 		
 		if(!drawState.indexOnly())
 		{
-			if(!flag)
+			if(!formatEquals)
 				GlStateManager._glBindBuffer(GL15C.GL_ARRAY_BUFFER, this.vertexBufferId);
 			
 			RenderSystem.glBufferData(GL15C.GL_ARRAY_BUFFER, vertexBuffer, 35044);

@@ -185,6 +185,7 @@ public class SpaceObject implements INBTSerializable<CompoundTag>
 			tag.putString(PARENT_NAME, parentName);
 		
 		tag.put(COORDS, coords.serializeNBT());
+		
 		tag.put(AXIS_ROTATION, axisRotation.serializeNBT());
 
 		// Serialize Texture Layers

@@ -82,7 +82,7 @@ public class AxisRotation implements INBTSerializable<CompoundTag>
 	
 	public AxisRotation add(double xRot, double yRot, double zRot)
 	{
-		return new AxisRotation(this.xAxis + xRot, this.yAxis + yRot, this.zAxis + zRot);
+		return new AxisRotation(false, this.xAxis + xRot, this.yAxis + yRot, this.zAxis + zRot);
 	}
 	
 	/**

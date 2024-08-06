@@ -21,8 +21,8 @@ float clampStar(float starSize, float distance)
 	float maxStarSize = 0.2 + starSize / 5;
 	starSize = starSize * 200000.0 * distance;
 	
-	if(starSize < 0.05)
-		return 0.05;
+	if(starSize < 0.02)
+		return 0.02;
 	
 	return starSize > maxStarSize ? maxStarSize : starSize;
 }

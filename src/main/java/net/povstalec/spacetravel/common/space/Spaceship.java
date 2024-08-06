@@ -30,7 +30,13 @@ public class Spaceship extends OrbitingObject
 	private final HashMap<SpaceRegion.Position, SpaceRegion> loadedSpaceRegions = new HashMap<SpaceRegion.Position, SpaceRegion>();
 	private SpaceRegion.Position spaceRegionPos;
 	
-	private int speed = 0;
+	private int xAxisSpeed = 0;
+	private int yAxisSpeed = 0;
+	private int zAxisSpeed = 0;
+	
+	private double xAxisRotation = 0;
+	private double yAxisRotation = 0;
+	private double zAxisRotation = 0;
 	
 	public Spaceship()
 	{
@@ -39,15 +45,25 @@ public class Spaceship extends OrbitingObject
 		spaceRegionPos = new SpaceRegion.Position(this.getSpaceCoords());
 	}
 	
-	public void setSpeed(int speed)
+	public void setSpeed(int xAxisSpeed, int yAxisSpeed, int zAxisSpeed)
 	{
-		this.speed = speed;
+		this.xAxisSpeed = xAxisSpeed;
+		this.yAxisSpeed = yAxisSpeed;
+		this.zAxisSpeed = zAxisSpeed;
+	}
+	
+	public void rotate(double xAxisRotation, double yAxisRotation, double zAxisRotation)
+	{
+		this.xAxisRotation = Math.toRadians(xAxisRotation);
+		this.yAxisRotation = Math.toRadians(yAxisRotation);
+		this.zAxisRotation = Math.toRadians(zAxisRotation);
 	}
 	
 	public void travel(ServerLevel level)
 	{
-		if(speed != 0)
-			this.coords = this.coords.add(new SpaceCoords(0, 0, -speed));
+		this.coords = this.coords.add(new SpaceCoords(xAxisSpeed, yAxisSpeed, zAxisSpeed));
+
+		this.axisRotation = this.axisRotation.add(xAxisRotation, yAxisRotation, zAxisRotation);
 		
 		SpaceRegion.Position spaceRegionPos = new SpaceRegion.Position(this.getSpaceCoords());
 		if(!this.spaceRegionPos.equals(spaceRegionPos))

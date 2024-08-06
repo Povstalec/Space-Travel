@@ -2,6 +2,7 @@ package net.povstalec.spacetravel.common.init;
 
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.arguments.DoubleArgumentType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
@@ -40,8 +41,15 @@ public class CommandInit
 		dispatcher.register(Commands.literal(SpaceTravel.MODID)
 				.then(Commands.literal("spaceship")
 					.then(Commands.literal("speed")
-							.then(Commands.argument("speed", IntegerArgumentType.integer()).executes(CommandInit::setSpaceshipSpeed)))
-					.requires(commandSourceStack -> commandSourceStack.hasPermission(2))));
+							.then(Commands.argument("x_axis", IntegerArgumentType.integer())
+									.then(Commands.argument("y_axis", IntegerArgumentType.integer())
+											.then(Commands.argument("z_axis", IntegerArgumentType.integer()).executes(CommandInit::setSpaceshipSpeed))))
+							.requires(commandSourceStack -> commandSourceStack.hasPermission(2)))
+					.then(Commands.literal("rotate")
+							.then(Commands.argument("x_axis", DoubleArgumentType.doubleArg())
+									.then(Commands.argument("y_axis", DoubleArgumentType.doubleArg())
+											.then(Commands.argument("z_axis", DoubleArgumentType.doubleArg()).executes(CommandInit::rotateSpaceship)
+													.requires(commandSourceStack -> commandSourceStack.hasPermission(2))))))));
 		
 		// Client commands
 		dispatcher.register(Commands.literal(SpaceTravel.MODID)
@@ -91,7 +99,9 @@ public class CommandInit
 	private static int setSpaceshipSpeed(CommandContext<CommandSourceStack> context) throws CommandSyntaxException
 	{
 		ServerLevel level = context.getSource().getLevel();
-		int speed = IntegerArgumentType.getInteger(context, "speed");
+		int xAxis = IntegerArgumentType.getInteger(context, "x_axis");
+		int yAxis = IntegerArgumentType.getInteger(context, "y_axis");
+		int zAxis = IntegerArgumentType.getInteger(context, "z_axis");
 		
 		if(level != null)
 		{
@@ -100,7 +110,28 @@ public class CommandInit
 			spaceshipCapability.ifPresent(cap -> 
 			{
 				if(cap != null)
-					cap.spaceship.setSpeed(speed);
+					cap.spaceship.setSpeed(xAxis, yAxis, zAxis);
+			});
+		}
+		
+		return Command.SINGLE_SUCCESS;
+	}
+	
+	private static int rotateSpaceship(CommandContext<CommandSourceStack> context) throws CommandSyntaxException
+	{
+		ServerLevel level = context.getSource().getLevel();
+		double xAxis = DoubleArgumentType.getDouble(context, "x_axis");
+		double yAxis = DoubleArgumentType.getDouble(context, "y_axis");
+		double zAxis = DoubleArgumentType.getDouble(context, "z_axis");
+		
+		if(level != null)
+		{
+			LazyOptional<SpaceshipCapability> spaceshipCapability = level.getCapability(SpaceshipCapabilityProvider.SPACESHIP);
+			
+			spaceshipCapability.ifPresent(cap -> 
+			{
+				if(cap != null)
+					cap.spaceship.rotate(xAxis, yAxis, zAxis);
 			});
 		}
 		

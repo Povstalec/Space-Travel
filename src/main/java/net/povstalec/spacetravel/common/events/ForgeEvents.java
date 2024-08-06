@@ -73,4 +73,17 @@ public class ForgeEvents
 		
 		SpaceTravel.updatePlayerRenderer(player.level(), player);
 	}
+	
+	@SubscribeEvent
+	public static void onPlayerChangedDimensions(PlayerEvent.PlayerChangedDimensionEvent event)
+	{
+		ServerPlayer player = (ServerPlayer) event.getEntity();
+		
+		if(player != null && player.level() == null)
+			return;
+		
+		MinecraftServer server = player.level().getServer();
+		
+		SpaceTravel.updatePlayerRenderer(server.getLevel(event.getTo()), player);
+	}
 }

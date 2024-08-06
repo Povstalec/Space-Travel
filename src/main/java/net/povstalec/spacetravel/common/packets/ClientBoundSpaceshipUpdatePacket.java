@@ -14,7 +14,7 @@ public class ClientBoundSpaceshipUpdatePacket
 
     public ClientBoundSpaceshipUpdatePacket(Spaceship spaceship)
     {
-        this.spaceshipTag = spaceship.serializeNBT();
+        this(spaceship.serializeNBT());
     }
 
     private ClientBoundSpaceshipUpdatePacket(CompoundTag spaceshipTag)

@@ -116,9 +116,9 @@ public class RenderCenter
 		
 		stack.pushPose();
 		
-		stack.mulPose(Axis.YP.rotationDegrees((float) axisRotation.yAxis)); //TODO Rotation of the sky depending on where you are
-		stack.mulPose(Axis.ZP.rotationDegrees((float) axisRotation.zAxis)); //TODO Rotation of the sky because you're on the surface
-		stack.mulPose(Axis.XP.rotationDegrees((float) axisRotation.xAxis)); //TODO Rotation of the planet
+		stack.mulPose(Axis.YP.rotation((float) viewCenter.spaceObject.getAxisRotation().yAxis)); //TODO Rotation of the sky depending on where you are
+		stack.mulPose(Axis.ZP.rotation((float) viewCenter.spaceObject.getAxisRotation().zAxis)); //TODO Rotation of the sky because you're on the surface
+		stack.mulPose(Axis.XP.rotation((float) viewCenter.spaceObject.getAxisRotation().xAxis)); //TODO Rotation of the planet
 		
 		viewCenter.renderFrom(this, level, partialTicks, stack, camera, projectionMatrix, FogEffects.isFoggy(minecraft, camera), setupFog, bufferbuilder);
 
