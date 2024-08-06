@@ -4,9 +4,6 @@ import java.io.IOException;
 
 import org.jetbrains.annotations.Nullable;
 
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
-
-import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.RegisterShadersEvent;
@@ -17,7 +14,7 @@ import net.povstalec.spacetravel.SpaceTravel;
 public class SpaceTravelShaders
 {
 	@Nullable
-    private static ShaderInstance rendertypeStarShater;
+    private static StarShaderInstance rendertypeStarShater;
 	
 	@Mod.EventBusSubscriber(modid = SpaceTravel.MODID, value = Dist.CLIENT, bus= Mod.EventBusSubscriber.Bus.MOD)
     public static class ShaderInit
@@ -25,15 +22,15 @@ public class SpaceTravelShaders
         @SubscribeEvent
         public static void registerShaders(RegisterShadersEvent event) throws IOException
         {
-            event.registerShader(new ShaderInstance(event.getResourceProvider(), new ResourceLocation(SpaceTravel.MODID, "rendertype_star"), DefaultVertexFormat.NEW_ENTITY),
+            event.registerShader(new StarShaderInstance(event.getResourceProvider(), new ResourceLocation(SpaceTravel.MODID, "rendertype_star"), SpaceTravelVertexFormat.STAR),
             		(shaderInstance) ->
             {
-            	rendertypeStarShater = shaderInstance;
+            	rendertypeStarShater = (StarShaderInstance) shaderInstance;
             });
         }
     }
 	
-	public static ShaderInstance starShader()
+	public static StarShaderInstance starShader()
 	{
 		return rendertypeStarShater;
 	}

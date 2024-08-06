@@ -5,6 +5,7 @@ import java.nio.ByteBuffer;
 import javax.annotation.Nullable;
 
 import org.joml.Matrix4f;
+import org.joml.Vector3f;
 import org.lwjgl.opengl.GL31C;
 import org.lwjgl.opengl.GL40;
 
@@ -16,7 +17,7 @@ import com.mojang.blaze3d.vertex.BufferUploader;
 import com.mojang.blaze3d.vertex.VertexFormat;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.ShaderInstance;
+import net.povstalec.spacetravel.client.render.shaders.StarShaderInstance;
 
 public class StarBuffer implements AutoCloseable
 {
@@ -110,6 +111,7 @@ public class StarBuffer implements AutoCloseable
 		   // Custom
 		   //RenderSystem.assertOnRenderThread();
 		   //GL31C.glDrawArraysInstanced(GL40.GL_PATCHES, 0, indexCount, 1);
+		   //GL31C.glDrawArraysInstanced(GL40.GL_PATCHES, 0, 1, indexCount);
 	   }
 
 	   private VertexFormat.IndexType getIndexType() {
@@ -117,76 +119,80 @@ public class StarBuffer implements AutoCloseable
 	      return rendersystem$autostorageindexbuffer != null ? rendersystem$autostorageindexbuffer.type() : this.indexType;
 	   }
 
-	   public void drawWithShader(Matrix4f p_254480_, Matrix4f p_254555_, ShaderInstance p_253993_) {
+	   public void drawWithShader(Matrix4f modelViewMatrix, Matrix4f projectionMatrix, Vector3f relativeSpacePos, StarShaderInstance shaderInstance) {
 	      if (!RenderSystem.isOnRenderThread()) {
 	         RenderSystem.recordRenderCall(() -> {
-	            this._drawWithShader(new Matrix4f(p_254480_), new Matrix4f(p_254555_), p_253993_);
+	            this._drawWithShader(new Matrix4f(modelViewMatrix), new Matrix4f(projectionMatrix), relativeSpacePos, shaderInstance);
 	         });
 	      } else {
-	         this._drawWithShader(p_254480_, p_254555_, p_253993_);
+	         this._drawWithShader(modelViewMatrix, projectionMatrix, relativeSpacePos, shaderInstance);
 	      }
 
 	   }
 
-	   private void _drawWithShader(Matrix4f p_253705_, Matrix4f p_253737_, ShaderInstance p_166879_) {
+	   private void _drawWithShader(Matrix4f modelViewMatrix, Matrix4f projectionMatrix, Vector3f relativeSpacePos, StarShaderInstance shaderInstance) {
 	      for(int i = 0; i < 12; ++i) {
 	         int j = RenderSystem.getShaderTexture(i);
-	         p_166879_.setSampler("Sampler" + i, j);
+	         shaderInstance.setSampler("Sampler" + i, j);
 	      }
 
-	      if (p_166879_.MODEL_VIEW_MATRIX != null) {
-	         p_166879_.MODEL_VIEW_MATRIX.set(p_253705_);
+	      if (shaderInstance.MODEL_VIEW_MATRIX != null) {
+	         shaderInstance.MODEL_VIEW_MATRIX.set(modelViewMatrix);
 	      }
 
-	      if (p_166879_.PROJECTION_MATRIX != null) {
-	         p_166879_.PROJECTION_MATRIX.set(p_253737_);
+	      if (shaderInstance.PROJECTION_MATRIX != null) {
+	         shaderInstance.PROJECTION_MATRIX.set(projectionMatrix);
 	      }
 
-	      if (p_166879_.INVERSE_VIEW_ROTATION_MATRIX != null) {
-	         p_166879_.INVERSE_VIEW_ROTATION_MATRIX.set(RenderSystem.getInverseViewRotationMatrix());
+	      if (shaderInstance.INVERSE_VIEW_ROTATION_MATRIX != null) {
+	         shaderInstance.INVERSE_VIEW_ROTATION_MATRIX.set(RenderSystem.getInverseViewRotationMatrix());
 	      }
 
-	      if (p_166879_.COLOR_MODULATOR != null) {
-	         p_166879_.COLOR_MODULATOR.set(RenderSystem.getShaderColor());
+	      if (shaderInstance.COLOR_MODULATOR != null) {
+	         shaderInstance.COLOR_MODULATOR.set(RenderSystem.getShaderColor());
 	      }
 
-	      if (p_166879_.FOG_START != null) {
-	         p_166879_.FOG_START.set(RenderSystem.getShaderFogStart());
+	      if (shaderInstance.FOG_START != null) {
+	         shaderInstance.FOG_START.set(RenderSystem.getShaderFogStart());
 	      }
 
-	      if (p_166879_.FOG_END != null) {
-	         p_166879_.FOG_END.set(RenderSystem.getShaderFogEnd());
+	      if (shaderInstance.FOG_END != null) {
+	         shaderInstance.FOG_END.set(RenderSystem.getShaderFogEnd());
 	      }
 
-	      if (p_166879_.FOG_COLOR != null) {
-	         p_166879_.FOG_COLOR.set(RenderSystem.getShaderFogColor());
+	      if (shaderInstance.FOG_COLOR != null) {
+	         shaderInstance.FOG_COLOR.set(RenderSystem.getShaderFogColor());
 	      }
 
-	      if (p_166879_.FOG_SHAPE != null) {
-	         p_166879_.FOG_SHAPE.set(RenderSystem.getShaderFogShape().getIndex());
+	      if (shaderInstance.FOG_SHAPE != null) {
+	         shaderInstance.FOG_SHAPE.set(RenderSystem.getShaderFogShape().getIndex());
 	      }
 
-	      if (p_166879_.TEXTURE_MATRIX != null) {
-	         p_166879_.TEXTURE_MATRIX.set(RenderSystem.getTextureMatrix());
+	      if (shaderInstance.TEXTURE_MATRIX != null) {
+	         shaderInstance.TEXTURE_MATRIX.set(RenderSystem.getTextureMatrix());
 	      }
 
-	      if (p_166879_.GAME_TIME != null) {
-	         p_166879_.GAME_TIME.set(RenderSystem.getShaderGameTime());
+	      if (shaderInstance.GAME_TIME != null) {
+	         shaderInstance.GAME_TIME.set(RenderSystem.getShaderGameTime());
 	      }
 
-	      if (p_166879_.SCREEN_SIZE != null) {
+	      if (shaderInstance.SCREEN_SIZE != null) {
 	         Window window = Minecraft.getInstance().getWindow();
-	         p_166879_.SCREEN_SIZE.set((float)window.getWidth(), (float)window.getHeight());
+	         shaderInstance.SCREEN_SIZE.set((float)window.getWidth(), (float)window.getHeight());
 	      }
 
-	      if (p_166879_.LINE_WIDTH != null && (this.mode == VertexFormat.Mode.LINES || this.mode == VertexFormat.Mode.LINE_STRIP)) {
-	         p_166879_.LINE_WIDTH.set(RenderSystem.getShaderLineWidth());
+	      if (shaderInstance.LINE_WIDTH != null && (this.mode == VertexFormat.Mode.LINES || this.mode == VertexFormat.Mode.LINE_STRIP)) {
+	         shaderInstance.LINE_WIDTH.set(RenderSystem.getShaderLineWidth());
 	      }
 
-	      RenderSystem.setupShaderLights(p_166879_);
-	      p_166879_.apply();
+	      if (shaderInstance.RELATIVE_SPACE_POS != null) {
+	         shaderInstance.RELATIVE_SPACE_POS.set(relativeSpacePos);
+	      }
+
+	      RenderSystem.setupShaderLights(shaderInstance);
+	      shaderInstance.apply();
 	      this.draw();
-	      p_166879_.clear();
+	      shaderInstance.clear();
 	   }
 
 	   public void close() {

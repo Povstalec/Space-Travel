@@ -102,7 +102,7 @@ public abstract class StarFieldRenderer<StarField extends AbstractStarField> ext
 			FogRenderer.setupNoFog();
 			
 			this.starBuffer.bind();
-			this.starBuffer.drawWithShader(stack.last().pose(), projectionMatrix, SpaceTravelShaders.starShader());
+			this.starBuffer.drawWithShader(stack.last().pose(), projectionMatrix, new Vector3f((float) difference.x().toLy(), (float) difference.y().toLy(), (float) difference.z().toLy()), SpaceTravelShaders.starShader());
 			//this.starBuffer.drawWithShader(stack.last().pose(), projectionMatrix, GameRenderer.getPositionColorTexShader());
 			VertexBuffer.unbind();
 			

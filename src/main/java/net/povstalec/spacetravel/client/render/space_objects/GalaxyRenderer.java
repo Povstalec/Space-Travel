@@ -8,6 +8,7 @@ import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.VertexFormat;
 
 import net.minecraft.util.RandomSource;
+import net.povstalec.spacetravel.client.render.shaders.SpaceTravelVertexFormat;
 import net.povstalec.spacetravel.common.space.objects.Galaxy;
 import net.povstalec.spacetravel.common.util.AxisRotation;
 import net.povstalec.spacetravel.common.util.SpaceCoords;
@@ -36,7 +37,7 @@ public class GalaxyRenderer
 		protected RenderedBuffer generateStarBuffer(BufferBuilder bufferBuilder, SpaceCoords relativeCoords)
 		{
 			RandomSource randomsource = RandomSource.create(spaceObject.getSeed());
-			bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
+			bufferBuilder.begin(VertexFormat.Mode.QUADS, SpaceTravelVertexFormat.STAR);
 			
 			double spread = armThickness;
 			double sizeMultiplier = spaceObject.getDiameter() / 30D;
@@ -94,7 +95,7 @@ public class GalaxyRenderer
 		protected RenderedBuffer getStarBuffer(BufferBuilder bufferBuilder, SpaceCoords relativeCoords)
 		{
 			RandomSource randomsource = RandomSource.create(spaceObject.getSeed());
-			bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
+			bufferBuilder.begin(VertexFormat.Mode.QUADS, SpaceTravelVertexFormat.STAR);
 			
 			for(int j = 0; j < numberOfArms; j++) //Draw each arm
 			{
