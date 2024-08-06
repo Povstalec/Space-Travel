@@ -3,11 +3,13 @@ package net.povstalec.spacetravel.common.events;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.common.capabilities.RegisterCapabilitiesEvent;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
 import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.server.ServerStartingEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -59,5 +61,16 @@ public class ForgeEvents
 	public static void onRegisterCapabilities(RegisterCapabilitiesEvent event)
 	{
 		event.register(SpaceshipCapability.class);
+	}
+	
+	@SubscribeEvent
+	public static void onPlayerLoggedIn(PlayerEvent.PlayerLoggedInEvent event)
+	{
+		ServerPlayer player = (ServerPlayer) event.getEntity();
+		
+		if(player != null && player.level() == null)
+			return;
+		
+		SpaceTravel.updatePlayerRenderer(player.level(), player);
 	}
 }

@@ -1,21 +1,36 @@
 package net.povstalec.spacetravel;
 
+import java.util.Map;
+import java.util.Optional;
+
 import org.slf4j.Logger;
 
 import com.mojang.logging.LogUtils;
 
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.level.Level;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.RegisterDimensionSpecialEffectsEvent;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.povstalec.spacetravel.client.SpaceTravelDimensionSpecialEffects;
+import net.povstalec.spacetravel.common.capabilities.SpaceshipCapability;
+import net.povstalec.spacetravel.common.capabilities.SpaceshipCapabilityProvider;
+import net.povstalec.spacetravel.common.data.Multiverse;
 import net.povstalec.spacetravel.common.init.CommandInit;
 import net.povstalec.spacetravel.common.init.PacketHandlerInit;
 import net.povstalec.spacetravel.common.init.WorldGenInit;
+import net.povstalec.spacetravel.common.packets.ClientBoundRenderCenterUpdatePacket;
+import net.povstalec.spacetravel.common.packets.ClientBoundSpaceRegionClearPacket;
+import net.povstalec.spacetravel.common.packets.ClientBoundSpaceRegionLoadPacket;
+import net.povstalec.spacetravel.common.space.SpaceRegion;
+import net.povstalec.spacetravel.common.space.Spaceship;
+import net.povstalec.spacetravel.common.space.Universe;
 
 @Mod(SpaceTravel.MODID)
 public class SpaceTravel
@@ -53,5 +68,28 @@ public class SpaceTravel
 		{
 			SpaceTravelDimensionSpecialEffects.register(event);
 		}
+	}
+	
+	public static void updatePlayerRenderer(Level level, ServerPlayer player)
+	{
+		LazyOptional<SpaceshipCapability> spaceshipCapability = level.getCapability(SpaceshipCapabilityProvider.SPACESHIP);
+		
+		spaceshipCapability.ifPresent(cap -> 
+		{
+			if(cap != null)
+			{
+				Optional<Universe> universe = Multiverse.get(level).getUniverse("main"); //TODO There can be other universes
+				
+				if(universe.isPresent())
+				{
+					PacketHandlerInit.sendToPlayer(player, new ClientBoundRenderCenterUpdatePacket(new Spaceship())); //TODO Get coords from somewhere
+					PacketHandlerInit.sendToPlayer(player, new ClientBoundSpaceRegionClearPacket());
+					for(Map.Entry<SpaceRegion.Position, SpaceRegion> spaceRegionEntry : universe.get().getRegionsAt(new SpaceRegion.Position(cap.spaceship.getSpaceCoords()), 1).entrySet())
+					{
+						PacketHandlerInit.sendToPlayer(player, new ClientBoundSpaceRegionLoadPacket(spaceRegionEntry.getValue()));
+					}
+				}
+			}
+		});
 	}
 }

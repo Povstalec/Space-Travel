@@ -1,11 +1,7 @@
 package net.povstalec.spacetravel.common.init;
 
-import java.util.Map;
-import java.util.Optional;
-
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
-import com.mojang.brigadier.arguments.DoubleArgumentType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
@@ -23,13 +19,6 @@ import net.minecraftforge.event.RegisterCommandsEvent;
 import net.povstalec.spacetravel.SpaceTravel;
 import net.povstalec.spacetravel.common.capabilities.SpaceshipCapability;
 import net.povstalec.spacetravel.common.capabilities.SpaceshipCapabilityProvider;
-import net.povstalec.spacetravel.common.data.Multiverse;
-import net.povstalec.spacetravel.common.packets.ClientBoundRenderCenterUpdatePacket;
-import net.povstalec.spacetravel.common.packets.ClientBoundSpaceRegionClearPacket;
-import net.povstalec.spacetravel.common.packets.ClientBoundSpaceRegionLoadPacket;
-import net.povstalec.spacetravel.common.space.SpaceRegion;
-import net.povstalec.spacetravel.common.space.Spaceship;
-import net.povstalec.spacetravel.common.space.Universe;
 import net.povstalec.spacetravel.common.util.DimensionUtil;
 
 public class CommandInit
@@ -89,27 +78,9 @@ public class CommandInit
 		ServerPlayer player = context.getSource().getPlayer();
 		ServerLevel level = context.getSource().getLevel();
 
-		PacketHandlerInit.sendToPlayer(player, new ClientBoundRenderCenterUpdatePacket(new Spaceship())); //TODO Get coords from somewhere
 		if(player != null && level != null)
 		{
-			LazyOptional<SpaceshipCapability> spaceshipCapability = level.getCapability(SpaceshipCapabilityProvider.SPACESHIP);
-			
-			spaceshipCapability.ifPresent(cap -> 
-			{
-				if(cap != null)
-				{
-					Optional<Universe> universe = Multiverse.get(level).getUniverse("main");
-					
-					if(universe.isPresent())
-					{
-						PacketHandlerInit.sendToPlayer(player, new ClientBoundSpaceRegionClearPacket());
-						for(Map.Entry<SpaceRegion.Position, SpaceRegion> spaceRegionEntry : universe.get().getRegionsAt(new SpaceRegion.Position(cap.spaceship.getSpaceCoords()), 1).entrySet()) //TODO Get coords from somewhere
-						{
-							PacketHandlerInit.sendToPlayer(player, new ClientBoundSpaceRegionLoadPacket(spaceRegionEntry.getValue())); //TODO Get coords from somewhere
-						}
-					}
-				}
-			});
+			SpaceTravel.updatePlayerRenderer(level, player);
 			
 			context.getSource().sendSuccess(() -> Component.literal("Reloaded renderer"), false); //TODO Translation
 		}

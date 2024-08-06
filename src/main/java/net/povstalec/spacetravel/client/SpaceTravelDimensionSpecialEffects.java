@@ -14,6 +14,7 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.client.event.RegisterDimensionSpecialEffectsEvent;
 import net.povstalec.spacetravel.SpaceTravel;
 import net.povstalec.spacetravel.client.render.SpaceRenderer;
+import net.povstalec.spacetravel.client.render.TestBuffer;
 
 public class SpaceTravelDimensionSpecialEffects extends DimensionSpecialEffects
 {
