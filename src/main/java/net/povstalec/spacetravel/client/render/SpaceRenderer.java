@@ -30,13 +30,11 @@ public class SpaceRenderer
 	public static void addSpaceRegion(ClientSpaceRegion spaceRegion)
 	{
 		SPACE_REGIONS.put(spaceRegion.getRegionPos(), spaceRegion);
-		System.out.println("Adding region " + spaceRegion.getRegionPos().toString());
 	}
 	
 	public static void removeSpaceRegion(SpaceRegion.Position regionPos)
 	{
 		SPACE_REGIONS.remove(regionPos);
-		System.out.println("Removing region " + regionPos.toString());
 	}
 	
 	public static void render(RenderCenter viewCenter, SpaceObjectRenderer<?> masterParent, ClientLevel level, Camera camera, float partialTicks, PoseStack stack, Matrix4f projectionMatrix, boolean isFoggy, Runnable setupFog, BufferBuilder bufferbuilder)

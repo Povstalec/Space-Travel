@@ -1,18 +1,20 @@
 package net.povstalec.spacetravel.common.data;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 import javax.annotation.Nonnull;
 
+import net.minecraft.core.Registry;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.level.storage.DimensionDataStorage;
 import net.povstalec.spacetravel.SpaceTravel;
 import net.povstalec.spacetravel.common.space.Universe;
+import net.povstalec.spacetravel.common.space.objects.StarField;
 
 public class Multiverse extends SavedData
 {
@@ -40,12 +42,14 @@ public class Multiverse extends SavedData
 	public void setupUniverse()
 	{
 		if(universes.containsKey("main"))
-			System.out.println("--- Already contains main");
+			SpaceTravel.LOGGER.error("Already contains main");
 		else
 		{
 			universes.put("main", new Universe());
-			System.out.println("--- Created new main");
+			SpaceTravel.LOGGER.info("Created new main");
 		}
+		
+		registerStarFields(server);
 		
 		this.setDirty();
 	}
@@ -62,7 +66,22 @@ public class Multiverse extends SavedData
 	//*********************************Registering Space Objects**********************************
 	//============================================================================================
 	
-	
+	public void registerStarFields(MinecraftServer server)
+	{
+		final RegistryAccess registries = server.registryAccess();
+		final Registry<StarField> starFieldRegistry = registries.registryOrThrow(StarField.REGISTRY_KEY);
+		
+		Set<Map.Entry<ResourceKey<StarField>, StarField>> starFieldSet = starFieldRegistry.entrySet();
+		starFieldSet.forEach((starFieldEntry) ->
+		{
+			StarField starField = starFieldEntry.getValue();
+			
+			Optional<Universe> universe = getUniverse("main");
+			if(universe.isPresent())
+				universe.get().addToRegion(starField, true); //TODO Maybe let datapacks decide?
+		});
+		SpaceTravel.LOGGER.info("Star Fields registered");
+	}
 
 	//============================================================================================
 	//*************************************Saving and Loading*************************************

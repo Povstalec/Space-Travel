@@ -22,6 +22,7 @@ public final class SpaceRegion implements INBTSerializable<CompoundTag>
 	public static final String Z = "z";
 
 	public static final String CHILDREN = "children";
+	public static final String GENERATED = "generated";
 	
 	public static final long LY_PER_REGION = 1500000;
 	public static final long LY_PER_REGION_HALF = LY_PER_REGION / 2;
@@ -29,6 +30,7 @@ public final class SpaceRegion implements INBTSerializable<CompoundTag>
 	private Position pos;
 	
 	protected ArrayList<SpaceObject> children = new ArrayList<SpaceObject>();
+	private boolean isGenerated = false;
 	
 	public SpaceRegion(Position pos)
 	{
@@ -55,9 +57,12 @@ public final class SpaceRegion implements INBTSerializable<CompoundTag>
 		return children;
 	}
 	
-	public void addChild(SpaceObject child)
+	public void addChild(SpaceObject child, boolean setGenerated)
 	{
 		this.children.add(child);
+		
+		if(setGenerated)
+			isGenerated = true;
 	}
 	
 	public static SpaceRegion generateRegion(Position pos, long seed)
@@ -71,11 +76,11 @@ public final class SpaceRegion implements INBTSerializable<CompoundTag>
 		
 		int chance = random.nextInt(0, 100);
 		
-		if(chance >= 80)
+		if(chance >= 90)
 		{
 			StarField starField = StarField.randomStarField(pos.x(), pos.y(), pos.z(), usedSeed);
 			
-			spaceRegion.addChild(starField);
+			spaceRegion.addChild(starField, false);
 		}
 		
 		return spaceRegion;
@@ -95,6 +100,8 @@ public final class SpaceRegion implements INBTSerializable<CompoundTag>
 		tag.putLong(Z, pos.z());
 		
 		tag.put(CHILDREN, getChildrenTag());
+		
+		tag.putBoolean(GENERATED, isGenerated);
 		
 		return tag;
 	}
@@ -117,6 +124,8 @@ public final class SpaceRegion implements INBTSerializable<CompoundTag>
 	{
 		pos = new Position(tag.getLong(X), tag.getLong(Y), tag.getLong(Z));
 		
+		isGenerated = tag.getBoolean(GENERATED);
+		
 		CompoundTag childrenTag = tag.getCompound(CHILDREN);
 		for(int i = 0; i < childrenTag.size(); i++)
 		{
@@ -125,7 +134,7 @@ public final class SpaceRegion implements INBTSerializable<CompoundTag>
 			SpaceObject spaceObject = SpaceObjectDeserializer.deserialize(childTag.getString(SpaceObject.OBJECT_TYPE), childTag);
 			
 			if(spaceObject != null && spaceObject.isInitialized())
-				addChild(spaceObject);
+				addChild(spaceObject, isGenerated);
 		}
 	}
 	

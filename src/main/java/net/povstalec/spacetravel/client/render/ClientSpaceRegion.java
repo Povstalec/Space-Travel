@@ -128,8 +128,6 @@ public final class ClientSpaceRegion
 	{
 		StarField starField = new StarField();
 		starField.deserializeNBT(childTag);
-		
-		System.out.println("Deserialized Seed: " + starField.getSeed()); //TODO Remove
     	
     	if(starField.isInitialized())
     		return new StarFieldRenderer<StarField>(starField);

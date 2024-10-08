@@ -30,45 +30,6 @@ public class Universe implements INBTSerializable<CompoundTag>
 	public Universe()
 	{
 		spaceRegions = new HashMap<SpaceRegion.Position, SpaceRegion>();
-		
-		StarField.SpiralArm arm1 = new StarField.SpiralArm(1500, 0, 1.6298770314100501, 2.0, true);
-		StarField.SpiralArm arm2 = new StarField.SpiralArm(1500, 90, 1.6941251689586823, 2.0, true);
-		StarField.SpiralArm arm3 = new StarField.SpiralArm(1500, 180, 1.9660513834462778, 2.0, true);
-		StarField.SpiralArm arm4 = new StarField.SpiralArm(1500, 270, 1.8086568638593041, 2.0, true);
-		
-		ArrayList<StarField.SpiralArm> arms = new ArrayList<StarField.SpiralArm>();
-		arms.add(arm1);
-		arms.add(arm2);
-		arms.add(arm3);
-		arms.add(arm4);
-		
-		//TODO Don't keep these here forever
-		StarField milkyWay = new StarField(StarField.STAR_FIELD_LOCATION, Optional.empty(), new SpaceCoords(0L, 0L, 28000L),
-				new AxisRotation(0, 0, 0), new ArrayList<TextureLayer>(),
-				StarInfo.DEFAULT_STAR_INFO, 10842L, 90000, 1500, true, 0.5, 0.25, 0.5, arms);
-		
-		StarField.SpiralArm arm5 = new StarField.SpiralArm(4000, 0, 2.92, 2.5, true);
-		StarField.SpiralArm arm6 = new StarField.SpiralArm(4000, 180, 2.56, 2.5, true);
-		
-		ArrayList<StarField.SpiralArm> armsA = new ArrayList<StarField.SpiralArm>();
-		armsA.add(arm5);
-		armsA.add(arm6);
-		
-		//TODO Don't keep these here forever
-		StarField andromeda = new StarField(StarField.STAR_FIELD_LOCATION, Optional.empty(), new StellarCoordinates.Equatorial(
-				new StellarCoordinates.RightAscension(0, 42, 44.3), new StellarCoordinates.Declination(41, 16, 9),
-				new SpaceCoords.SpaceDistance(2500000)),
-				new AxisRotation(0, 32, -49), new ArrayList<TextureLayer>(),
-				StarInfo.DEFAULT_STAR_INFO, 55183L, 152000, 4000, true, 0.5, 0.25, 0.5, armsA);
-		
-		addToRegion(milkyWay);
-		addToRegion(andromeda);
-    	
-    	ArrayList<TextureLayer> texture = new ArrayList<TextureLayer>();
-    	texture.add(new TextureLayer(new ResourceLocation("textures/environment/sun.png"), new Color.IntRGBA(255, 255, 255, 255), true, 100, 0.4, true, 0, new UV.Quad(false)));
-    	SpaceObject sun = new SpaceObject(StarField.STAR_FIELD_LOCATION, Optional.empty(), Either.left(new SpaceCoords()), new AxisRotation(), texture);
-
-		getRegionAt(0, 0, 0).addChild(sun);
 	}
 	
 	/**
@@ -78,11 +39,11 @@ public class Universe implements INBTSerializable<CompoundTag>
 	 * @param z
 	 * @return Returns an existing space region located at xyz coordinates or a new space region if it doesn't exist yet
 	 */
-	public SpaceRegion getRegionAt(long x, long y, long z)
+	public SpaceRegion getRegionAt(long x, long y, long z, boolean generate)
 	{
 		SpaceRegion.Position pos = new SpaceRegion.Position(x, y, z);
 		
-		return getRegionAt(pos);
+		return getRegionAt(pos, generate);
 	}
 	
 	/**
@@ -90,9 +51,12 @@ public class Universe implements INBTSerializable<CompoundTag>
 	 * @param pos Position of the Space Region
 	 * @return Returns an existing space region located at xyz coordinates or a new space region if it doesn't exist yet
 	 */
-	public SpaceRegion getRegionAt(SpaceRegion.Position pos)
+	public SpaceRegion getRegionAt(SpaceRegion.Position pos, boolean generate)
 	{
-		return spaceRegions.computeIfAbsent(pos, position -> SpaceRegion.generateRegion(position, 10428)); // TODO Handle seeds
+		if(!generate)
+			return spaceRegions.computeIfAbsent(pos, position -> new SpaceRegion(pos));
+		else
+			return spaceRegions.computeIfAbsent(pos, position -> SpaceRegion.generateRegion(position, 10428)); // TODO Handle seeds
 	}
 	
 	/**
@@ -123,7 +87,7 @@ public class Universe implements INBTSerializable<CompoundTag>
 			{
 				for(long z = -radius + zCenter; z <= radius + zCenter; z++)
 				{
-					SpaceRegion spaceRegion = getRegionAt(x, y, z);
+					SpaceRegion spaceRegion = getRegionAt(x, y, z, true);
 					spaceRegions.put(spaceRegion.getRegionPos(), spaceRegion);
 				}
 			}
@@ -137,11 +101,11 @@ public class Universe implements INBTSerializable<CompoundTag>
 	 * @param spaceObject Space Object that should be added
 	 * @return Returns true if
 	 */
-	public void addToRegion(SpaceObject spaceObject)
+	public void addToRegion(SpaceObject spaceObject, boolean setGenerated)
 	{
 		SpaceRegion.Position pos = new SpaceRegion.Position(spaceObject.getSpaceCoords());
 		
-		getRegionAt(pos).addChild(spaceObject);
+		getRegionAt(pos, false).addChild(spaceObject, setGenerated);
 	}
 	
 	//============================================================================================
