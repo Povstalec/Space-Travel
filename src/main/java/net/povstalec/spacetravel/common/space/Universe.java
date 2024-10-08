@@ -1,28 +1,22 @@
 package net.povstalec.spacetravel.common.space;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-
-import org.joml.Vector3f;
-
+import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
-
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.common.util.INBTSerializable;
 import net.povstalec.spacetravel.SpaceTravel;
-import net.povstalec.spacetravel.common.space.objects.Galaxy;
-import net.povstalec.spacetravel.common.space.objects.Galaxy.SpiralGalaxy;
 import net.povstalec.spacetravel.common.space.objects.SpaceObject;
-import net.povstalec.spacetravel.common.util.AxisRotation;
-import net.povstalec.spacetravel.common.util.Color;
-import net.povstalec.spacetravel.common.util.SpaceCoords;
-import net.povstalec.spacetravel.common.util.TextureLayer;
-import net.povstalec.spacetravel.common.util.UV;
+import net.povstalec.spacetravel.common.space.objects.StarField;
+import net.povstalec.spacetravel.common.util.*;
+import org.joml.Vector3f;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 
 public class Universe implements INBTSerializable<CompoundTag>
 {
@@ -37,14 +31,42 @@ public class Universe implements INBTSerializable<CompoundTag>
 	{
 		spaceRegions = new HashMap<SpaceRegion.Position, SpaceRegion>();
 		
-		//TODO Don't keep these here forever
-		Galaxy.SpiralGalaxy milkyWay = new Galaxy.SpiralGalaxy(SpiralGalaxy.SPIRAL_GALAXY_LOCATION, Optional.empty(), new SpaceCoords(), new AxisRotation(), new ArrayList<TextureLayer>(), 10842, 90000, 4, 2.5, 1500);
+		StarField.SpiralArm arm1 = new StarField.SpiralArm(1500, 0, 1.6298770314100501, 2.0, true);
+		StarField.SpiralArm arm2 = new StarField.SpiralArm(1500, 90, 1.6941251689586823, 2.0, true);
+		StarField.SpiralArm arm3 = new StarField.SpiralArm(1500, 180, 1.9660513834462778, 2.0, true);
+		StarField.SpiralArm arm4 = new StarField.SpiralArm(1500, 270, 1.8086568638593041, 2.0, true);
 		
-		getRegionAt(0, 0, 0).addChild(milkyWay);
+		ArrayList<StarField.SpiralArm> arms = new ArrayList<StarField.SpiralArm>();
+		arms.add(arm1);
+		arms.add(arm2);
+		arms.add(arm3);
+		arms.add(arm4);
+		
+		//TODO Don't keep these here forever
+		StarField milkyWay = new StarField(StarField.STAR_FIELD_LOCATION, Optional.empty(), new SpaceCoords(0L, 0L, 28000L),
+				new AxisRotation(0, 0, 0), new ArrayList<TextureLayer>(),
+				StarInfo.DEFAULT_STAR_INFO, 10842L, 90000, 1500, true, 0.5, 0.25, 0.5, arms);
+		
+		StarField.SpiralArm arm5 = new StarField.SpiralArm(4000, 0, 2.92, 2.5, true);
+		StarField.SpiralArm arm6 = new StarField.SpiralArm(4000, 180, 2.56, 2.5, true);
+		
+		ArrayList<StarField.SpiralArm> armsA = new ArrayList<StarField.SpiralArm>();
+		armsA.add(arm5);
+		armsA.add(arm6);
+		
+		//TODO Don't keep these here forever
+		StarField andromeda = new StarField(StarField.STAR_FIELD_LOCATION, Optional.empty(), new StellarCoordinates.Equatorial(
+				new StellarCoordinates.RightAscension(0, 42, 44.3), new StellarCoordinates.Declination(41, 16, 9),
+				new SpaceCoords.SpaceDistance(2500000)),
+				new AxisRotation(0, 32, -49), new ArrayList<TextureLayer>(),
+				StarInfo.DEFAULT_STAR_INFO, 55183L, 152000, 4000, true, 0.5, 0.25, 0.5, armsA);
+		
+		addToRegion(milkyWay);
+		addToRegion(andromeda);
     	
     	ArrayList<TextureLayer> texture = new ArrayList<TextureLayer>();
-    	texture.add(new TextureLayer(new ResourceLocation("textures/environment/sun.png"), new Color.IntRGBA(255, 255, 255, 255), true, 100, 10, true, 0, new UV.Quad(false)));
-    	SpaceObject sun = new SpaceObject(SpiralGalaxy.SPACE_OBJECT_LOCATION, Optional.empty(), new SpaceCoords().add(new Vector3f(1, 0, 0)), new AxisRotation(), texture);
+    	texture.add(new TextureLayer(new ResourceLocation("textures/environment/sun.png"), new Color.IntRGBA(255, 255, 255, 255), true, 100, 0.4, true, 0, new UV.Quad(false)));
+    	SpaceObject sun = new SpaceObject(StarField.STAR_FIELD_LOCATION, Optional.empty(), Either.left(new SpaceCoords()), new AxisRotation(), texture);
 
 		getRegionAt(0, 0, 0).addChild(sun);
 	}
@@ -59,7 +81,17 @@ public class Universe implements INBTSerializable<CompoundTag>
 	public SpaceRegion getRegionAt(long x, long y, long z)
 	{
 		SpaceRegion.Position pos = new SpaceRegion.Position(x, y, z);
-
+		
+		return getRegionAt(pos);
+	}
+	
+	/**
+	 * Method for getting a space region at specific coordinates
+	 * @param pos Position of the Space Region
+	 * @return Returns an existing space region located at xyz coordinates or a new space region if it doesn't exist yet
+	 */
+	public SpaceRegion getRegionAt(SpaceRegion.Position pos)
+	{
 		return spaceRegions.computeIfAbsent(pos, position -> SpaceRegion.generateRegion(position, 10428)); // TODO Handle seeds
 	}
 	
@@ -75,9 +107,10 @@ public class Universe implements INBTSerializable<CompoundTag>
 	
 	/**
 	 * Method that fetches space regions in a certain radius
-	 * @param x
-	 * @param y
-	 * @param z
+	 * @param xCenter
+	 * @param yCenter
+	 * @param zCenter
+	 * @param radius
 	 * @return Returns a map of space region position + space region of regions in some range around coords
 	 */
 	public Map<SpaceRegion.Position, SpaceRegion> getRegionsAt(long xCenter, long yCenter, long zCenter, int radius)
@@ -97,6 +130,18 @@ public class Universe implements INBTSerializable<CompoundTag>
 		}
 		
 		return spaceRegions;
+	}
+	
+	/**
+	 * Method for adding an object to the Space Region
+	 * @param spaceObject Space Object that should be added
+	 * @return Returns true if
+	 */
+	public void addToRegion(SpaceObject spaceObject)
+	{
+		SpaceRegion.Position pos = new SpaceRegion.Position(spaceObject.getSpaceCoords());
+		
+		getRegionAt(pos).addChild(spaceObject);
 	}
 	
 	//============================================================================================

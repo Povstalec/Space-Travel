@@ -5,6 +5,8 @@ import java.util.Optional;
 
 import javax.annotation.Nullable;
 
+import com.mojang.datafixers.util.Either;
+import net.povstalec.spacetravel.common.util.StellarCoordinates;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
@@ -37,7 +39,7 @@ public class OrbitingObject extends SpaceObject
 	
 	public OrbitingObject() {}
 	
-	public OrbitingObject(ResourceLocation objectType, Optional<String> parentName, SpaceCoords coords, AxisRotation axisRotation, Optional<OrbitInfo> orbitInfo, List<TextureLayer> textureLayers)
+	public OrbitingObject(ResourceLocation objectType, Optional<String> parentName, Either<SpaceCoords, StellarCoordinates.Equatorial> coords, AxisRotation axisRotation, Optional<OrbitInfo> orbitInfo, List<TextureLayer> textureLayers)
 	{
 		super(objectType, parentName, coords, axisRotation, textureLayers);
 		

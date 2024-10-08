@@ -51,6 +51,11 @@ public class CommandInit
 											.then(Commands.argument("z_axis", DoubleArgumentType.doubleArg()).executes(CommandInit::rotateSpaceship)
 													.requires(commandSourceStack -> commandSourceStack.hasPermission(2))))))));
 		
+		dispatcher.register(Commands.literal(SpaceTravel.MODID)
+				.then(Commands.literal("spaceship")
+						.then(Commands.literal("pos")
+								.then(Commands.literal("get").executes(CommandInit::getSpaceshipPos)))));
+		
 		// Client commands
 		dispatcher.register(Commands.literal(SpaceTravel.MODID)
 				.then(Commands.literal("render")
@@ -76,6 +81,24 @@ public class CommandInit
 		{
 			DimensionUtil.createSpaceship(server, name);
 			context.getSource().sendSuccess(() -> Component.literal("Created a new Dimension"), false); //TODO Translation
+		}
+		
+		return Command.SINGLE_SUCCESS;
+	}
+	
+	private static int getSpaceshipPos(CommandContext<CommandSourceStack> context) throws CommandSyntaxException
+	{
+		ServerLevel level = context.getSource().getLevel();
+		
+		if(level != null)
+		{
+			LazyOptional<SpaceshipCapability> spaceshipCapability = level.getCapability(SpaceshipCapabilityProvider.SPACESHIP);
+			
+			spaceshipCapability.ifPresent(cap ->
+			{
+				if(cap != null)
+					context.getSource().sendSuccess(() -> Component.literal(cap.spaceship.getSpaceCoords().toString()), false); //TODO Translation
+			});
 		}
 		
 		return Command.SINGLE_SUCCESS;

@@ -1,14 +1,15 @@
 package net.povstalec.spacetravel.common.util;
 
-import org.joml.Vector3d;
-import org.joml.Vector3f;
-
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.common.util.INBTSerializable;
+import net.povstalec.spacetravel.client.RenderCenter;
+import org.joml.Quaternionf;
+import org.joml.Vector3d;
+import org.joml.Vector3f;
 
 public class SpaceCoords implements INBTSerializable<CompoundTag>
 {
@@ -99,6 +100,15 @@ public class SpaceCoords implements INBTSerializable<CompoundTag>
 	public double distanceToCenter()
 	{
 		return distance(NULL_COORDS);
+	}
+	
+	public static Quaternionf getQuaternionf(ClientLevel level, RenderCenter renderCenter, float partialTicks)
+	{
+		Quaternionf q = new Quaternionf();
+		// Inverting so that we can view the world through the relative rotation of our view center
+		renderCenter.getObjectAxisRotation().quaternionf().invert(q);
+		
+		return q;
 	}
 	
 	/**
@@ -304,6 +314,14 @@ public class SpaceCoords implements INBTSerializable<CompoundTag>
 		public SpaceDistance sub(double value)
 		{
 			return new SpaceDistance(this.ly, this.km - value);
+		}
+		
+		public SpaceDistance mul(double value, boolean roundDown)
+		{
+			double result = this.ly * value;
+			long ly = (long) result;
+			
+			return new SpaceDistance((long) ly, roundDown ? 0 : result - ly);
 		}
 		
 		public SpaceDistance copy()

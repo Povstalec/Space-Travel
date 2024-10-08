@@ -22,7 +22,7 @@ public class SpaceTravelShaders
         @SubscribeEvent
         public static void registerShaders(RegisterShadersEvent event) throws IOException
         {
-            event.registerShader(new StarShaderInstance(event.getResourceProvider(), new ResourceLocation(SpaceTravel.MODID, "rendertype_star"), SpaceTravelVertexFormat.STAR),
+            event.registerShader(new StarShaderInstance(event.getResourceProvider(), new ResourceLocation(SpaceTravel.MODID, "rendertype_star"), SpaceTravelVertexFormat.STAR_POS_COLOR_LY),
             		(shaderInstance) ->
             {
             	rendertypeStarShater = (StarShaderInstance) shaderInstance;

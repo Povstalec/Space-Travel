@@ -8,6 +8,7 @@ import java.util.Optional;
 
 import javax.annotation.Nullable;
 
+import com.mojang.datafixers.util.Either;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
@@ -40,7 +41,7 @@ public class Spaceship extends OrbitingObject
 	
 	public Spaceship()
 	{
-		super(SPACESHIP_LOCATION, Optional.empty(), new SpaceCoords(), new AxisRotation(), Optional.empty(), new ArrayList<TextureLayer>());
+		super(SPACESHIP_LOCATION, Optional.empty(), Either.left(new SpaceCoords()), new AxisRotation(), Optional.empty(), new ArrayList<TextureLayer>());
 		
 		spaceRegionPos = new SpaceRegion.Position(this.getSpaceCoords());
 	}
@@ -50,6 +51,11 @@ public class Spaceship extends OrbitingObject
 		this.xAxisSpeed = xAxisSpeed;
 		this.yAxisSpeed = yAxisSpeed;
 		this.zAxisSpeed = zAxisSpeed;
+	}
+	
+	public SpaceCoords getSpaceCoords()
+	{
+		return this.coords;
 	}
 	
 	public void rotate(double xAxisRotation, double yAxisRotation, double zAxisRotation)

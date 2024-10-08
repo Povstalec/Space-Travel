@@ -4,6 +4,7 @@ import java.nio.ByteBuffer;
 
 import javax.annotation.Nullable;
 
+import net.povstalec.spacetravel.common.util.SpaceCoords;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.lwjgl.opengl.GL15C;
@@ -22,7 +23,6 @@ public class StarBuffer implements AutoCloseable
 {
 	private int vertexBufferId;
 	private int indexBufferId;
-	//private int instanceBufferId; //Custom
 	private int arrayObjectId;
 	@Nullable
 	private VertexFormat format;
@@ -37,7 +37,6 @@ public class StarBuffer implements AutoCloseable
 		RenderSystem.assertOnRenderThread();
 		this.vertexBufferId = GlStateManager._glGenBuffers();
 		this.indexBufferId = GlStateManager._glGenBuffers();
-		//this.instanceBufferId = GlStateManager._glGenBuffers();
 		this.arrayObjectId = GlStateManager._glGenVertexArrays();
 	}
 	
@@ -59,7 +58,7 @@ public class StarBuffer implements AutoCloseable
 			{
 				buffer.release();
 			}
-
+			
 		}
 	}
 	
@@ -106,14 +105,6 @@ public class StarBuffer implements AutoCloseable
 		}
 	}
 	
-	/*private void uploadInstanceBuffer(BufferBuilder.DrawState p_231224_, ByteBuffer p_231225_)
-	{
-		GL20C.glEnableVertexAttribArray(this.instanceBufferId);
-		GlStateManager._glBindBuffer(GL15C.GL_ARRAY_BUFFER, this.instanceBufferId);
-		GL20C.glVertexAttribPointer(indexBufferId, arrayObjectId);
-		GL33C.glVertexAttribDivisor(4, 1); // 4 vertices per 1 instance
-	}*/
-	
 	public void bind()
 	{
 		BufferUploader.invalidate();
@@ -129,10 +120,6 @@ public class StarBuffer implements AutoCloseable
 	public void draw()
 	{
 		RenderSystem.drawElements(this.mode.asGLMode, this.indexCount, this.getIndexType().asGLType);
-		// Custom
-		//RenderSystem.assertOnRenderThread();
-		//GL31C.glDrawArraysInstanced(GL40.GL_PATCHES, 0, indexCount, 1);
-		//GL31C.glDrawArraysInstanced(GL40.GL_PATCHES, 0, 1, indexCount);
 	}
 	
 	private VertexFormat.IndexType getIndexType()
@@ -141,19 +128,24 @@ public class StarBuffer implements AutoCloseable
 		return rendersystem$autostorageindexbuffer != null ? rendersystem$autostorageindexbuffer.type() : this.indexType;
 	}
 	
-	public void drawWithShader(Matrix4f modelViewMatrix, Matrix4f projectionMatrix, Vector3f relativeSpacePos, StarShaderInstance shaderInstance) {
+	public void drawWithShader(Matrix4f modelViewMatrix, Matrix4f projectionMatrix, SpaceCoords relativeSpacePos, StarShaderInstance shaderInstance)
+	{
+		Vector3f relativeVectorLy = new Vector3f((float) relativeSpacePos.x().ly(), (float) relativeSpacePos.y().ly(), (float) relativeSpacePos.z().ly());
+		Vector3f relativeVectorKm = new Vector3f((float) relativeSpacePos.x().km(), (float) relativeSpacePos.y().km(), (float) relativeSpacePos.z().km());
+		
 		if(!RenderSystem.isOnRenderThread())
 		{
 			RenderSystem.recordRenderCall(() ->
 			{
-				this._drawWithShader(new Matrix4f(modelViewMatrix), new Matrix4f(projectionMatrix), relativeSpacePos, shaderInstance);
+				this._drawWithShader(new Matrix4f(modelViewMatrix), new Matrix4f(projectionMatrix), relativeVectorLy, relativeVectorKm, shaderInstance);
 			});
 		}
 		else
-			this._drawWithShader(modelViewMatrix, projectionMatrix, relativeSpacePos, shaderInstance);
+			this._drawWithShader(modelViewMatrix, projectionMatrix, relativeVectorLy, relativeVectorKm, shaderInstance);
 	}
 	
-	private void _drawWithShader(Matrix4f modelViewMatrix, Matrix4f projectionMatrix, Vector3f relativeSpacePos, StarShaderInstance shaderInstance) {
+	private void _drawWithShader(Matrix4f modelViewMatrix, Matrix4f projectionMatrix, Vector3f relativeSpaceLy, Vector3f relativeSpaceKm, StarShaderInstance shaderInstance)
+	{
 		for(int i = 0; i < 12; ++i)
 		{
 			int j = RenderSystem.getShaderTexture(i);
@@ -199,8 +191,11 @@ public class StarBuffer implements AutoCloseable
 		if(shaderInstance.LINE_WIDTH != null && (this.mode == VertexFormat.Mode.LINES || this.mode == VertexFormat.Mode.LINE_STRIP))
 			shaderInstance.LINE_WIDTH.set(RenderSystem.getShaderLineWidth());
 		
-		if(shaderInstance.RELATIVE_SPACE_POS != null)
-			shaderInstance.RELATIVE_SPACE_POS.set(relativeSpacePos);
+		if(shaderInstance.RELATIVE_SPACE_LY != null)
+			shaderInstance.RELATIVE_SPACE_LY.set(relativeSpaceLy);
+		
+		if(shaderInstance.RELATIVE_SPACE_KM != null)
+			shaderInstance.RELATIVE_SPACE_KM.set(relativeSpaceKm);
 		
 		RenderSystem.setupShaderLights(shaderInstance);
 		shaderInstance.apply();
@@ -208,7 +203,8 @@ public class StarBuffer implements AutoCloseable
 		shaderInstance.clear();
 	}
 	
-	public void close() {
+	public void close()
+	{
 		if (this.vertexBufferId >= 0)
 		{
 			RenderSystem.glDeleteBuffers(this.vertexBufferId);
@@ -232,7 +228,7 @@ public class StarBuffer implements AutoCloseable
 	{
 		return this.format;
 	}
-
+	
 	public boolean isInvalid()
 	{
 		return this.arrayObjectId == -1;

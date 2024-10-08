@@ -1,14 +1,13 @@
 package net.povstalec.spacetravel.common.space;
 
-import org.jetbrains.annotations.Nullable;
-
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.povstalec.spacetravel.common.events.custom.SpaceObjectDeserializationEvent;
 import net.povstalec.spacetravel.common.events.custom.SpaceTravelEvents;
-import net.povstalec.spacetravel.common.space.objects.Galaxy;
 import net.povstalec.spacetravel.common.space.objects.OrbitingObject;
 import net.povstalec.spacetravel.common.space.objects.SpaceObject;
+import net.povstalec.spacetravel.common.space.objects.StarField;
+import org.jetbrains.annotations.Nullable;
 
 public class SpaceObjectDeserializer
 {
@@ -20,7 +19,7 @@ public class SpaceObjectDeserializer
 			return deserializeOrbitingObject(tag);
 		if(objectType.equals(SpaceObject.SPACE_OBJECT_LOCATION))
 			return deserializeSpaceObject(tag);
-		else if(objectType.equals(Galaxy.SpiralGalaxy.SPIRAL_GALAXY_LOCATION))
+		else if(objectType.equals(StarField.STAR_FIELD_LOCATION))
 			return deserializeSpiralGalaxy(tag);
 		
 		SpaceObjectDeserializationEvent event = SpaceTravelEvents.onObjectDeserialized(objectType, tag);
@@ -35,7 +34,7 @@ public class SpaceObjectDeserializer
 	@Nullable
 	public static SpaceObject deserialize(String objectTypeString, CompoundTag tag) //TODO Add all the other basic Space Object types //TODO Probably should thrown an exception if a deserialization doesn't work out
 	{
-		System.out.println("Deserialization attempt [" + objectTypeString + "]");
+		System.out.println("Deserialization attempt [" + objectTypeString + "]"); //TODO Remove
 		if(objectTypeString != null && ResourceLocation.isValidResourceLocation(objectTypeString))
 			return deserialize(new ResourceLocation(objectTypeString), tag);
 		
@@ -46,7 +45,7 @@ public class SpaceObjectDeserializer
 	{
 		SpaceObject spaceObject = new SpaceObject();
 		spaceObject.deserializeNBT(tag);
-		System.out.println("Deserialized space object");
+		System.out.println("Deserialized space object"); //TODO Remove
 		
     	return spaceObject;
 	}
@@ -55,17 +54,17 @@ public class SpaceObjectDeserializer
 	{
 		OrbitingObject orbitingObject = new OrbitingObject();
 		orbitingObject.deserializeNBT(tag);
-		System.out.println("Deserialized orbiting object");
+		System.out.println("Deserialized orbiting object"); //TODO Remove
 		
     	return orbitingObject;
 	}
 	
-	private static Galaxy.SpiralGalaxy deserializeSpiralGalaxy(CompoundTag tag)
+	private static StarField deserializeSpiralGalaxy(CompoundTag tag)
 	{
-		Galaxy.SpiralGalaxy spiralGalaxy = new Galaxy.SpiralGalaxy();
-    	spiralGalaxy.deserializeNBT(tag);
-		System.out.println("Deserialized spiral galaxy");
+		StarField starField = new StarField();
+		starField.deserializeNBT(tag);
+		System.out.println("Deserialized star field"); //TODO Remove
     	
-    	return spiralGalaxy;
+    	return starField;
 	}
 }

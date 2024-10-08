@@ -1,24 +1,23 @@
 package net.povstalec.spacetravel.client.render;
 
-import java.util.ArrayList;
-
-import org.joml.Matrix4f;
-import org.joml.Vector3f;
-
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.PoseStack;
-
 import net.minecraft.client.Camera;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
+import net.povstalec.spacetravel.SpaceTravel;
 import net.povstalec.spacetravel.client.RenderCenter;
-import net.povstalec.spacetravel.client.render.space_objects.GalaxyRenderer;
 import net.povstalec.spacetravel.client.render.space_objects.SpaceObjectRenderer;
+import net.povstalec.spacetravel.client.render.space_objects.StarFieldRenderer;
 import net.povstalec.spacetravel.common.space.SpaceRegion.Position;
-import net.povstalec.spacetravel.common.space.objects.Galaxy;
 import net.povstalec.spacetravel.common.space.objects.OrbitingObject;
 import net.povstalec.spacetravel.common.space.objects.SpaceObject;
+import net.povstalec.spacetravel.common.space.objects.StarField;
+import org.joml.Matrix4f;
+import org.joml.Vector3f;
+
+import java.util.ArrayList;
 
 public final class ClientSpaceRegion
 {
@@ -92,7 +91,7 @@ public final class ClientSpaceRegion
 					spaceObjectRenderer = deserializeOrbitingObject(childTag);
 				if(objectType.equals(SpaceObject.SPACE_OBJECT_LOCATION))
 					spaceObjectRenderer = deserializeSpaceObject(childTag);
-				else if(objectType.equals(Galaxy.SpiralGalaxy.SPIRAL_GALAXY_LOCATION))
+				else if(objectType.equals(StarField.STAR_FIELD_LOCATION))
 					spaceObjectRenderer = deserializeSpiralGalaxy(childTag);
 				
 				//TODO Add event for leftover object types
@@ -125,14 +124,16 @@ public final class ClientSpaceRegion
     	return null;
 	}
 	
-	private GalaxyRenderer.SpiralGalaxy deserializeSpiralGalaxy(CompoundTag childTag)
+	private StarFieldRenderer<StarField> deserializeSpiralGalaxy(CompoundTag childTag)
 	{
-		Galaxy.SpiralGalaxy spiralGalaxy = new Galaxy.SpiralGalaxy();
-    	spiralGalaxy.deserializeNBT(childTag);
+		StarField starField = new StarField();
+		starField.deserializeNBT(childTag);
+		
+		System.out.println("Deserialized Seed: " + starField.getSeed()); //TODO Remove
     	
-    	if(spiralGalaxy.isInitialized())
-    		return new GalaxyRenderer.SpiralGalaxy(spiralGalaxy);
-    	
+    	if(starField.isInitialized())
+    		return new StarFieldRenderer<StarField>(starField);
+		
     	return null;
 	}
 }

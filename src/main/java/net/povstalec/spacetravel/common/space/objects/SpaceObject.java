@@ -6,6 +6,9 @@ import java.util.Optional;
 
 import javax.annotation.Nullable;
 
+import com.mojang.datafixers.util.Either;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.povstalec.spacetravel.common.util.StellarCoordinates;
 import org.joml.Vector3f;
 
 import com.mojang.serialization.Codec;
@@ -58,18 +61,25 @@ public class SpaceObject implements INBTSerializable<CompoundTag>
 	
 	private ArrayList<TextureLayer> textureLayers = new ArrayList<TextureLayer>();
 	
+	protected FadeOutHandler fadeOutHandler;
+	
 	public String name;
 	
 	public SpaceObject(){}
 	
-	public SpaceObject(ResourceLocation objectType, Optional<String> parentName, SpaceCoords coords, AxisRotation axisRotation, List<TextureLayer> textureLayers)
+	public SpaceObject(ResourceLocation objectType, Optional<String> parentName, Either<SpaceCoords, StellarCoordinates.Equatorial> coords,
+					   AxisRotation axisRotation, List<TextureLayer> textureLayers)
 	{
 		this.objectType = objectType;
 		
 		if(parentName.isPresent())
 				this.parentName = parentName.get();
 		
-		this.coords = coords;
+		if(coords.left().isPresent())
+			this.coords = coords.left().get();
+		else
+			this.coords = coords.right().get().toGalactic().toSpaceCoords();
+		
 		this.axisRotation = axisRotation;
 		
 		this.textureLayers = new ArrayList<TextureLayer>(textureLayers);
@@ -171,7 +181,7 @@ public class SpaceObject implements INBTSerializable<CompoundTag>
 	
 	public static SpaceObject readFromBuffer(FriendlyByteBuf buffer)
 	{
-		return new SpaceObject(buffer.readResourceLocation(), buffer.readOptional((buf) -> buf.readUtf()), SpaceCoords.readFromBuffer(buffer), AxisRotation.readFromBuffer(buffer), new ArrayList<TextureLayer>()); // TODO Read texture layers
+		return new SpaceObject(buffer.readResourceLocation(), buffer.readOptional((buf) -> buf.readUtf()), Either.left(SpaceCoords.readFromBuffer(buffer)), AxisRotation.readFromBuffer(buffer), new ArrayList<TextureLayer>()); // TODO Read texture layers
 	}
 
 	@Override
@@ -218,14 +228,12 @@ public class SpaceObject implements INBTSerializable<CompoundTag>
 		
 		if(tag.contains(PARENT_NAME))
 			this.parentName = tag.getString(PARENT_NAME);
-	
-		SpaceCoords coords = new SpaceCoords();
-		coords.deserializeNBT(tag.getCompound(COORDS));
-		this.coords = coords;
 		
-		AxisRotation axisRotation = new AxisRotation();
+		this.coords = new SpaceCoords();
+		coords.deserializeNBT(tag.getCompound(COORDS));
+		
+		this.axisRotation = new AxisRotation();
 		axisRotation.deserializeNBT(tag.getCompound(AXIS_ROTATION));
-		this.axisRotation = axisRotation;
 		
 		// Deserialize Texture Layers
 		CompoundTag textureLayerTag = tag.getCompound(TEXTURE_LAYERS);
@@ -244,6 +252,45 @@ public class SpaceObject implements INBTSerializable<CompoundTag>
 			
 			if(spaceObject != null && spaceObject.isInitialized())
 				addChild(spaceObject);
+		}
+	}
+	
+	public static class FadeOutHandler
+	{
+		public static final FadeOutHandler DEFAULT_PLANET_HANDLER = new FadeOutHandler(new SpaceCoords.SpaceDistance(70000000000D), new SpaceCoords.SpaceDistance(100000000000D), new SpaceCoords.SpaceDistance(100000000000D));
+		public static final FadeOutHandler DEFAULT_STAR_HANDLER = new FadeOutHandler(new SpaceCoords.SpaceDistance(3000000L), new SpaceCoords.SpaceDistance(5000000L), new SpaceCoords.SpaceDistance(100000000000D));
+		public static final FadeOutHandler DEFAULT_STAR_FIELD_HANDLER = new FadeOutHandler(new SpaceCoords.SpaceDistance(3000000L), new SpaceCoords.SpaceDistance(5000000L), new SpaceCoords.SpaceDistance(5000000L));
+		
+		private SpaceCoords.SpaceDistance fadeOutStartDistance;
+		private SpaceCoords.SpaceDistance fadeOutEndDistance;
+		private SpaceCoords.SpaceDistance maxChildRenderDistance;
+		
+		public static final Codec<FadeOutHandler> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+				SpaceCoords.SpaceDistance.CODEC.fieldOf("fade_out_start_distance").forGetter(FadeOutHandler::getFadeOutStartDistance),
+				SpaceCoords.SpaceDistance.CODEC.fieldOf("fade_out_end_distance").forGetter(FadeOutHandler::getFadeOutEndDistance),
+				SpaceCoords.SpaceDistance.CODEC.fieldOf("max_child_render_distance").forGetter(FadeOutHandler::getMaxChildRenderDistance)
+		).apply(instance, FadeOutHandler::new));
+		
+		public FadeOutHandler(SpaceCoords.SpaceDistance fadeOutStartDistance, SpaceCoords.SpaceDistance fadeOutEndDistance, SpaceCoords.SpaceDistance maxChildRenderDistance)
+		{
+			this.fadeOutStartDistance = fadeOutStartDistance;
+			this.fadeOutEndDistance = fadeOutEndDistance;
+			this.maxChildRenderDistance = maxChildRenderDistance;
+		}
+		
+		public SpaceCoords.SpaceDistance getFadeOutStartDistance()
+		{
+			return fadeOutStartDistance;
+		}
+		
+		public SpaceCoords.SpaceDistance getFadeOutEndDistance()
+		{
+			return fadeOutEndDistance;
+		}
+		
+		public SpaceCoords.SpaceDistance getMaxChildRenderDistance()
+		{
+			return maxChildRenderDistance;
 		}
 	}
 }

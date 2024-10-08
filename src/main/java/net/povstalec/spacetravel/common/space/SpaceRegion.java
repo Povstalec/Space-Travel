@@ -1,16 +1,18 @@
 package net.povstalec.spacetravel.common.space;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 
+import com.mojang.datafixers.util.Either;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraftforge.common.util.INBTSerializable;
-import net.povstalec.spacetravel.common.space.objects.Galaxy;
-import net.povstalec.spacetravel.common.space.objects.Galaxy.SpiralGalaxy;
 import net.povstalec.spacetravel.common.space.objects.SpaceObject;
+import net.povstalec.spacetravel.common.space.objects.StarField;
 import net.povstalec.spacetravel.common.util.AxisRotation;
 import net.povstalec.spacetravel.common.util.SpaceCoords;
+import net.povstalec.spacetravel.common.util.StarInfo;
 import net.povstalec.spacetravel.common.util.TextureLayer;
 
 public final class SpaceRegion implements INBTSerializable<CompoundTag>
@@ -21,7 +23,8 @@ public final class SpaceRegion implements INBTSerializable<CompoundTag>
 
 	public static final String CHILDREN = "children";
 	
-	public static final long LY_PER_REGION = 1000000;
+	public static final long LY_PER_REGION = 1500000;
+	public static final long LY_PER_REGION_HALF = LY_PER_REGION / 2;
 	
 	private Position pos;
 	
@@ -64,37 +67,15 @@ public final class SpaceRegion implements INBTSerializable<CompoundTag>
 		SpaceRegion spaceRegion = new SpaceRegion(pos);
 		
 		//TODO Random generation
-		Random random = new Random(usedSeed);
+		Random random = new Random(usedSeed); // TODO Swap this for randomsource
 		
 		int chance = random.nextInt(0, 100);
 		
-		if(chance >= 20)
+		if(chance >= 80)
 		{
-
-			long randomX = random.nextLong(0, LY_PER_REGION);
-			long randomY = random.nextLong(0, LY_PER_REGION);
-			long randomZ = random.nextLong(0, LY_PER_REGION);
+			StarField starField = StarField.randomStarField(pos.x(), pos.y(), pos.z(), usedSeed);
 			
-			long x = randomX + pos.x() * LY_PER_REGION;
-			long y = randomY + pos.y() * LY_PER_REGION;
-			long z = randomZ + pos.z() * LY_PER_REGION;
-
-			System.out.println("Pos: " + pos.toString() + " Hash:" + pos.hashCode() + " X: " + randomX + " Y: " + randomY + " Z: " + randomZ);
-			//System.out.println(x + " " + y + " " + z);
-			
-			double xRot = random.nextDouble(0, 360);
-			double yRot = random.nextDouble(0, 360);
-			double zRot = random.nextDouble(0, 360);
-			
-			int stars = random.nextInt(400, 3000); // 1500
-			int diameter = stars * 60; // 90000
-			short numberOfArms = (short) random.nextInt(2, 4); // 4
-			double spread = random.nextDouble(2, 5); // 2.5
-			
-			//seed = 10842
-			Galaxy.SpiralGalaxy spiralGalaxy = new Galaxy.SpiralGalaxy(SpiralGalaxy.SPIRAL_GALAXY_LOCATION, Optional.empty(), new SpaceCoords(x, y, z), new AxisRotation(xRot, yRot, zRot), new ArrayList<TextureLayer>(), usedSeed, diameter, numberOfArms, spread, stars);
-			
-			spaceRegion.addChild(spiralGalaxy);
+			spaceRegion.addChild(starField);
 		}
 		
 		return spaceRegion;
@@ -166,7 +147,9 @@ public final class SpaceRegion implements INBTSerializable<CompoundTag>
 		
 		public Position(SpaceCoords coords)
 		{
-			this((long) Math.floor((double) coords.x().ly() / LY_PER_REGION), (long) Math.floor((double) coords.y().ly() / LY_PER_REGION), (long) Math.floor((double) coords.z().ly() / LY_PER_REGION));
+			this(	(long) Math.floor( ((double) (coords.x().ly() - LY_PER_REGION_HALF) ) / LY_PER_REGION ),
+					(long) Math.floor( ((double) (coords.y().ly() - LY_PER_REGION_HALF) ) / LY_PER_REGION ),
+					(long) Math.floor( ((double) (coords.z().ly() - LY_PER_REGION_HALF) ) / LY_PER_REGION ));
 		}
 		
 		public long x()
