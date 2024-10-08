@@ -18,6 +18,8 @@ import com.mojang.blaze3d.vertex.VertexFormat;
 
 import net.minecraft.client.Minecraft;
 import net.povstalec.spacetravel.client.render.shaders.StarShaderInstance;
+import org.lwjgl.opengl.GL31C;
+import org.lwjgl.opengl.GL40;
 
 public class StarBuffer implements AutoCloseable
 {
@@ -120,6 +122,10 @@ public class StarBuffer implements AutoCloseable
 	public void draw()
 	{
 		RenderSystem.drawElements(this.mode.asGLMode, this.indexCount, this.getIndexType().asGLType);
+		// Custom
+		//RenderSystem.assertOnRenderThread();
+		//GL31C.glDrawArraysInstanced(GL40.GL_PATCHES, 0, indexCount * 4, 1);
+		//GL31C.glDrawArraysInstanced(GL40.GL_PATCHES, 0, 1, indexCount);
 	}
 	
 	private VertexFormat.IndexType getIndexType()

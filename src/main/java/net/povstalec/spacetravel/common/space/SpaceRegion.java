@@ -77,7 +77,7 @@ public final class SpaceRegion implements INBTSerializable<CompoundTag>
 		
 		int chance = randomsource.nextInt() % 100;
 		
-		if(chance >= 90)
+		if(chance >= 80)
 		{
 			StarField starField = StarField.randomStarField(randomsource, usedSeed, pos.x(), pos.y(), pos.z());
 			spaceRegion.addChild(starField, false);
