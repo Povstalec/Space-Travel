@@ -7,6 +7,7 @@ import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.RandomSource;
 import net.minecraftforge.common.util.INBTSerializable;
 import net.povstalec.spacetravel.SpaceTravel;
 import net.povstalec.spacetravel.common.space.SpaceRegion;
@@ -173,32 +174,30 @@ public class StarField extends SpaceObject
 		return spiralArms;
 	}
 	
-	public static StarField randomStarField(long xPos, long yPos, long zPos, long seed)
+	public static StarField randomStarField(RandomSource randomsource, long seed, long xPos, long yPos, long zPos)
 	{
-		Random random = new Random(seed);
-		
-		long randomX = random.nextLong(0, SpaceRegion.LY_PER_REGION);
-		long randomY = random.nextLong(0, SpaceRegion.LY_PER_REGION);
-		long randomZ = random.nextLong(0, SpaceRegion.LY_PER_REGION);
+		long randomX = randomsource.nextLong() % SpaceRegion.LY_PER_REGION;
+		long randomY = randomsource.nextLong() % SpaceRegion.LY_PER_REGION;
+		long randomZ = randomsource.nextLong() % SpaceRegion.LY_PER_REGION;
 		
 		long x = randomX + xPos * SpaceRegion.LY_PER_REGION;
 		long y = randomY + yPos * SpaceRegion.LY_PER_REGION;
 		long z = randomZ + zPos * SpaceRegion.LY_PER_REGION;
 		
-		double xRot = random.nextDouble(0, 360);
-		double yRot = random.nextDouble(0, 360);
-		double zRot = random.nextDouble(0, 360);
+		double xRot = randomsource.nextDouble() * 360;
+		double yRot = randomsource.nextDouble() * 360;
+		double zRot = randomsource.nextDouble() * 360;
 		
 		AxisRotation axisRotation = new AxisRotation(true, xRot, yRot, zRot);
 		
-		double xStretch = 0.5D + random.nextDouble();
-		double yStretch = 0.5D + random.nextDouble();
-		double zStretch = 0.5D + random.nextDouble();
+		double xStretch = 0.5D + randomsource.nextDouble();
+		double yStretch = 0.5D + randomsource.nextDouble();
+		double zStretch = 0.5D + randomsource.nextDouble();
 		
-		int stars = random.nextInt(400, 3000); // 1500
+		int stars = Math.abs(randomsource.nextInt()) % 4600 + 400; // 1500
 		int diameter = stars * 60; // 90000
 		
-		int numberOfArms = random.nextInt(-6, 7);
+		int numberOfArms = Math.abs(randomsource.nextInt()) % 13 - 6;
 		
 		if(numberOfArms < 0)
 			numberOfArms = 0;
@@ -208,7 +207,7 @@ public class StarField extends SpaceObject
 		ArrayList<StarField.SpiralArm> arms = new ArrayList<StarField.SpiralArm>();
 		for(int i = 0; i < numberOfArms; i++)
 		{
-			arms.add(SpiralArm.randomSpiralArm(stars, degrees * i, seed));
+			arms.add(SpiralArm.randomSpiralArm(randomsource, stars, degrees * i));
 		}
 		
 		StarField starField = new StarField(Optional.empty(), new SpaceCoords(x, y, z), axisRotation, new ArrayList<TextureLayer>(),
@@ -345,13 +344,11 @@ public class StarField extends SpaceObject
 			return clumpStarsInCenter;
 		}
 		
-		public static SpiralArm randomSpiralArm(int starFieldStars, double armRotation, long seed)
+		public static SpiralArm randomSpiralArm(RandomSource randomsource, int starFieldStars, double armRotation)
 		{
-			Random random = new Random(seed);
-			
-			int stars = starFieldStars + random.nextInt(0, starFieldStars / 2);
-			double armLength = 1.5D + random.nextDouble();
-			double armThickness = 1.75D + random.nextDouble();
+			int stars = starFieldStars + Math.abs(randomsource.nextInt()) % (starFieldStars / 2);
+			double armLength = 1.5D + randomsource.nextDouble();
+			double armThickness = 1.75D + randomsource.nextDouble();
 			boolean clumpStarsInCenter = true;
 			
 			SpiralArm arm = new SpiralArm(stars, armRotation, armLength, armThickness, clumpStarsInCenter);

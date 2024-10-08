@@ -7,6 +7,7 @@ import java.util.Random;
 
 import com.mojang.datafixers.util.Either;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.util.RandomSource;
 import net.minecraftforge.common.util.INBTSerializable;
 import net.povstalec.spacetravel.common.space.objects.SpaceObject;
 import net.povstalec.spacetravel.common.space.objects.StarField;
@@ -72,14 +73,13 @@ public final class SpaceRegion implements INBTSerializable<CompoundTag>
 		SpaceRegion spaceRegion = new SpaceRegion(pos);
 		
 		//TODO Random generation
-		Random random = new Random(usedSeed); // TODO Swap this for randomsource
+		RandomSource randomsource = RandomSource.create(usedSeed);
 		
-		int chance = random.nextInt(0, 100);
+		int chance = randomsource.nextInt() % 100;
 		
 		if(chance >= 90)
 		{
-			StarField starField = StarField.randomStarField(pos.x(), pos.y(), pos.z(), usedSeed);
-			
+			StarField starField = StarField.randomStarField(randomsource, usedSeed, pos.x(), pos.y(), pos.z());
 			spaceRegion.addChild(starField, false);
 		}
 		
