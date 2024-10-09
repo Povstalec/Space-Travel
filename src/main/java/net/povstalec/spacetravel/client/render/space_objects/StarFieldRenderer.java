@@ -142,8 +142,6 @@ public class StarFieldRenderer<SF extends StarField> extends SpaceObjectRenderer
 		
 		if(requiresSetup())
 			setupBuffer();
-		else
-			setStarBuffer(); // This could be viable with fewer stars
 		
 		float starBrightness = getStarBrightness(level, camera, partialTicks);
 		
