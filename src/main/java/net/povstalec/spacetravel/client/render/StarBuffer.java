@@ -4,10 +4,11 @@ import java.nio.ByteBuffer;
 
 import javax.annotation.Nullable;
 
+import com.mojang.blaze3d.platform.MemoryTracker;
 import net.povstalec.spacetravel.common.util.SpaceCoords;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
-import org.lwjgl.opengl.GL15C;
+import org.lwjgl.opengl.*;
 
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.platform.Window;
@@ -18,14 +19,14 @@ import com.mojang.blaze3d.vertex.VertexFormat;
 
 import net.minecraft.client.Minecraft;
 import net.povstalec.spacetravel.client.render.shaders.StarShaderInstance;
-import org.lwjgl.opengl.GL31C;
-import org.lwjgl.opengl.GL40;
 
 public class StarBuffer implements AutoCloseable
 {
 	private int vertexBufferId;
 	private int indexBufferId;
 	private int arrayObjectId;
+	// Instanced
+	//TODO private int instanceBufferId;
 	@Nullable
 	private VertexFormat format;
 	@Nullable
@@ -40,9 +41,22 @@ public class StarBuffer implements AutoCloseable
 		this.vertexBufferId = GlStateManager._glGenBuffers();
 		this.indexBufferId = GlStateManager._glGenBuffers();
 		this.arrayObjectId = GlStateManager._glGenVertexArrays();
+		// Instanced
+		//TODO this.instanceBufferId = GlStateManager._glGenBuffers();
 	}
 	
-	public void upload(BufferBuilder.RenderedBuffer buffer)
+	// Instanced
+	public void setupBufferState()
+	{
+		//TODO Describe what this is doing
+		//GL33C.glEnableVertexAttribArray(1);//TODO
+		
+		//glVertexAttribPointer(1, 4, GL_FLOAT, false, this.lightSize, 0); //TODO
+		
+		//glVertexAttribDivisor(1, 1); //TODO
+	}
+	
+	public void upload(BufferBuilder.RenderedBuffer buffer, long size)
 	{
 		if (!this.isInvalid())
 		{
@@ -55,6 +69,17 @@ public class StarBuffer implements AutoCloseable
 				this.indexCount = bufferbuilder$drawstate.indexCount();
 				this.indexType = bufferbuilder$drawstate.indexType();
 				this.mode = bufferbuilder$drawstate.mode();
+				
+				// Instanced
+				/*TODO GlStateManager._glBindBuffer(GL15C.GL_ARRAY_BUFFER, this.instanceBufferId); // Binds a new buffer for instancing
+				GL15C.glBufferData(GL15C.GL_ARRAY_BUFFER, size, GL15C.GL_DYNAMIC_DRAW); // Creates a dynamic buffer data store
+				setupBufferState();
+				GlStateManager._glBindBuffer(GL15C.GL_ARRAY_BUFFER, 0);
+				
+				long offset = 0;
+				ByteBuffer dataBuffer = MemoryTracker.create(256 * 6); // 256 is an arbitrary number as of now
+				GL15C.glBufferSubData(GL15C.GL_ARRAY_BUFFER, offset, dataBuffer);*/ //TODO This probably should be somewhere in Star Field (InstancedLightRenderer#updateLights)
+				//TODO It should be possibly to only update the buffer with the information from here, without having to recreate the buffer constantly
 			}
 			finally
 			{
@@ -125,7 +150,7 @@ public class StarBuffer implements AutoCloseable
 		// Custom
 		//RenderSystem.assertOnRenderThread();
 		//GL31C.glDrawArraysInstanced(GL40.GL_PATCHES, 0, indexCount * 4, 1);
-		//GL31C.glDrawArraysInstanced(GL40.GL_PATCHES, 0, 1, indexCount);
+		//TODO GL31C.glDrawArraysInstanced(GL40.GL_PATCHES, 0, 1, indexCount);
 	}
 	
 	private VertexFormat.IndexType getIndexType()
@@ -228,6 +253,13 @@ public class StarBuffer implements AutoCloseable
 			RenderSystem.glDeleteVertexArrays(this.arrayObjectId);
 			this.arrayObjectId = -1;
 		}
+		
+		/*TODO if (this.instanceBufferId >= 0)
+		{
+			RenderSystem.glDeleteVertexArrays(this.instanceBufferId);
+			this.instanceBufferId = -1;
+		}*/
+		
 	}
 	
 	public VertexFormat getFormat()

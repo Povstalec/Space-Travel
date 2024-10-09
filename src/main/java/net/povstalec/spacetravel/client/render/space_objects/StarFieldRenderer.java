@@ -1,5 +1,6 @@
 package net.povstalec.spacetravel.client.render.space_objects;
 
+import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import net.minecraft.client.Camera;
@@ -17,6 +18,9 @@ import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 import org.joml.Vector3d;
 import org.joml.Vector3f;
+import org.lwjgl.opengl.GL15;
+import org.lwjgl.opengl.GL15C;
+import org.lwjgl.opengl.GL33C;
 
 import javax.annotation.Nullable;
 
@@ -42,7 +46,7 @@ public class StarFieldRenderer<SF extends StarField> extends SpaceObjectRenderer
 		starBuffer = null;
 	}
 	
-	protected void generateStars(BufferBuilder bufferBuilder, SpaceCoords relativeCoords, RandomSource randomsource)
+	protected void generateStars(BufferBuilder bufferBuilder, RandomSource randomsource)
 	{
 		for(int i = 0; i < spaceObject.getStars(); i++)
 		{
@@ -59,11 +63,11 @@ public class StarFieldRenderer<SF extends StarField> extends SpaceObjectRenderer
 			
 			spaceObject.getAxisRotation().quaterniond().transform(cartesian);
 			
-			starData.newStar(spaceObject.getStarInfo(), bufferBuilder, randomsource, relativeCoords, cartesian.x, cartesian.y, cartesian.z, i);
+			starData.newStar(spaceObject.getStarInfo(), bufferBuilder, randomsource, cartesian.x, cartesian.y, cartesian.z, i);
 		}
 	}
 	
-	protected BufferBuilder.RenderedBuffer generateStarBuffer(BufferBuilder bufferBuilder, SpaceCoords relativeCoords)
+	protected BufferBuilder.RenderedBuffer generateStarBuffer(BufferBuilder bufferBuilder)
 	{
 		RandomSource randomsource = RandomSource.create(spaceObject.getSeed());
 		bufferBuilder.begin(VertexFormat.Mode.QUADS, SpaceTravelVertexFormat.STAR_POS_COLOR_LY);
@@ -72,31 +76,30 @@ public class StarFieldRenderer<SF extends StarField> extends SpaceObjectRenderer
 		
 		starData = new StarData(spaceObject.getTotalStars());
 		
-		generateStars(bufferBuilder, relativeCoords, randomsource);
+		generateStars(bufferBuilder, randomsource);
 		
 		int numberOfStars = spaceObject.getStars();
 		for(StarField.SpiralArm arm : spaceObject.getSpiralArms()) //Draw each arm
 		{
-			generateArmStars(arm, bufferBuilder, relativeCoords, spaceObject.getAxisRotation(), starData, spaceObject.getStarInfo(), randomsource, numberOfStars, sizeMultiplier);
+			generateArmStars(arm, bufferBuilder, spaceObject.getAxisRotation(), starData, spaceObject.getStarInfo(), randomsource, numberOfStars, sizeMultiplier);
 			numberOfStars += arm.armStars();
 		}
 		
 		return bufferBuilder.end();
 	}
 	
-	protected BufferBuilder.RenderedBuffer getStarBuffer(BufferBuilder bufferBuilder, SpaceCoords relativeCoords)
+	protected BufferBuilder.RenderedBuffer getStarBuffer(BufferBuilder bufferBuilder)
 	{
-		RandomSource randomsource = RandomSource.create(spaceObject.getSeed());
 		bufferBuilder.begin(VertexFormat.Mode.QUADS, SpaceTravelVertexFormat.STAR_POS_COLOR_LY);
 		
 		for(int i = 0; i < spaceObject.getTotalStars(); i++)
 		{
-			starData.createStar(bufferBuilder, randomsource, relativeCoords, i);
+			starData.createStar(bufferBuilder, i);
 		}
 		return bufferBuilder.end();
 	}
 	
-	public void setStarBuffer(SpaceCoords relativeCoords)
+	public void setStarBuffer()
 	{
 		if(starBuffer != null)
 			starBuffer.close();
@@ -107,14 +110,14 @@ public class StarFieldRenderer<SF extends StarField> extends SpaceObjectRenderer
 		RenderSystem.setShader(GameRenderer::getPositionShader);
 		BufferBuilder.RenderedBuffer bufferbuilder$renderedbuffer;
 		
-		bufferbuilder$renderedbuffer = getStarBuffer(bufferBuilder, relativeCoords);
+		bufferbuilder$renderedbuffer = getStarBuffer(bufferBuilder);
 		
 		starBuffer.bind();
-		starBuffer.upload(bufferbuilder$renderedbuffer);
+		starBuffer.upload(bufferbuilder$renderedbuffer, (long) this.spaceObject.getTotalStars());
 		VertexBuffer.unbind();
 	}
 	
-	public void setupBuffer(SpaceCoords relativeCoords)
+	public void setupBuffer()
 	{
 		if(starBuffer != null)
 			starBuffer.close();
@@ -125,10 +128,10 @@ public class StarFieldRenderer<SF extends StarField> extends SpaceObjectRenderer
 		RenderSystem.setShader(GameRenderer::getPositionShader);
 		BufferBuilder.RenderedBuffer bufferbuilder$renderedbuffer;
 		
-		bufferbuilder$renderedbuffer = generateStarBuffer(bufferBuilder, relativeCoords);
+		bufferbuilder$renderedbuffer = generateStarBuffer(bufferBuilder);
 		
 		starBuffer.bind();
-		starBuffer.upload(bufferbuilder$renderedbuffer);
+		starBuffer.upload(bufferbuilder$renderedbuffer, (long) this.spaceObject.getTotalStars());
 		VertexBuffer.unbind();
 	}
 	
@@ -138,9 +141,9 @@ public class StarFieldRenderer<SF extends StarField> extends SpaceObjectRenderer
 		SpaceCoords difference = viewCenter.getCoords().sub(spaceObject.getSpaceCoords());
 		
 		if(requiresSetup())
-			setupBuffer(difference);
+			setupBuffer();
 		else
-			setStarBuffer(difference); // This could be viable with fewer stars
+			setStarBuffer(); // This could be viable with fewer stars
 		
 		float starBrightness = getStarBrightness(level, camera, partialTicks);
 		
@@ -185,7 +188,7 @@ public class StarFieldRenderer<SF extends StarField> extends SpaceObjectRenderer
 		return 1;//starBrightness; //TODO Change this back
 	}
 	
-	public static void generateArmStars(StarField.SpiralArm arm, BufferBuilder bufferBuilder, SpaceCoords relativeCoords, AxisRotation axisRotation, StarData starData, StarInfo starInfo, RandomSource randomsource, int numberOfStars, double sizeMultiplier)
+	public static void generateArmStars(StarField.SpiralArm arm, BufferBuilder bufferBuilder, AxisRotation axisRotation, StarData starData, StarInfo starInfo, RandomSource randomsource, int numberOfStars, double sizeMultiplier)
 	{
 		for(int i = 0; i < arm.armStars(); i++)
 		{
@@ -213,7 +216,7 @@ public class StarFieldRenderer<SF extends StarField> extends SpaceObjectRenderer
 			
 			axisRotation.quaterniond().transform(cartesian);
 			
-			starData.newStar(starInfo, bufferBuilder, randomsource, relativeCoords, cartesian.x, cartesian.y, cartesian.z, numberOfStars + i);
+			starData.newStar(starInfo, bufferBuilder, randomsource, cartesian.x, cartesian.y, cartesian.z, numberOfStars + i);
 		}
 	}
 }
