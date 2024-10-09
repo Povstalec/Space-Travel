@@ -100,7 +100,7 @@ public class Spaceship extends OrbitingObject
 		Optional<Universe> universe = Multiverse.get(server).getUniverse("main");
 		
 		if(universe.isPresent())
-			return universe.get().getRegionsAt(spaceRegionPos, 1);
+			return universe.get().getRegionsAt(spaceRegionPos, 2);
 		
 		return null;
 	}

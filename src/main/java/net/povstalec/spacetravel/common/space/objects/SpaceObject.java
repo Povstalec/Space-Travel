@@ -43,10 +43,6 @@ public class SpaceObject implements INBTSerializable<CompoundTag>
 
 	public static final String NAME = "name";
 	
-	public static final ResourceLocation SPACE_OBJECT_LOCATION = new ResourceLocation(SpaceTravel.MODID, "space_object");
-	public static final ResourceKey<Registry<SpaceObject>> REGISTRY_KEY = ResourceKey.createRegistryKey(SPACE_OBJECT_LOCATION);
-	public static final Codec<ResourceKey<SpaceObject>> RESOURCE_KEY_CODEC = ResourceKey.codec(REGISTRY_KEY);
-	
 	private ResourceLocation objectType;
 	
 	@Nullable
@@ -59,8 +55,6 @@ public class SpaceObject implements INBTSerializable<CompoundTag>
 	protected SpaceCoords coords; // Absolute coordinates of the center (not necessarily the object itself, since it can be orbiting some other object for example)
 	protected AxisRotation axisRotation;
 	
-	private ArrayList<TextureLayer> textureLayers = new ArrayList<TextureLayer>();
-	
 	protected FadeOutHandler fadeOutHandler;
 	
 	public String name;
@@ -68,7 +62,7 @@ public class SpaceObject implements INBTSerializable<CompoundTag>
 	public SpaceObject(){}
 	
 	public SpaceObject(ResourceLocation objectType, Optional<String> parentName, Either<SpaceCoords, StellarCoordinates.Equatorial> coords,
-					   AxisRotation axisRotation, List<TextureLayer> textureLayers)
+					   AxisRotation axisRotation)
 	{
 		this.objectType = objectType;
 		
@@ -81,8 +75,6 @@ public class SpaceObject implements INBTSerializable<CompoundTag>
 			this.coords = coords.right().get().toGalactic().toSpaceCoords();
 		
 		this.axisRotation = axisRotation;
-		
-		this.textureLayers = new ArrayList<TextureLayer>(textureLayers);
 	}
 	
 	public ResourceLocation getObjectType()
@@ -92,7 +84,7 @@ public class SpaceObject implements INBTSerializable<CompoundTag>
 	
 	public boolean isInitialized()
 	{
-		return objectType != null && coords != null && axisRotation != null && textureLayers != null;
+		return objectType != null && coords != null && axisRotation != null;
 	}
 	
 	public SpaceCoords getSpaceCoords()
@@ -113,11 +105,6 @@ public class SpaceObject implements INBTSerializable<CompoundTag>
 	public AxisRotation getAxisRotation()
 	{
 		return axisRotation;
-	}
-	
-	public ArrayList<TextureLayer> getTextureLayers()
-	{
-		return textureLayers;
 	}
 	
 	public Optional<String> getParentName()
@@ -176,12 +163,11 @@ public class SpaceObject implements INBTSerializable<CompoundTag>
 		buffer.writeOptional(Optional.ofNullable(parentName), (buf, key) -> buf.writeUtf(key));
 		coords.writeToBuffer(buffer);
 		axisRotation.writeToBuffer(buffer);
-		//TODO Write texture layers
 	}
 	
 	public static SpaceObject readFromBuffer(FriendlyByteBuf buffer)
 	{
-		return new SpaceObject(buffer.readResourceLocation(), buffer.readOptional((buf) -> buf.readUtf()), Either.left(SpaceCoords.readFromBuffer(buffer)), AxisRotation.readFromBuffer(buffer), new ArrayList<TextureLayer>()); // TODO Read texture layers
+		return new SpaceObject(buffer.readResourceLocation(), buffer.readOptional((buf) -> buf.readUtf()), Either.left(SpaceCoords.readFromBuffer(buffer)), AxisRotation.readFromBuffer(buffer));
 	}
 
 	@Override
@@ -197,16 +183,6 @@ public class SpaceObject implements INBTSerializable<CompoundTag>
 		tag.put(COORDS, coords.serializeNBT());
 		
 		tag.put(AXIS_ROTATION, axisRotation.serializeNBT());
-
-		// Serialize Texture Layers
-		CompoundTag textureLayerTag = new CompoundTag();
-		int i = 0;
-		for(TextureLayer textureLayer : textureLayers)
-		{
-			textureLayerTag.put(String.valueOf(i), textureLayer.serialize());
-			i++;
-		}
-		tag.put(TEXTURE_LAYERS, textureLayerTag);
 
 		// Serialize Children
 		CompoundTag childrenTag = new CompoundTag();
@@ -234,13 +210,6 @@ public class SpaceObject implements INBTSerializable<CompoundTag>
 		
 		this.axisRotation = new AxisRotation();
 		axisRotation.deserializeNBT(tag.getCompound(AXIS_ROTATION));
-		
-		// Deserialize Texture Layers
-		CompoundTag textureLayerTag = tag.getCompound(TEXTURE_LAYERS);
-		for(int i = 0; i < textureLayerTag.size(); i++)
-		{
-			textureLayers.add(TextureLayer.deserialize(textureLayerTag.getCompound(String.valueOf(i))));
-		}
 		
 		// Deserialize Children
 		CompoundTag childrenTag = tag.getCompound(CHILDREN);

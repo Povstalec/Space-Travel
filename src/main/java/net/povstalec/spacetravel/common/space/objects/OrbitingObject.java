@@ -20,7 +20,7 @@ import net.povstalec.spacetravel.common.util.AxisRotation;
 import net.povstalec.spacetravel.common.util.SpaceCoords;
 import net.povstalec.spacetravel.common.util.TextureLayer;
 
-public class OrbitingObject extends SpaceObject
+public class OrbitingObject extends TexturedObject
 {
 	public static final Vector3f INITIAL_ORBIT_VECTOR = new Vector3f(0, 0, -1);
 

@@ -5,6 +5,7 @@ import java.nio.ByteBuffer;
 import javax.annotation.Nullable;
 
 import com.mojang.blaze3d.platform.MemoryTracker;
+import net.minecraft.util.Mth;
 import net.povstalec.spacetravel.common.util.SpaceCoords;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
@@ -159,9 +160,12 @@ public class StarBuffer implements AutoCloseable
 		return rendersystem$autostorageindexbuffer != null ? rendersystem$autostorageindexbuffer.type() : this.indexType;
 	}
 	
-	public void drawWithShader(Matrix4f modelViewMatrix, Matrix4f projectionMatrix, SpaceCoords relativeSpacePos, StarShaderInstance shaderInstance)
+	public void drawWithShader(Matrix4f modelViewMatrix, Matrix4f projectionMatrix, SpaceCoords relativeSpacePos, SpaceCoords oldRelativeSpacePos, StarShaderInstance shaderInstance, float partialTicks)
 	{
-		Vector3f relativeVectorLy = new Vector3f((float) relativeSpacePos.x().ly(), (float) relativeSpacePos.y().ly(), (float) relativeSpacePos.z().ly());
+		Vector3f relativeVectorLy = new Vector3f(
+				Mth.lerp(partialTicks, (float) oldRelativeSpacePos.x().ly(), (float) relativeSpacePos.x().ly()),
+				Mth.lerp(partialTicks, (float) oldRelativeSpacePos.y().ly(), (float) relativeSpacePos.y().ly()),
+				Mth.lerp(partialTicks, (float) oldRelativeSpacePos.z().ly(), (float) relativeSpacePos.z().ly()));
 		Vector3f relativeVectorKm = new Vector3f((float) relativeSpacePos.x().km(), (float) relativeSpacePos.y().km(), (float) relativeSpacePos.z().km());
 		
 		if(!RenderSystem.isOnRenderThread())

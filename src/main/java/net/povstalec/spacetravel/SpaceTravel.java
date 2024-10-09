@@ -4,6 +4,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import net.minecraftforge.registries.DataPackRegistryEvent;
+import net.povstalec.spacetravel.common.space.objects.Star;
 import net.povstalec.spacetravel.common.space.objects.StarField;
 import org.slf4j.Logger;
 
@@ -48,6 +49,7 @@ public class SpaceTravel
 		modEventBus.addListener((DataPackRegistryEvent.NewRegistry event) ->
 		{
 			event.dataPackRegistry(StarField.REGISTRY_KEY, StarField.CODEC, StarField.CODEC);
+			event.dataPackRegistry(Star.REGISTRY_KEY, Star.CODEC, Star.CODEC);
 		});
 		
 		modEventBus.addListener(this::commonSetup);

@@ -1,4 +1,4 @@
-package net.povstalec.spacetravel.client.render.space_objects;
+package net.povstalec.spacetravel.common.space.objects;
 
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.datafixers.util.Either;
@@ -6,22 +6,80 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.client.Camera;
 import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.common.util.INBTSerializable;
+import net.povstalec.spacetravel.SpaceTravel;
 import net.povstalec.spacetravel.common.space.objects.OrbitingObject;
 import net.povstalec.spacetravel.common.space.objects.SpaceObject;
-import net.povstalec.spacetravel.common.util.AxisRotation;
-import net.povstalec.spacetravel.common.util.Color;
-import net.povstalec.spacetravel.common.util.SpaceCoords;
+import net.povstalec.spacetravel.common.util.*;
 import org.joml.Matrix4f;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 
-public abstract class StarLike
+public abstract class StarLike extends OrbitingObject
 {
-	//TODO Fill this in
+	public static final float MIN_SIZE = 0.2F;
+	
+	public static final float MAX_ALPHA = 1F;
+	public static final float MIN_ALPHA = MAX_ALPHA * 0.1F; // Previously used (MAX_ALPHA - 0.66F) * 2 / 5;
+	
+	private float minStarSize;
+	
+	private float maxStarAlpha;
+	private float minStarAlpha;
+	
+	public StarLike(ResourceLocation objectType, Optional<String> parentName, Either<SpaceCoords, StellarCoordinates.Equatorial> coords, AxisRotation axisRotation,
+					Optional<OrbitingObject.OrbitInfo> orbitInfo, List<TextureLayer> textureLayers, float minStarSize, float maxStarAlpha, float minStarAlpha)
+	{
+		super(objectType, parentName, coords, axisRotation, orbitInfo, textureLayers);
+		
+		this.minStarSize = minStarSize;
+		this.maxStarAlpha = maxStarAlpha;
+		this.minStarAlpha = minStarAlpha;
+	}
+	
+	public float getMinStarSize()
+	{
+		return minStarSize;
+	}
+	
+	public float getMaxStarAlpha()
+	{
+		return maxStarAlpha;
+	}
+	
+	public float getMinStarAlpha()
+	{
+		return minStarAlpha;
+	}
+	
+	public float starSize(float size, double lyDistance)
+	{
+		size -= size * lyDistance / 1000000.0;
+		
+		if(size < getMinStarSize())
+			return getMinStarSize();
+		
+		return size;
+	}
+	
+	/*TODO public Color.FloatRGBA starRGBA(double lyDistance)
+	{
+		float alpha = getMaxStarAlpha();
+		
+		alpha -= lyDistance / 100000;
+		
+		if(alpha < getMinStarAlpha())
+			alpha = getMinStarAlpha();
+		
+		return new Color.FloatRGBA(1, 1, 1, alpha);
+	}*/
+	
 	public static class StarType implements INBTSerializable<CompoundTag>
 	{
 		public static final String RGB = "rgb";

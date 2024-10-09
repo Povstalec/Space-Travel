@@ -31,6 +31,8 @@ public class StarFieldRenderer<SF extends StarField> extends SpaceObjectRenderer
 	
 	protected StarData starData;
 	
+	protected SpaceCoords oldDifference;
+	
 	public StarFieldRenderer(StarField starField)
 	{
 		super(starField);
@@ -99,10 +101,11 @@ public class StarFieldRenderer<SF extends StarField> extends SpaceObjectRenderer
 		return bufferBuilder.end();
 	}
 	
-	public void setStarBuffer()
+	public void setStarBuffer(SpaceCoords difference)
 	{
 		if(starBuffer != null)
 			starBuffer.close();
+		oldDifference = difference;
 		
 		starBuffer = new StarBuffer();
 		Tesselator tesselator = Tesselator.getInstance();
@@ -113,14 +116,15 @@ public class StarFieldRenderer<SF extends StarField> extends SpaceObjectRenderer
 		bufferbuilder$renderedbuffer = getStarBuffer(bufferBuilder);
 		
 		starBuffer.bind();
-		starBuffer.upload(bufferbuilder$renderedbuffer, (long) this.spaceObject.getTotalStars());
+		starBuffer.upload(bufferbuilder$renderedbuffer, this.spaceObject.getTotalStars());
 		VertexBuffer.unbind();
 	}
 	
-	public void setupBuffer()
+	public void setupBuffer(SpaceCoords difference)
 	{
 		if(starBuffer != null)
 			starBuffer.close();
+		oldDifference = difference;
 		
 		starBuffer = new StarBuffer();
 		Tesselator tesselator = Tesselator.getInstance();
@@ -131,7 +135,7 @@ public class StarFieldRenderer<SF extends StarField> extends SpaceObjectRenderer
 		bufferbuilder$renderedbuffer = generateStarBuffer(bufferBuilder);
 		
 		starBuffer.bind();
-		starBuffer.upload(bufferbuilder$renderedbuffer, (long) this.spaceObject.getTotalStars());
+		starBuffer.upload(bufferbuilder$renderedbuffer, this.spaceObject.getTotalStars());
 		VertexBuffer.unbind();
 	}
 	
@@ -141,7 +145,7 @@ public class StarFieldRenderer<SF extends StarField> extends SpaceObjectRenderer
 		SpaceCoords difference = viewCenter.getCoords().sub(spaceObject.getSpaceCoords());
 		
 		if(requiresSetup())
-			setupBuffer();
+			setupBuffer(difference);
 		
 		float starBrightness = getStarBrightness(level, camera, partialTicks);
 		
@@ -158,7 +162,7 @@ public class StarFieldRenderer<SF extends StarField> extends SpaceObjectRenderer
 			
 			stack.mulPose(q);
 			this.starBuffer.bind();
-			this.starBuffer.drawWithShader(stack.last().pose(), projectionMatrix, difference, SpaceTravelShaders.starShader());
+			this.starBuffer.drawWithShader(stack.last().pose(), projectionMatrix, difference, oldDifference, SpaceTravelShaders.starShader(), partialTicks);
 			//this.starBuffer.drawWithShader(stack.last().pose(), projectionMatrix, GameRenderer.getPositionColorTexShader());
 			VertexBuffer.unbind();
 			
@@ -170,6 +174,8 @@ public class StarFieldRenderer<SF extends StarField> extends SpaceObjectRenderer
 		{
 			child.render(viewCenter, level, partialTicks, stack, camera, projectionMatrix, isFoggy, setupFog, bufferbuilder, parentVector);
 		}
+		
+		oldDifference = difference;
 	}
 	
 	/**

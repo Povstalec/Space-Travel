@@ -10,6 +10,7 @@ import net.minecraft.world.level.Level;
 import net.povstalec.spacetravel.client.render.ClientSpaceRegion;
 import net.povstalec.spacetravel.client.render.SpaceRenderer;
 import net.povstalec.spacetravel.client.render.space_objects.SpaceObjectRenderer;
+import net.povstalec.spacetravel.client.render.space_objects.TexturedObjectRenderer;
 import net.povstalec.spacetravel.common.space.SpaceRegion;
 import net.povstalec.spacetravel.common.space.Spaceship;
 
@@ -48,7 +49,7 @@ public class ClientAccess
     	if(SpaceRenderer.renderCenter == null)
     	{
         	Spaceship ship = new Spaceship();
-        	SpaceObjectRenderer.Generic testRenderer = new SpaceObjectRenderer.Generic(ship);
+			TexturedObjectRenderer.Generic testRenderer = new TexturedObjectRenderer.Generic(ship);
         	
     		SpaceRenderer.renderCenter = new RenderCenter();
     		SpaceRenderer.renderCenter.viewCenter = testRenderer;

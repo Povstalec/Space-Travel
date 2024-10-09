@@ -10,10 +10,12 @@ import net.povstalec.spacetravel.SpaceTravel;
 import net.povstalec.spacetravel.client.RenderCenter;
 import net.povstalec.spacetravel.client.render.space_objects.SpaceObjectRenderer;
 import net.povstalec.spacetravel.client.render.space_objects.StarFieldRenderer;
+import net.povstalec.spacetravel.client.render.space_objects.TexturedObjectRenderer;
 import net.povstalec.spacetravel.common.space.SpaceRegion.Position;
 import net.povstalec.spacetravel.common.space.objects.OrbitingObject;
 import net.povstalec.spacetravel.common.space.objects.SpaceObject;
 import net.povstalec.spacetravel.common.space.objects.StarField;
+import net.povstalec.spacetravel.common.space.objects.TexturedObject;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
@@ -89,8 +91,8 @@ public final class ClientSpaceRegion
 				// Deserializes object based on its type specified in the object_type
 				if(objectType.equals(OrbitingObject.ORBITING_OBJECT_LOCATION))
 					spaceObjectRenderer = deserializeOrbitingObject(childTag);
-				if(objectType.equals(SpaceObject.SPACE_OBJECT_LOCATION))
-					spaceObjectRenderer = deserializeSpaceObject(childTag);
+				if(objectType.equals(TexturedObject.TEXTURED_OBJECT_LOCATION))
+					spaceObjectRenderer = deserializeTexturedObject(childTag);
 				else if(objectType.equals(StarField.STAR_FIELD_LOCATION))
 					spaceObjectRenderer = deserializeSpiralGalaxy(childTag);
 				
@@ -102,24 +104,24 @@ public final class ClientSpaceRegion
 		}
 	}
 	
-	private SpaceObjectRenderer<SpaceObject> deserializeSpaceObject(CompoundTag childTag)
+	private TexturedObjectRenderer.Generic deserializeTexturedObject(CompoundTag childTag)
 	{
-		SpaceObject spaceObject = new SpaceObject();
+		TexturedObject spaceObject = new TexturedObject();
 		spaceObject.deserializeNBT(childTag);
     	
     	if(spaceObject.isInitialized())
-    		return new SpaceObjectRenderer<SpaceObject>(spaceObject);
+    		return new TexturedObjectRenderer.Generic(spaceObject);
 		
     	return null;
 	}
 	
-	private SpaceObjectRenderer<OrbitingObject> deserializeOrbitingObject(CompoundTag childTag)
+	private TexturedObjectRenderer<OrbitingObject> deserializeOrbitingObject(CompoundTag childTag)
 	{
 		OrbitingObject orbitingObject = new OrbitingObject();
 		orbitingObject.deserializeNBT(childTag);
     	
     	if(orbitingObject.isInitialized())
-    		return new SpaceObjectRenderer<OrbitingObject>(orbitingObject);
+    		return new TexturedObjectRenderer<OrbitingObject>(orbitingObject);
 		
     	return null;
 	}

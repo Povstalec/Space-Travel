@@ -1,11 +1,9 @@
 package net.povstalec.spacetravel.common.util;
 
-import java.util.Random;
-
 import com.mojang.blaze3d.vertex.BufferBuilder;
 
 import net.minecraft.util.RandomSource;
-import net.povstalec.spacetravel.client.render.space_objects.StarLike;
+import net.povstalec.spacetravel.common.space.objects.StarLike;
 
 public class StarData
 {

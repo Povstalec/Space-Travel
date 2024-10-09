@@ -14,6 +14,7 @@ import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.level.storage.DimensionDataStorage;
 import net.povstalec.spacetravel.SpaceTravel;
 import net.povstalec.spacetravel.common.space.Universe;
+import net.povstalec.spacetravel.common.space.objects.Star;
 import net.povstalec.spacetravel.common.space.objects.StarField;
 
 public class Multiverse extends SavedData
@@ -50,6 +51,7 @@ public class Multiverse extends SavedData
 		}
 		
 		registerStarFields(server);
+		registerStars(server);
 		
 		this.setDirty();
 	}
@@ -79,6 +81,23 @@ public class Multiverse extends SavedData
 			Optional<Universe> universe = getUniverse("main");
 			if(universe.isPresent())
 				universe.get().addToRegion(starField, true); //TODO Maybe let datapacks decide?
+		});
+		SpaceTravel.LOGGER.info("Star Fields registered");
+	}
+	
+	public void registerStars(MinecraftServer server)
+	{
+		final RegistryAccess registries = server.registryAccess();
+		final Registry<Star> starRegistry = registries.registryOrThrow(Star.REGISTRY_KEY);
+		
+		Set<Map.Entry<ResourceKey<Star>, Star>> starSet = starRegistry.entrySet();
+		starSet.forEach((starEntry) ->
+		{
+			Star star = starEntry.getValue();
+			
+			Optional<Universe> universe = getUniverse("main");
+			if(universe.isPresent())
+				universe.get().addToRegion(star, true); //TODO Maybe let datapacks decide?
 		});
 		SpaceTravel.LOGGER.info("Star Fields registered");
 	}

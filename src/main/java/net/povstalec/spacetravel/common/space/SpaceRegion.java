@@ -77,9 +77,9 @@ public final class SpaceRegion implements INBTSerializable<CompoundTag>
 		
 		int chance = randomsource.nextInt() % 100;
 		
-		if(chance >= 20)
+		if(chance >= 80)
 		{
-			StarField starField = StarField.randomStarField(randomsource, usedSeed, pos.x(), pos.y(), pos.z());
+			StarField starField = StarField.randomStarField(randomsource, usedSeed, pos.lyX(), pos.lyY(), pos.lyZ());
 			spaceRegion.addChild(starField, false);
 		}
 		
@@ -156,9 +156,9 @@ public final class SpaceRegion implements INBTSerializable<CompoundTag>
 		
 		public Position(SpaceCoords coords)
 		{
-			this(	(long) Math.floor( ((double) (coords.x().ly() - LY_PER_REGION_HALF) ) / LY_PER_REGION ),
-					(long) Math.floor( ((double) (coords.y().ly() - LY_PER_REGION_HALF) ) / LY_PER_REGION ),
-					(long) Math.floor( ((double) (coords.z().ly() - LY_PER_REGION_HALF) ) / LY_PER_REGION ));
+			this(	(coords.x().ly() - LY_PER_REGION_HALF) / LY_PER_REGION,
+					(coords.y().ly() - LY_PER_REGION_HALF)  / LY_PER_REGION,
+					(coords.z().ly() - LY_PER_REGION_HALF) / LY_PER_REGION);
 		}
 		
 		public long x()
@@ -174,6 +174,21 @@ public final class SpaceRegion implements INBTSerializable<CompoundTag>
 		public long z()
 		{
 			return z;
+		}
+		
+		public long lyX()
+		{
+			return x * SpaceRegion.LY_PER_REGION;
+		}
+		
+		public long lyY()
+		{
+			return y * SpaceRegion.LY_PER_REGION;
+		}
+		
+		public long lyZ()
+		{
+			return z * SpaceRegion.LY_PER_REGION;
 		}
 		
 		@Override

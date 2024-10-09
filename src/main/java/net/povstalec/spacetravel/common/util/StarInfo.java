@@ -4,7 +4,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraftforge.common.util.INBTSerializable;
-import net.povstalec.spacetravel.client.render.space_objects.StarLike;
+import net.povstalec.spacetravel.common.space.objects.StarLike;
 
 import java.util.ArrayList;
 import java.util.Arrays;

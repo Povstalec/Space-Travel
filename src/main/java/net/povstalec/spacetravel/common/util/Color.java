@@ -11,6 +11,9 @@ public class Color
 	public static final int MAX_INT_VALUE = 255;
 	public static final int MIN_INT_VALUE = 0;
 	
+	public static final float MAX_FLOAT_VALUE = 1F;
+	public static final float MIN_FLOAT_VALUE = 0F;
+	
 	public static final String RED = "red";
 	public static final String GREEN = "green";
 	public static final String BLUE = "blue";
