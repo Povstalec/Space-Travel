@@ -55,6 +55,8 @@ public class StarField extends SpaceObject
 			Codec.either(SpaceCoords.CODEC, StellarCoordinates.Equatorial.CODEC).fieldOf("coords").forGetter(object -> Either.left(object.getSpaceCoords())),
 			AxisRotation.CODEC.fieldOf("axis_rotation").forGetter(StarField::getAxisRotation),
 			
+			SpaceObject.FadeOutHandler.CODEC.optionalFieldOf("fade_out_handler", SpaceObject.FadeOutHandler.DEFAULT_STAR_FIELD_HANDLER).forGetter(StarField::getFadeOutHandler),
+			
 			StarInfo.CODEC.optionalFieldOf("star_info", StarInfo.DEFAULT_STAR_INFO).forGetter(StarField::getStarInfo),
 			Codec.LONG.fieldOf(SEED).forGetter(StarField::getSeed),
 			Codec.INT.fieldOf(DIAMETER_LY).forGetter(StarField::getDiameter),
@@ -72,11 +74,11 @@ public class StarField extends SpaceObject
 	public StarField() {}
 	
 	public StarField(ResourceLocation objectType, Optional<String> parentName, Either<SpaceCoords, StellarCoordinates.Equatorial> coords,
-					 AxisRotation axisRotation, StarInfo starInfo,
+					 AxisRotation axisRotation, FadeOutHandler fadeOutHandler, StarInfo starInfo,
 					 long seed, int diameter, int numberOfStars, boolean clumpStarsInCenter,
 					 double xStretch, double yStretch, double zStretch, List<SpiralArm> spiralArms)
 	{
-		super(objectType, parentName, coords, axisRotation);
+		super(objectType, parentName, coords, axisRotation, fadeOutHandler);
 		
 		this.starInfo = starInfo;
 		this.seed = seed;
@@ -101,25 +103,25 @@ public class StarField extends SpaceObject
 		this.totalStars = totalStars;
 	}
 	
-	public StarField(Optional<String> parentName, Either<SpaceCoords, StellarCoordinates.Equatorial> coords, AxisRotation axisRotation,
+	public StarField(Optional<String> parentName, Either<SpaceCoords, StellarCoordinates.Equatorial> coords, AxisRotation axisRotation, FadeOutHandler fadeOutHandler,
 					 StarInfo starInfo, long seed, int diameter, int numberOfStars, boolean clumpStarsInCenter,
 					 double xStretch, double yStretch, double zStretch, List<SpiralArm> spiralArms)
 	{
-		this(STAR_FIELD_LOCATION, parentName, coords, axisRotation, starInfo, seed, diameter, numberOfStars, clumpStarsInCenter, xStretch, yStretch, zStretch, spiralArms);
+		this(STAR_FIELD_LOCATION, parentName, coords, axisRotation, fadeOutHandler, starInfo, seed, diameter, numberOfStars, clumpStarsInCenter, xStretch, yStretch, zStretch, spiralArms);
 	}
 	
-	public StarField(Optional<String> parentName, SpaceCoords coords, AxisRotation axisRotation,
+	public StarField(Optional<String> parentName, SpaceCoords coords, AxisRotation axisRotation, FadeOutHandler fadeOutHandler,
 					 StarInfo starInfo, long seed, int diameter, int numberOfStars, boolean clumpStarsInCenter,
 					 double xStretch, double yStretch, double zStretch, List<SpiralArm> spiralArms)
 	{
-		this(parentName, Either.left(coords), axisRotation, starInfo, seed, diameter, numberOfStars, clumpStarsInCenter, xStretch, yStretch, zStretch, spiralArms);
+		this(parentName, Either.left(coords), axisRotation, fadeOutHandler, starInfo, seed, diameter, numberOfStars, clumpStarsInCenter, xStretch, yStretch, zStretch, spiralArms);
 	}
 	
-	public StarField(Optional<String> parentName, StellarCoordinates.Equatorial coords, AxisRotation axisRotation,
+	public StarField(Optional<String> parentName, StellarCoordinates.Equatorial coords, AxisRotation axisRotation, FadeOutHandler fadeOutHandler,
 					 StarInfo starInfo, long seed, int diameter, int numberOfStars, boolean clumpStarsInCenter,
 					 double xStretch, double yStretch, double zStretch, List<SpiralArm> spiralArms)
 	{
-		this(parentName, Either.right(coords), axisRotation, starInfo, seed, diameter, numberOfStars, clumpStarsInCenter, xStretch, yStretch, zStretch, spiralArms);
+		this(parentName, Either.right(coords), axisRotation, fadeOutHandler, starInfo, seed, diameter, numberOfStars, clumpStarsInCenter, xStretch, yStretch, zStretch, spiralArms);
 	}
 	
 	public StarInfo getStarInfo()
@@ -187,9 +189,9 @@ public class StarField extends SpaceObject
 		
 		AxisRotation axisRotation = new AxisRotation(true, xRot, yRot, zRot);
 		
-		double xStretch = 0.5D + randomsource.nextDouble();
-		double yStretch = 0.5D + randomsource.nextDouble();
-		double zStretch = 0.5D + randomsource.nextDouble();
+		double xStretch = 0.25D + randomsource.nextDouble() * 0.75F;
+		double yStretch = 0.25D + randomsource.nextDouble() * 0.75F;
+		double zStretch = 0.25D + randomsource.nextDouble() * 0.75F;
 		
 		int numberOfArms = Math.abs(randomsource.nextInt()) % 13 - 6;
 		
@@ -210,7 +212,7 @@ public class StarField extends SpaceObject
 			arms.add(SpiralArm.randomSpiralArm(randomsource, stars, degrees * i));
 		}
 		
-		StarField starField = new StarField(Optional.empty(), new SpaceCoords(x, y, z), axisRotation,
+		StarField starField = new StarField(Optional.empty(), new SpaceCoords(x, y, z), axisRotation, FadeOutHandler.DEFAULT_STAR_FIELD_HANDLER,
 				StarInfo.DEFAULT_STAR_INFO, seed, diameter, stars, true, xStretch, yStretch, zStretch, arms);
 		
 		return starField;

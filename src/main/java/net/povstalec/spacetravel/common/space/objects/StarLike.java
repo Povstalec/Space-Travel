@@ -34,9 +34,10 @@ public abstract class StarLike extends OrbitingObject
 	private float minStarAlpha;
 	
 	public StarLike(ResourceLocation objectType, Optional<String> parentName, Either<SpaceCoords, StellarCoordinates.Equatorial> coords, AxisRotation axisRotation,
-					Optional<OrbitingObject.OrbitInfo> orbitInfo, List<TextureLayer> textureLayers, float minStarSize, float maxStarAlpha, float minStarAlpha)
+					FadeOutHandler fadeOutHandler, List<TextureLayer> textureLayers, Optional<OrbitingObject.OrbitInfo> orbitInfo,
+					float minStarSize, float maxStarAlpha, float minStarAlpha)
 	{
-		super(objectType, parentName, coords, axisRotation, orbitInfo, textureLayers);
+		super(objectType, parentName, coords, axisRotation, fadeOutHandler, textureLayers, orbitInfo);
 		
 		this.minStarSize = minStarSize;
 		this.maxStarAlpha = maxStarAlpha;
@@ -68,7 +69,7 @@ public abstract class StarLike extends OrbitingObject
 		return size;
 	}
 	
-	/*TODO public Color.FloatRGBA starRGBA(double lyDistance)
+	public Color.FloatRGBA starRGBA(double lyDistance)
 	{
 		float alpha = getMaxStarAlpha();
 		
@@ -78,7 +79,7 @@ public abstract class StarLike extends OrbitingObject
 			alpha = getMinStarAlpha();
 		
 		return new Color.FloatRGBA(1, 1, 1, alpha);
-	}*/
+	}
 	
 	public static class StarType implements INBTSerializable<CompoundTag>
 	{

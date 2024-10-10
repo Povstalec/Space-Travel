@@ -1,13 +1,8 @@
 package net.povstalec.spacetravel.common.space.objects;
 
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.client.Camera;
-import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -31,10 +26,12 @@ public class Star extends StarLike
 			Codec.STRING.optionalFieldOf("parent").forGetter(Star::getParentName),
 			Codec.either(SpaceCoords.CODEC, StellarCoordinates.Equatorial.CODEC).fieldOf("coords").forGetter(object -> Either.left(object.getSpaceCoords())),
 			AxisRotation.CODEC.fieldOf("axis_rotation").forGetter(Star::getAxisRotation),
-			OrbitInfo.CODEC.optionalFieldOf("orbit_info").forGetter(Star::getOrbitInfo),
+			
+			SpaceObject.FadeOutHandler.CODEC.optionalFieldOf("fade_out_handler", SpaceObject.FadeOutHandler.DEFAULT_STAR_HANDLER).forGetter(Star::getFadeOutHandler),
+			
 			TextureLayer.CODEC.listOf().fieldOf("texture_layers").forGetter(Star::getTextureLayers),
 			
-			//SpaceObject.FadeOutHandler.CODEC.optionalFieldOf("fade_out_handler", SpaceObject.FadeOutHandler.DEFAULT_STAR_HANDLER).forGetter(Star::getFadeOutHandler),
+			OrbitInfo.CODEC.optionalFieldOf("orbit_info").forGetter(Star::getOrbitInfo),
 			
 			Codec.floatRange(0, Float.MAX_VALUE).optionalFieldOf("min_star_size", MIN_SIZE).forGetter(Star::getMinStarSize),
 			Codec.floatRange(0, Color.MAX_FLOAT_VALUE).optionalFieldOf("max_star_alpha", MAX_ALPHA).forGetter(Star::getMaxStarAlpha),
@@ -44,10 +41,10 @@ public class Star extends StarLike
 			).apply(instance, Star::new));
 	
 	public Star(Optional<String> parentName, Either<SpaceCoords, StellarCoordinates.Equatorial> coords, AxisRotation axisRotation,
-				Optional<OrbitInfo> orbitInfo, List<TextureLayer> textureLayers, float minStarSize, float maxStarAlpha, float minStarAlpha,
-				Optional<SupernovaInfo> supernovaInfo)
+				FadeOutHandler fadeOutHandler, List<TextureLayer> textureLayers, Optional<OrbitInfo> orbitInfo,
+				float minStarSize, float maxStarAlpha, float minStarAlpha, Optional<SupernovaInfo> supernovaInfo)
 	{
-		super(STAR_LOCATION, parentName, coords, axisRotation, orbitInfo, textureLayers, minStarSize, maxStarAlpha, minStarAlpha);
+		super(STAR_LOCATION, parentName, coords, axisRotation, fadeOutHandler, textureLayers, orbitInfo, minStarSize, maxStarAlpha, minStarAlpha);
 		
 		if(supernovaInfo.isPresent())
 			this.supernovaInfo = supernovaInfo.get();
@@ -88,7 +85,7 @@ public class Star extends StarLike
 	}
 	
 	
-	/*TODO public Color.FloatRGBA supernovaRGBA(long ticks, double lyDistance)
+	public Color.FloatRGBA supernovaRGBA(long ticks, double lyDistance)
 	{
 		Color.FloatRGBA starRGBA = super.starRGBA(lyDistance);
 		
@@ -101,7 +98,7 @@ public class Star extends StarLike
 		starRGBA.setAlpha(alpha <= Color.MIN_FLOAT_VALUE ? Color.MIN_FLOAT_VALUE : alpha >= Color.MAX_FLOAT_VALUE ? Color.MAX_FLOAT_VALUE : alpha);
 		
 		return starRGBA;
-	}*/
+	}
 	
 	
 	

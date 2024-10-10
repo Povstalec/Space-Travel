@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import javax.annotation.Nullable;
 
+import net.povstalec.spacetravel.common.util.AxisRotation;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
@@ -83,7 +84,8 @@ public abstract class SpaceObjectRenderer<RenderedSpaceObject extends SpaceObjec
 	 * @param parentVector
 	 */
 	public abstract void render(RenderCenter viewCenter, ClientLevel level, float partialTicks, PoseStack stack, Camera camera,
-			Matrix4f projectionMatrix, boolean isFoggy, Runnable setupFog, BufferBuilder bufferbuilder, Vector3f parentVector);
+			Matrix4f projectionMatrix, boolean isFoggy, Runnable setupFog, BufferBuilder bufferbuilder,
+			Vector3f parentVector, AxisRotation parentRotation);
 	
 	/**
 	 * Method used for rendering the sky from some Space Object's point of view
@@ -100,7 +102,10 @@ public abstract class SpaceObjectRenderer<RenderedSpaceObject extends SpaceObjec
 	public void renderFrom(RenderCenter viewCenter, ClientLevel level, float partialTicks, PoseStack stack, Camera camera,
 			Matrix4f projectionMatrix, boolean isFoggy, Runnable setupFog, BufferBuilder bufferbuilder)
 	{
-		viewCenter.addCoords(spaceObject.getPosition(level.getDayTime()));
+		if(parent != null)
+			viewCenter.addCoords(spaceObject.getPosition(!viewCenter.objectEquals(spaceObject), parent.spaceObject.getAxisRotation(), level.getDayTime(), partialTicks));
+		else
+			viewCenter.addCoords(spaceObject.getPosition(!viewCenter.objectEquals(spaceObject), level.getDayTime(), partialTicks));
 		
 		if(parent != null)
 			parent.renderFrom(viewCenter, level, partialTicks, stack, camera, projectionMatrix, isFoggy, setupFog, bufferbuilder);

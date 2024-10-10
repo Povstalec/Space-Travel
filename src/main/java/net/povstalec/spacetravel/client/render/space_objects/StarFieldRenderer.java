@@ -26,6 +26,8 @@ import javax.annotation.Nullable;
 
 public class StarFieldRenderer<SF extends StarField> extends SpaceObjectRenderer<StarField>
 {
+	private static final Vector3f NULL_VECTOR = new Vector3f();
+	
 	@Nullable
 	protected StarBuffer starBuffer;
 	
@@ -140,7 +142,9 @@ public class StarFieldRenderer<SF extends StarField> extends SpaceObjectRenderer
 	}
 	
 	@Override
-	public void render(RenderCenter viewCenter, ClientLevel level, float partialTicks, PoseStack stack, Camera camera, Matrix4f projectionMatrix, boolean isFoggy, Runnable setupFog, BufferBuilder bufferbuilder, Vector3f parentVector)
+	public void render(RenderCenter viewCenter, ClientLevel level, float partialTicks, PoseStack stack, Camera camera,
+					   Matrix4f projectionMatrix, boolean isFoggy, Runnable setupFog, BufferBuilder bufferbuilder,
+					   Vector3f parentVector, AxisRotation parentRotation)
 	{
 		SpaceCoords difference = viewCenter.getCoords().sub(spaceObject.getSpaceCoords());
 		
@@ -172,7 +176,7 @@ public class StarFieldRenderer<SF extends StarField> extends SpaceObjectRenderer
 		
 		for(SpaceObjectRenderer<?> child : clientChildren)
 		{
-			child.render(viewCenter, level, partialTicks, stack, camera, projectionMatrix, isFoggy, setupFog, bufferbuilder, parentVector);
+			child.render(viewCenter, level, partialTicks, stack, camera, projectionMatrix, isFoggy, setupFog, bufferbuilder, NULL_VECTOR, new AxisRotation());
 		}
 		
 		oldDifference = difference;

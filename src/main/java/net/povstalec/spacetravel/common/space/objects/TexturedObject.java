@@ -24,9 +24,9 @@ public class TexturedObject extends SpaceObject
 	
 	public TexturedObject() {}
 	public TexturedObject(ResourceLocation objectType, Optional<String> parentName,Either<SpaceCoords, StellarCoordinates.Equatorial> coords,
-					 AxisRotation axisRotation, List<TextureLayer> textureLayers)
+					 AxisRotation axisRotation, FadeOutHandler fadeOutHandler, List<TextureLayer> textureLayers)
 	{
-		super(objectType, parentName, coords, axisRotation);
+		super(objectType, parentName, coords, axisRotation, fadeOutHandler);
 		
 		this.textureLayers = new ArrayList<TextureLayer>(textureLayers);
 	}

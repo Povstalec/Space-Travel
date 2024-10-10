@@ -59,10 +59,12 @@ public class SpaceObject implements INBTSerializable<CompoundTag>
 	
 	public String name;
 	
+	public double lastDistance = 0; // Last known distance of this object from the View Center, used for sorting
+	
 	public SpaceObject(){}
 	
 	public SpaceObject(ResourceLocation objectType, Optional<String> parentName, Either<SpaceCoords, StellarCoordinates.Equatorial> coords,
-					   AxisRotation axisRotation)
+					   AxisRotation axisRotation, FadeOutHandler fadeOutHandler)
 	{
 		this.objectType = objectType;
 		
@@ -75,6 +77,8 @@ public class SpaceObject implements INBTSerializable<CompoundTag>
 			this.coords = coords.right().get().toGalactic().toSpaceCoords();
 		
 		this.axisRotation = axisRotation;
+		
+		this.fadeOutHandler = fadeOutHandler;
 	}
 	
 	public ResourceLocation getObjectType()
@@ -97,7 +101,12 @@ public class SpaceObject implements INBTSerializable<CompoundTag>
 		return this.coords.add(other);
 	}
 	
-	public Vector3f getPosition(long ticks)
+	public Vector3f getPosition(boolean canClamp, AxisRotation axisRotation, long ticks, float partialTicks)
+	{
+		return new Vector3f();
+	}
+	
+	public Vector3f getPosition(boolean canClamp, long ticks, float partialTicks)
 	{
 		return new Vector3f();
 	}
@@ -115,7 +124,12 @@ public class SpaceObject implements INBTSerializable<CompoundTag>
 		return Optional.empty();
 	}
 	
-	public float sizeMultiplier(float distance)
+	public FadeOutHandler getFadeOutHandler()
+	{
+		return fadeOutHandler;
+	}
+	
+	public static double distanceSize(double distance)
 	{
 		return 1 / distance;
 	}
@@ -163,11 +177,12 @@ public class SpaceObject implements INBTSerializable<CompoundTag>
 		buffer.writeOptional(Optional.ofNullable(parentName), (buf, key) -> buf.writeUtf(key));
 		coords.writeToBuffer(buffer);
 		axisRotation.writeToBuffer(buffer);
+		fadeOutHandler.writeToBuffer(buffer);
 	}
 	
 	public static SpaceObject readFromBuffer(FriendlyByteBuf buffer)
 	{
-		return new SpaceObject(buffer.readResourceLocation(), buffer.readOptional((buf) -> buf.readUtf()), Either.left(SpaceCoords.readFromBuffer(buffer)), AxisRotation.readFromBuffer(buffer));
+		return new SpaceObject(buffer.readResourceLocation(), buffer.readOptional((buf) -> buf.readUtf()), Either.left(SpaceCoords.readFromBuffer(buffer)), AxisRotation.readFromBuffer(buffer), FadeOutHandler.readFromBuffer(buffer));
 	}
 
 	@Override
@@ -260,6 +275,18 @@ public class SpaceObject implements INBTSerializable<CompoundTag>
 		public SpaceCoords.SpaceDistance getMaxChildRenderDistance()
 		{
 			return maxChildRenderDistance;
+		}
+		
+		public void writeToBuffer(FriendlyByteBuf buffer)
+		{
+			fadeOutStartDistance.writeToBuffer(buffer);
+			fadeOutEndDistance.writeToBuffer(buffer);
+			maxChildRenderDistance.writeToBuffer(buffer);
+		}
+		
+		public static FadeOutHandler readFromBuffer(FriendlyByteBuf buffer)
+		{
+			return new FadeOutHandler(SpaceCoords.SpaceDistance.readFromBuffer(buffer), SpaceCoords.SpaceDistance.readFromBuffer(buffer), SpaceCoords.SpaceDistance.readFromBuffer(buffer));
 		}
 	}
 }

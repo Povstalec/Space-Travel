@@ -16,6 +16,7 @@ import net.povstalec.spacetravel.common.space.objects.OrbitingObject;
 import net.povstalec.spacetravel.common.space.objects.SpaceObject;
 import net.povstalec.spacetravel.common.space.objects.StarField;
 import net.povstalec.spacetravel.common.space.objects.TexturedObject;
+import net.povstalec.spacetravel.common.util.AxisRotation;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
@@ -69,10 +70,10 @@ public final class ClientSpaceRegion
 		for(SpaceObjectRenderer<?> spaceObject : children)
 		{
 			if(spaceObject != masterParent) // Makes sure the master parent (usually galaxy) is rendered last, that way stars from other galaxies don't get rendered over planets
-				spaceObject.render(viewCenter, level, partialTicks, stack, camera, projectionMatrix, isFoggy, setupFog, bufferbuilder, NULL_VECTOR);
+				spaceObject.render(viewCenter, level, partialTicks, stack, camera, projectionMatrix, isFoggy, setupFog, bufferbuilder, NULL_VECTOR, new AxisRotation());
 		}
 		
-		masterParent.render(viewCenter, level, partialTicks, stack, camera, projectionMatrix, isFoggy, setupFog, bufferbuilder, NULL_VECTOR);
+		masterParent.render(viewCenter, level, partialTicks, stack, camera, projectionMatrix, isFoggy, setupFog, bufferbuilder, NULL_VECTOR, new AxisRotation());
 	}
 
 	private void deserializeChildren(CompoundTag childrenTag)

@@ -41,7 +41,7 @@ public class Spaceship extends OrbitingObject
 	
 	public Spaceship()
 	{
-		super(SPACESHIP_LOCATION, Optional.empty(), Either.left(new SpaceCoords()), new AxisRotation(), Optional.empty(), new ArrayList<TextureLayer>());
+		super(SPACESHIP_LOCATION, Optional.empty(), Either.left(new SpaceCoords()), new AxisRotation(), FadeOutHandler.DEFAULT_PLANET_HANDLER, new ArrayList<TextureLayer>(), Optional.empty());
 		
 		spaceRegionPos = new SpaceRegion.Position(this.getSpaceCoords());
 	}
