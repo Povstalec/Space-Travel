@@ -39,9 +39,9 @@ public class SpaceObject implements INBTSerializable<CompoundTag>
 	public static final String COORDS = "coords";
 	public static final String AXIS_ROTATION = "axis_rotation";
 	
-	public static final String TEXTURE_LAYERS = "texture_layers";
+	public static final String FADE_OUT_HANDLER = "fade_out_handler";
 
-	public static final String NAME = "name";
+	public static final String ID = "id";
 	
 	private ResourceLocation objectType;
 	
@@ -57,7 +57,7 @@ public class SpaceObject implements INBTSerializable<CompoundTag>
 	
 	protected FadeOutHandler fadeOutHandler;
 	
-	public String name;
+	protected ResourceLocation location;
 	
 	public double lastDistance = 0; // Last known distance of this object from the View Center, used for sorting
 	
@@ -129,6 +129,16 @@ public class SpaceObject implements INBTSerializable<CompoundTag>
 		return fadeOutHandler;
 	}
 	
+	public void setResourceLocation(ResourceLocation resourceLocation)
+	{
+		this.location = resourceLocation;
+	}
+	
+	public ResourceLocation getResourceLocation()
+	{
+		return this.location;
+	}
+	
 	public static double distanceSize(double distance)
 	{
 		return 1 / distance;
@@ -161,8 +171,8 @@ public class SpaceObject implements INBTSerializable<CompoundTag>
 	@Override
 	public String toString()
 	{
-		if(name != null)
-			return name.toString();
+		if(location != null)
+			return location.toString();
 		
 		return this.getClass().toString();
 	}
@@ -184,11 +194,25 @@ public class SpaceObject implements INBTSerializable<CompoundTag>
 	{
 		return new SpaceObject(buffer.readResourceLocation(), buffer.readOptional((buf) -> buf.readUtf()), Either.left(SpaceCoords.readFromBuffer(buffer)), AxisRotation.readFromBuffer(buffer), FadeOutHandler.readFromBuffer(buffer));
 	}
+	
+	@Override
+	public boolean equals(Object other)
+	{
+		if(other == this)
+			return true;
+		else if(other instanceof SpaceObject spaceObject && spaceObject.location != null && spaceObject.location.equals(this.location))
+			return true;
+		
+		return false;
+	}
 
 	@Override
 	public CompoundTag serializeNBT()
 	{
 		CompoundTag tag = new CompoundTag();
+		
+		if(location != null)
+			tag.putString(ID, location.toString());
 		
 		tag.putString(OBJECT_TYPE, objectType.toString());
 		
@@ -209,6 +233,8 @@ public class SpaceObject implements INBTSerializable<CompoundTag>
 		}
 		tag.put(CHILDREN, childrenTag);
 		
+		tag.put(FADE_OUT_HANDLER, fadeOutHandler.serializeNBT());
+		
 		return tag;
 	}
 
@@ -216,6 +242,9 @@ public class SpaceObject implements INBTSerializable<CompoundTag>
 	public void deserializeNBT(CompoundTag tag)
 	{
 		objectType = new ResourceLocation(tag.getString(OBJECT_TYPE));
+		
+		if(tag.contains(ID))
+			this.location = new ResourceLocation(tag.getString(ID));
 		
 		if(tag.contains(PARENT_NAME))
 			this.parentName = tag.getString(PARENT_NAME);
@@ -237,10 +266,17 @@ public class SpaceObject implements INBTSerializable<CompoundTag>
 			if(spaceObject != null && spaceObject.isInitialized())
 				addChild(spaceObject);
 		}
+		
+		this.fadeOutHandler = new FadeOutHandler();
+		this.fadeOutHandler.deserializeNBT(tag.getCompound(FADE_OUT_HANDLER));
 	}
 	
-	public static class FadeOutHandler
+	public static class FadeOutHandler implements INBTSerializable<CompoundTag>
 	{
+		public static final String FADE_OUT_START_DISTANCE = "fade_out_start_distance";
+		public static final String FADE_OUT_END_DISTANCE = "fade_out_end_distance";
+		public static final String MAX_CHILD_RENDER_DISTANCE = "max_child_render_distance";
+		
 		public static final FadeOutHandler DEFAULT_PLANET_HANDLER = new FadeOutHandler(new SpaceCoords.SpaceDistance(70000000000D), new SpaceCoords.SpaceDistance(100000000000D), new SpaceCoords.SpaceDistance(100000000000D));
 		public static final FadeOutHandler DEFAULT_STAR_HANDLER = new FadeOutHandler(new SpaceCoords.SpaceDistance(3000000L), new SpaceCoords.SpaceDistance(5000000L), new SpaceCoords.SpaceDistance(100000000000D));
 		public static final FadeOutHandler DEFAULT_STAR_FIELD_HANDLER = new FadeOutHandler(new SpaceCoords.SpaceDistance(3000000L), new SpaceCoords.SpaceDistance(5000000L), new SpaceCoords.SpaceDistance(5000000L));
@@ -250,10 +286,12 @@ public class SpaceObject implements INBTSerializable<CompoundTag>
 		private SpaceCoords.SpaceDistance maxChildRenderDistance;
 		
 		public static final Codec<FadeOutHandler> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-				SpaceCoords.SpaceDistance.CODEC.fieldOf("fade_out_start_distance").forGetter(FadeOutHandler::getFadeOutStartDistance),
-				SpaceCoords.SpaceDistance.CODEC.fieldOf("fade_out_end_distance").forGetter(FadeOutHandler::getFadeOutEndDistance),
-				SpaceCoords.SpaceDistance.CODEC.fieldOf("max_child_render_distance").forGetter(FadeOutHandler::getMaxChildRenderDistance)
+				SpaceCoords.SpaceDistance.CODEC.fieldOf(FADE_OUT_START_DISTANCE).forGetter(FadeOutHandler::getFadeOutStartDistance),
+				SpaceCoords.SpaceDistance.CODEC.fieldOf(FADE_OUT_END_DISTANCE).forGetter(FadeOutHandler::getFadeOutEndDistance),
+				SpaceCoords.SpaceDistance.CODEC.fieldOf(MAX_CHILD_RENDER_DISTANCE).forGetter(FadeOutHandler::getMaxChildRenderDistance)
 		).apply(instance, FadeOutHandler::new));
+		
+		public FadeOutHandler() {};
 		
 		public FadeOutHandler(SpaceCoords.SpaceDistance fadeOutStartDistance, SpaceCoords.SpaceDistance fadeOutEndDistance, SpaceCoords.SpaceDistance maxChildRenderDistance)
 		{
@@ -287,6 +325,31 @@ public class SpaceObject implements INBTSerializable<CompoundTag>
 		public static FadeOutHandler readFromBuffer(FriendlyByteBuf buffer)
 		{
 			return new FadeOutHandler(SpaceCoords.SpaceDistance.readFromBuffer(buffer), SpaceCoords.SpaceDistance.readFromBuffer(buffer), SpaceCoords.SpaceDistance.readFromBuffer(buffer));
+		}
+		
+		@Override
+		public CompoundTag serializeNBT()
+		{
+			CompoundTag tag = new CompoundTag();
+			
+			tag.put(FADE_OUT_START_DISTANCE, fadeOutStartDistance.serializeNBT());
+			tag.put(FADE_OUT_END_DISTANCE, fadeOutEndDistance.serializeNBT());
+			tag.put(MAX_CHILD_RENDER_DISTANCE, maxChildRenderDistance.serializeNBT());
+			
+			return tag;
+		}
+		
+		@Override
+		public void deserializeNBT(CompoundTag tag)
+		{
+			fadeOutStartDistance = new SpaceCoords.SpaceDistance(0);
+			fadeOutStartDistance.deserializeNBT(tag.getCompound(FADE_OUT_START_DISTANCE));
+			
+			fadeOutEndDistance = new SpaceCoords.SpaceDistance(0);
+			fadeOutEndDistance.deserializeNBT(tag.getCompound(FADE_OUT_END_DISTANCE));
+			
+			maxChildRenderDistance = new SpaceCoords.SpaceDistance(0);
+			maxChildRenderDistance.deserializeNBT(tag.getCompound(MAX_CHILD_RENDER_DISTANCE));
 		}
 	}
 }

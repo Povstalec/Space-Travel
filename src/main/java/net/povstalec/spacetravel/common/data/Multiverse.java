@@ -77,6 +77,9 @@ public class Multiverse extends SavedData
 		starFieldSet.forEach((starFieldEntry) ->
 		{
 			StarField starField = starFieldEntry.getValue();
+			starField.setResourceLocation(starFieldEntry.getKey().location());
+			
+			System.out.println("Loading Star Field " + starField.toString()); //TODO Remove
 			
 			Optional<Universe> universe = getUniverse("main");
 			if(universe.isPresent())
@@ -94,6 +97,9 @@ public class Multiverse extends SavedData
 		starSet.forEach((starEntry) ->
 		{
 			Star star = starEntry.getValue();
+			star.setResourceLocation(starEntry.getKey().location());
+			
+			System.out.println("Loading Star " + star.toString()); //TODO Remove
 			
 			Optional<Universe> universe = getUniverse("main");
 			if(universe.isPresent())

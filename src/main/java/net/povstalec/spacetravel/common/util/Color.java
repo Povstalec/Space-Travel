@@ -178,7 +178,7 @@ public class Color
 		}
 	}
 	
-	public static class FloatRGB
+	public static class FloatRGB implements INBTSerializable<CompoundTag>
 	{
 		protected float red;
 		protected float green;
@@ -242,6 +242,26 @@ public class Color
 		public float blue()
 		{
 			return blue;
+		}
+		
+		@Override
+		public CompoundTag serializeNBT()
+		{
+			CompoundTag tag = new CompoundTag();
+			
+			tag.putFloat(RED, red);
+			tag.putFloat(GREEN, green);
+			tag.putFloat(BLUE, blue);
+			
+			return tag;
+		}
+		
+		@Override
+		public void deserializeNBT(CompoundTag tag)
+		{
+			red = tag.getFloat(RED);
+			green = tag.getFloat(GREEN);
+			blue = tag.getFloat(BLUE);
 		}
 	}
 	
@@ -309,6 +329,24 @@ public class Color
 		public float alpha()
 		{
 			return alpha;
+		}
+		
+		@Override
+		public CompoundTag serializeNBT()
+		{
+			CompoundTag tag = super.serializeNBT();
+			
+			tag.putFloat(ALPHA, alpha);
+			
+			return tag;
+		}
+		
+		@Override
+		public void deserializeNBT(CompoundTag tag)
+		{
+			super.deserializeNBT(tag);
+			
+			alpha = tag.getFloat(ALPHA);
 		}
 	}
 }

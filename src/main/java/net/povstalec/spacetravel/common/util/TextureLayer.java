@@ -24,7 +24,7 @@ public class TextureLayer
 	public static final String UV_QUAD = "uv";
 	
 	private final ResourceLocation texture;
-	private final Color.IntRGBA rgba;
+	private final Color.FloatRGBA rgba;
 	
 	private final boolean blend;
 	
@@ -38,7 +38,7 @@ public class TextureLayer
     
     public static final Codec<TextureLayer> CODEC = RecordCodecBuilder.create(instance -> instance.group(
     		ResourceLocation.CODEC.fieldOf(TEXTURE).forGetter(TextureLayer::texture),
-    		Color.IntRGBA.CODEC.fieldOf(RGBA).forGetter(TextureLayer::rgba),
+    		Color.FloatRGBA.INT_CODEC.fieldOf(RGBA).forGetter(TextureLayer::rgba),
     		
     		Codec.BOOL.fieldOf(BLEND).forGetter(TextureLayer::shoulBlend),
     		
@@ -51,7 +51,7 @@ public class TextureLayer
     		UV.Quad.CODEC.optionalFieldOf(UV_QUAD, UV.Quad.DEFAULT_QUAD_UV).forGetter(TextureLayer::uv)
 			).apply(instance, TextureLayer::new));
 	
-	public TextureLayer(ResourceLocation texture, Color.IntRGBA rgba, boolean blend,
+	public TextureLayer(ResourceLocation texture, Color.FloatRGBA rgba, boolean blend,
 		double size, double minSize, boolean clampAtMinSize,
 		double rotation, UV.Quad uv)
 	{
@@ -73,7 +73,7 @@ public class TextureLayer
 		return texture;
 	}
 	
-	public Color.IntRGBA rgba()
+	public Color.FloatRGBA rgba()
 	{
 		return rgba;
 	}
@@ -153,7 +153,7 @@ public class TextureLayer
 	{
 		ResourceLocation texture = new ResourceLocation(tag.getString(TEXTURE));
 		
-		Color.IntRGBA rgba = new Color.IntRGBA(0, 0, 0);
+		Color.FloatRGBA rgba = new Color.FloatRGBA(0, 0, 0);
 		rgba.deserializeNBT(tag.getCompound(RGBA));
 		
 		boolean blend = tag.getBoolean(BLEND);

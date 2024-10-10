@@ -109,8 +109,8 @@ public class TexturedObjectRenderer<TO extends TexturedObject> extends SpaceObje
 			}
 		}
 		
-		//if(!isViewCenter && spaceObject.getFadeOutHandler().getFadeOutEndDistance().toKm() > lastDistance)
-		//	renderTextureLayers(viewCenter, level, camera, bufferbuilder, stack.last().pose(), sphericalCoords, ticks, lastDistance, partialTicks);
+		if(!isViewCenter && spaceObject.getFadeOutHandler().getFadeOutEndDistance().toKm() > spaceObject.lastDistance)
+			renderTextureLayers(viewCenter, level, camera, bufferbuilder, stack.last().pose(), sphericalCoords, ticks, spaceObject.lastDistance, partialTicks);
 		
 		if(spaceObject.getFadeOutHandler().getMaxChildRenderDistance().toKm() > spaceObject.lastDistance)
 		{
@@ -132,7 +132,7 @@ public class TexturedObjectRenderer<TO extends TexturedObject> extends SpaceObje
 	//**********************************Texture Layer Rendering***********************************
 	//============================================================================================
 	
-	/*protected void renderTextureLayers(RenderCenter viewCenter, ClientLevel level, Camera camera, BufferBuilder bufferbuilder, Matrix4f lastMatrix, SphericalCoords sphericalCoords, long ticks, double distance, float partialTicks)
+	protected void renderTextureLayers(RenderCenter viewCenter, ClientLevel level, Camera camera, BufferBuilder bufferbuilder, Matrix4f lastMatrix, SphericalCoords sphericalCoords, long ticks, double distance, float partialTicks)
 	{
 		RenderSystem.setShader(GameRenderer::getPositionTexShader);
 		
@@ -140,7 +140,7 @@ public class TexturedObjectRenderer<TO extends TexturedObject> extends SpaceObje
 		{
 			renderTextureLayer(textureLayer, viewCenter, level, camera, bufferbuilder, lastMatrix, sphericalCoords, ticks, distance, partialTicks);
 		}
-	}*/
+	}
 	
 	/**
 	 * Method for rendering an individual texture layer, override to change details of how this object's texture layers are rendered
@@ -153,7 +153,7 @@ public class TexturedObjectRenderer<TO extends TexturedObject> extends SpaceObje
 	 * @param distance
 	 * @param partialTicks
 	 */
-	/*protected void renderTextureLayer(TextureLayer textureLayer, RenderCenter viewCenter, ClientLevel level, Camera camera, BufferBuilder bufferbuilder, Matrix4f lastMatrix, SphericalCoords sphericalCoords, long ticks, double distance, float partialTicks)
+	protected void renderTextureLayer(TextureLayer textureLayer, RenderCenter viewCenter, ClientLevel level, Camera camera, BufferBuilder bufferbuilder, Matrix4f lastMatrix, SphericalCoords sphericalCoords, long ticks, double distance, float partialTicks)
 	{
 		if(textureLayer.rgba().alpha() <= 0)
 			return;
@@ -171,7 +171,7 @@ public class TexturedObjectRenderer<TO extends TexturedObject> extends SpaceObje
 		renderOnSphere(textureLayer.rgba(), Color.FloatRGBA.DEFAULT, textureLayer.texture(), textureLayer.uv(),
 				level, camera, bufferbuilder, lastMatrix, sphericalCoords,
 				ticks, distance, partialTicks, dayBrightness(viewCenter, size, ticks, level, camera, partialTicks), size, (float) textureLayer.rotation(), textureLayer.shoulBlend());
-	}*/
+	}
 	
 	
 	

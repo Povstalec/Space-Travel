@@ -15,6 +15,7 @@ import java.util.Optional;
 
 public class TexturedObject extends SpaceObject
 {
+	public static final String TEXTURE_LAYERS = "texture_layers";
 	
 	public static final ResourceLocation TEXTURED_OBJECT_LOCATION = new ResourceLocation(SpaceTravel.MODID, "textured_object");
 	public static final ResourceKey<Registry<SpaceObject>> REGISTRY_KEY = ResourceKey.createRegistryKey(TEXTURED_OBJECT_LOCATION);

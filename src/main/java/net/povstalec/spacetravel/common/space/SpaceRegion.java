@@ -9,6 +9,7 @@ import com.mojang.datafixers.util.Either;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.RandomSource;
 import net.minecraftforge.common.util.INBTSerializable;
+import net.povstalec.spacetravel.SpaceTravel;
 import net.povstalec.spacetravel.common.space.objects.SpaceObject;
 import net.povstalec.spacetravel.common.space.objects.StarField;
 import net.povstalec.spacetravel.common.util.AxisRotation;
@@ -60,10 +61,16 @@ public final class SpaceRegion implements INBTSerializable<CompoundTag>
 	
 	public void addChild(SpaceObject child, boolean setGenerated)
 	{
-		this.children.add(child);
-		
-		if(setGenerated)
-			isGenerated = true;
+		if(!this.children.contains(child))
+		{
+			this.children.add(child);
+			
+			if(setGenerated)
+				isGenerated = true;
+		}
+		else
+			SpaceTravel.LOGGER.error("Region " + this.toString() + " already contains " + child.toString());
+		//TODO Handle this somewhere higher, ideally do something similar to the Stargate Network, which needs to be reloaded
 	}
 	
 	public static SpaceRegion generateRegion(Position pos, long seed)

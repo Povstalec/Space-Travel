@@ -10,12 +10,10 @@ import net.povstalec.spacetravel.SpaceTravel;
 import net.povstalec.spacetravel.client.RenderCenter;
 import net.povstalec.spacetravel.client.render.space_objects.SpaceObjectRenderer;
 import net.povstalec.spacetravel.client.render.space_objects.StarFieldRenderer;
+import net.povstalec.spacetravel.client.render.space_objects.StarRenderer;
 import net.povstalec.spacetravel.client.render.space_objects.TexturedObjectRenderer;
 import net.povstalec.spacetravel.common.space.SpaceRegion.Position;
-import net.povstalec.spacetravel.common.space.objects.OrbitingObject;
-import net.povstalec.spacetravel.common.space.objects.SpaceObject;
-import net.povstalec.spacetravel.common.space.objects.StarField;
-import net.povstalec.spacetravel.common.space.objects.TexturedObject;
+import net.povstalec.spacetravel.common.space.objects.*;
 import net.povstalec.spacetravel.common.util.AxisRotation;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
@@ -92,7 +90,9 @@ public final class ClientSpaceRegion
 				// Deserializes object based on its type specified in the object_type
 				if(objectType.equals(OrbitingObject.ORBITING_OBJECT_LOCATION))
 					spaceObjectRenderer = deserializeOrbitingObject(childTag);
-				if(objectType.equals(TexturedObject.TEXTURED_OBJECT_LOCATION))
+				else if(objectType.equals(Star.STAR_LOCATION))
+					spaceObjectRenderer = deserializeStar(childTag);
+				else if(objectType.equals(TexturedObject.TEXTURED_OBJECT_LOCATION))
 					spaceObjectRenderer = deserializeTexturedObject(childTag);
 				else if(objectType.equals(StarField.STAR_FIELD_LOCATION))
 					spaceObjectRenderer = deserializeSpiralGalaxy(childTag);
@@ -125,6 +125,17 @@ public final class ClientSpaceRegion
     		return new TexturedObjectRenderer<OrbitingObject>(orbitingObject);
 		
     	return null;
+	}
+	
+	private StarRenderer deserializeStar(CompoundTag childTag)
+	{
+		Star star = new Star();
+		star.deserializeNBT(childTag);
+		
+		if(star.isInitialized())
+			return new StarRenderer(star);
+		
+		return null;
 	}
 	
 	private StarFieldRenderer<StarField> deserializeSpiralGalaxy(CompoundTag childTag)

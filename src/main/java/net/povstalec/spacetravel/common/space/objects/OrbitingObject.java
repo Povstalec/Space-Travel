@@ -29,14 +29,6 @@ public class OrbitingObject extends TexturedObject
 	@Nullable
 	private OrbitInfo orbitInfo;
 	
-	/*public static final Codec<OrbitingObject> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-			RESOURCE_KEY_CODEC.optionalFieldOf("parent").forGetter(OrbitingObject::getParentKey),
-			SpaceCoords.CODEC.fieldOf("coords").forGetter(OrbitingObject::getCoords),
-			AxisRotation.CODEC.fieldOf("axis_rotation").forGetter(OrbitingObject::getAxisRotation),
-			OrbitInfo.CODEC.optionalFieldOf("orbit_info").forGetter(OrbitingObject::getOrbitInfo),
-			TextureLayer.CODEC.listOf().fieldOf("texture_layers").forGetter(OrbitingObject::getTextureLayers)
-			).apply(instance, OrbitingObject::new));*/
-	
 	public OrbitingObject() {}
 	
 	public OrbitingObject(ResourceLocation objectType, Optional<String> parentName, Either<SpaceCoords, StellarCoordinates.Equatorial> coords,

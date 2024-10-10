@@ -25,7 +25,7 @@ public class StarRenderer extends TexturedObjectRenderer<Star>
 	//*****************************************Rendering******************************************
 	//============================================================================================
 	
-	/*TODO @Override
+	@Override
 	protected void renderTextureLayer(TextureLayer textureLayer, RenderCenter viewCenter, ClientLevel level, Camera camera, BufferBuilder bufferbuilder, Matrix4f lastMatrix, SphericalCoords sphericalCoords, long ticks, double distance, float partialTicks)
 	{
 		double lyDistance = distance / SpaceCoords.LY_TO_KM;
@@ -44,14 +44,16 @@ public class StarRenderer extends TexturedObjectRenderer<Star>
 				size = (float) textureLayer.minSize();
 				
 				// Once the star has reached its usual min size, it will start getting smaller slowly again, but only up to a certain point
-				size = starSize(size, lyDistance);
+				size = spaceObject.starSize(size, lyDistance);
 			}
 			else
 				return;
 		}
 		
-		if(isSupernova())
-			size = supernovaSize(size, ticks, lyDistance);
+		if(spaceObject.isSupernova())
+			size = spaceObject.supernovaSize(size, ticks, lyDistance);
+		
+		System.out.println("Rendering " + spaceObject.toString() + " size: " + size);
 		
 		renderOnSphere(textureLayer.rgba(), starRGBA, textureLayer.texture(), textureLayer.uv(),
 				level, camera, bufferbuilder, lastMatrix, sphericalCoords,
@@ -59,16 +61,11 @@ public class StarRenderer extends TexturedObjectRenderer<Star>
 	}
 	
 	@Override
-	protected void renderTextureLayers(ViewCenter viewCenter, ClientLevel level, Camera camera, BufferBuilder bufferbuilder, Matrix4f lastMatrix, SphericalCoords sphericalCoords, long ticks, double distance, float partialTicks)
+	protected void renderTextureLayers(RenderCenter viewCenter, ClientLevel level, Camera camera, BufferBuilder bufferbuilder, Matrix4f lastMatrix, SphericalCoords sphericalCoords, long ticks, double distance, float partialTicks)
 	{
-		if(isSupernova() && supernovaInfo.supernovaEnded(ticks))
+		if(spaceObject.isSupernova() && spaceObject.getSupernovaInfo().get().supernovaEnded(ticks))
 			return;
 		
-		RenderSystem.setShader(GameRenderer::getPositionTexShader);
-		
-		for(TextureLayer textureLayer : textureLayers)
-		{
-			renderTextureLayer(textureLayer, viewCenter, level, camera, bufferbuilder, lastMatrix, sphericalCoords, ticks, distance, partialTicks);
-		}
-	}*/
+		super.renderTextureLayers(viewCenter, level, camera, bufferbuilder, lastMatrix, sphericalCoords, ticks, distance, partialTicks);
+	}
 }

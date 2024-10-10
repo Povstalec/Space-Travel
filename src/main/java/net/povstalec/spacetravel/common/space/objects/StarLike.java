@@ -17,12 +17,17 @@ import net.povstalec.spacetravel.common.space.objects.SpaceObject;
 import net.povstalec.spacetravel.common.util.*;
 import org.joml.Matrix4f;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 
 public abstract class StarLike extends OrbitingObject
 {
+	public static final String MIN_STAR_SIZE = "min_star_size";
+	public static final String MAX_STAR_ALPHA = "max_star_alpha";
+	public static final String MIN_STAR_ALPHA = "min_star_alpha";
+	
 	public static final float MIN_SIZE = 0.2F;
 	
 	public static final float MAX_ALPHA = 1F;
@@ -32,6 +37,8 @@ public abstract class StarLike extends OrbitingObject
 	
 	private float maxStarAlpha;
 	private float minStarAlpha;
+	
+	public StarLike() {};
 	
 	public StarLike(ResourceLocation objectType, Optional<String> parentName, Either<SpaceCoords, StellarCoordinates.Equatorial> coords, AxisRotation axisRotation,
 					FadeOutHandler fadeOutHandler, List<TextureLayer> textureLayers, Optional<OrbitingObject.OrbitInfo> orbitInfo,
@@ -79,6 +86,32 @@ public abstract class StarLike extends OrbitingObject
 			alpha = getMinStarAlpha();
 		
 		return new Color.FloatRGBA(1, 1, 1, alpha);
+	}
+	
+	//============================================================================================
+	//*************************************Saving and Loading*************************************
+	//============================================================================================
+	
+	@Override
+	public CompoundTag serializeNBT()
+	{
+		CompoundTag tag = super.serializeNBT();
+		
+		tag.putFloat(MIN_STAR_SIZE, minStarSize);
+		tag.putFloat(MAX_STAR_ALPHA, maxStarAlpha);
+		tag.putFloat(MIN_STAR_ALPHA, minStarAlpha);
+		
+		return tag;
+	}
+	
+	@Override
+	public void deserializeNBT(CompoundTag tag)
+	{
+		super.deserializeNBT(tag);
+		
+		minStarSize = tag.getFloat(MIN_STAR_SIZE);
+		maxStarAlpha = tag.getFloat(MAX_STAR_ALPHA);
+		minStarAlpha = tag.getFloat(MIN_STAR_ALPHA);
 	}
 	
 	public static class StarType implements INBTSerializable<CompoundTag>

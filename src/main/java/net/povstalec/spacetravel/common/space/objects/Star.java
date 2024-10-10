@@ -20,7 +20,7 @@ public class Star extends StarLike
 	public static final Codec<ResourceKey<Star>> RESOURCE_KEY_CODEC = ResourceKey.codec(REGISTRY_KEY);
 	
 	@Nullable
-	private final SupernovaInfo supernovaInfo;
+	private SupernovaInfo supernovaInfo;
 	
 	public static final Codec<Star> CODEC = RecordCodecBuilder.create(instance -> instance.group(
 			Codec.STRING.optionalFieldOf("parent").forGetter(Star::getParentName),
@@ -39,6 +39,8 @@ public class Star extends StarLike
 			
 			SupernovaInfo.CODEC.optionalFieldOf("supernova_info").forGetter(Star::getSupernovaInfo)
 			).apply(instance, Star::new));
+	
+	public Star() {};
 	
 	public Star(Optional<String> parentName, Either<SpaceCoords, StellarCoordinates.Equatorial> coords, AxisRotation axisRotation,
 				FadeOutHandler fadeOutHandler, List<TextureLayer> textureLayers, Optional<OrbitInfo> orbitInfo,
@@ -89,6 +91,7 @@ public class Star extends StarLike
 	{
 		Color.FloatRGBA starRGBA = super.starRGBA(lyDistance);
 		
+		System.out.println("Supernova alpha?");
 		if(!isSupernova() || supernovaInfo.supernovaEnded(ticks) || !supernovaInfo.supernovaStarted(ticks))
 			return starRGBA;
 		
