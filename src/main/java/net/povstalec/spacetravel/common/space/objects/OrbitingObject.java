@@ -6,6 +6,7 @@ import java.util.Optional;
 import javax.annotation.Nullable;
 
 import com.mojang.datafixers.util.Either;
+import net.minecraft.resources.ResourceKey;
 import net.povstalec.spacetravel.common.util.StellarCoordinates;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
@@ -31,10 +32,10 @@ public class OrbitingObject extends TexturedObject
 	
 	public OrbitingObject() {}
 	
-	public OrbitingObject(ResourceLocation objectType, Optional<String> parentName, Either<SpaceCoords, StellarCoordinates.Equatorial> coords,
+	public OrbitingObject(ResourceLocation objectType, Optional<ResourceLocation> parentLocation, Either<SpaceCoords, StellarCoordinates.Equatorial> coords,
 						  AxisRotation axisRotation, FadeOutHandler fadeOutHandler, List<TextureLayer> textureLayers, Optional<OrbitInfo> orbitInfo)
 	{
-		super(objectType, parentName, coords, axisRotation, fadeOutHandler, textureLayers);
+		super(objectType, parentLocation, coords, axisRotation, fadeOutHandler, textureLayers);
 		
 		if(orbitInfo.isPresent())
 			this.orbitInfo = orbitInfo.get();

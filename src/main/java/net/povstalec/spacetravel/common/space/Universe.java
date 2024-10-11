@@ -27,9 +27,13 @@ public class Universe implements INBTSerializable<CompoundTag>
 	
 	private final HashMap<SpaceRegion.Position, SpaceRegion> spaceRegions;
 	
+	private final HashMap<ResourceLocation, SpaceObject> spaceObjects; // Map of space objects that need to be added to this Universe
+	
 	public Universe()
 	{
 		spaceRegions = new HashMap<SpaceRegion.Position, SpaceRegion>();
+		
+		spaceObjects = new HashMap<ResourceLocation, SpaceObject>();
 	}
 	
 	/**
@@ -106,6 +110,44 @@ public class Universe implements INBTSerializable<CompoundTag>
 		SpaceRegion.Position pos = new SpaceRegion.Position(spaceObject.getSpaceCoords());
 		
 		getRegionAt(pos, false).addChild(spaceObject, setGenerated);
+	}
+	
+	public void addSpaceObject(ResourceLocation location, SpaceObject spaceObject)
+	{
+		if(!spaceObjects.containsKey(location))
+			spaceObjects.put(location, spaceObject);
+		else
+			SpaceTravel.LOGGER.error("Universe " + this.toString() + " already contains " + spaceObject.toString());
+	}
+	
+	public void prepareObjects()
+	{
+		for(Map.Entry<ResourceLocation, SpaceObject> spaceObjectEntry : spaceObjects.entrySet())
+		{
+			SpaceObject spaceObject = spaceObjectEntry.getValue();
+			
+			// Set name
+			spaceObject.setResourceLocation(spaceObjectEntry.getKey());
+			
+			// Handle parents
+			if(spaceObject.getParentLocation().isPresent())
+			{
+				for(Map.Entry<ResourceLocation, SpaceObject> parentEntry : spaceObjects.entrySet())
+				{
+					if(parentEntry.getKey().equals(spaceObject.getParentLocation().get()))
+					{
+						parentEntry.getValue().addChild(spaceObject);
+						break;
+					}
+				}
+				
+				if(!spaceObject.getParent().isPresent())
+					SpaceTravel.LOGGER.error("Failed to find parent for " + spaceObject.toString());
+			}
+			else
+				addToRegion(spaceObjectEntry.getValue(), true); //TODO Maybe let datapacks decide?
+		}
+		spaceObjects.clear();
 	}
 	
 	//============================================================================================

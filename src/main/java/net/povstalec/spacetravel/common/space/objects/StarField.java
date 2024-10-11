@@ -22,7 +22,6 @@ public class StarField extends SpaceObject
 {
 	public static final ResourceLocation STAR_FIELD_LOCATION = new ResourceLocation(SpaceTravel.MODID, "star_field");
 	public static final ResourceKey<Registry<StarField>> REGISTRY_KEY = ResourceKey.createRegistryKey(STAR_FIELD_LOCATION);
-	public static final Codec<ResourceKey<StarField>> RESOURCE_KEY_CODEC = ResourceKey.codec(REGISTRY_KEY);
 	
 	public static final String SEED = "seed";
 	public static final String DIAMETER_LY = "diameter_ly";
@@ -51,7 +50,7 @@ public class StarField extends SpaceObject
 	protected int totalStars;
 	
 	public static final Codec<StarField> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-			Codec.STRING.optionalFieldOf("parent").forGetter(StarField::getParentName),
+			ResourceLocation.CODEC.optionalFieldOf("parent").forGetter(StarField::getParentLocation),
 			Codec.either(SpaceCoords.CODEC, StellarCoordinates.Equatorial.CODEC).fieldOf("coords").forGetter(object -> Either.left(object.getSpaceCoords())),
 			AxisRotation.CODEC.fieldOf("axis_rotation").forGetter(StarField::getAxisRotation),
 			
@@ -73,12 +72,12 @@ public class StarField extends SpaceObject
 	
 	public StarField() {}
 	
-	public StarField(ResourceLocation objectType, Optional<String> parentName, Either<SpaceCoords, StellarCoordinates.Equatorial> coords,
+	public StarField(ResourceLocation objectType, Optional<ResourceLocation> parentLocation, Either<SpaceCoords, StellarCoordinates.Equatorial> coords,
 					 AxisRotation axisRotation, FadeOutHandler fadeOutHandler, StarInfo starInfo,
 					 long seed, int diameter, int numberOfStars, boolean clumpStarsInCenter,
 					 double xStretch, double yStretch, double zStretch, List<SpiralArm> spiralArms)
 	{
-		super(objectType, parentName, coords, axisRotation, fadeOutHandler);
+		super(objectType, parentLocation, coords, axisRotation, fadeOutHandler);
 		
 		this.starInfo = starInfo;
 		this.seed = seed;
@@ -103,25 +102,25 @@ public class StarField extends SpaceObject
 		this.totalStars = totalStars;
 	}
 	
-	public StarField(Optional<String> parentName, Either<SpaceCoords, StellarCoordinates.Equatorial> coords, AxisRotation axisRotation, FadeOutHandler fadeOutHandler,
+	public StarField(Optional<ResourceLocation> parentLocation, Either<SpaceCoords, StellarCoordinates.Equatorial> coords, AxisRotation axisRotation, FadeOutHandler fadeOutHandler,
 					 StarInfo starInfo, long seed, int diameter, int numberOfStars, boolean clumpStarsInCenter,
 					 double xStretch, double yStretch, double zStretch, List<SpiralArm> spiralArms)
 	{
-		this(STAR_FIELD_LOCATION, parentName, coords, axisRotation, fadeOutHandler, starInfo, seed, diameter, numberOfStars, clumpStarsInCenter, xStretch, yStretch, zStretch, spiralArms);
+		this(STAR_FIELD_LOCATION, parentLocation, coords, axisRotation, fadeOutHandler, starInfo, seed, diameter, numberOfStars, clumpStarsInCenter, xStretch, yStretch, zStretch, spiralArms);
 	}
 	
-	public StarField(Optional<String> parentName, SpaceCoords coords, AxisRotation axisRotation, FadeOutHandler fadeOutHandler,
+	public StarField(Optional<ResourceLocation> parentLocation, SpaceCoords coords, AxisRotation axisRotation, FadeOutHandler fadeOutHandler,
 					 StarInfo starInfo, long seed, int diameter, int numberOfStars, boolean clumpStarsInCenter,
 					 double xStretch, double yStretch, double zStretch, List<SpiralArm> spiralArms)
 	{
-		this(parentName, Either.left(coords), axisRotation, fadeOutHandler, starInfo, seed, diameter, numberOfStars, clumpStarsInCenter, xStretch, yStretch, zStretch, spiralArms);
+		this(parentLocation, Either.left(coords), axisRotation, fadeOutHandler, starInfo, seed, diameter, numberOfStars, clumpStarsInCenter, xStretch, yStretch, zStretch, spiralArms);
 	}
 	
-	public StarField(Optional<String> parentName, StellarCoordinates.Equatorial coords, AxisRotation axisRotation, FadeOutHandler fadeOutHandler,
+	public StarField(Optional<ResourceLocation> parentLocation, StellarCoordinates.Equatorial coords, AxisRotation axisRotation, FadeOutHandler fadeOutHandler,
 					 StarInfo starInfo, long seed, int diameter, int numberOfStars, boolean clumpStarsInCenter,
 					 double xStretch, double yStretch, double zStretch, List<SpiralArm> spiralArms)
 	{
-		this(parentName, Either.right(coords), axisRotation, fadeOutHandler, starInfo, seed, diameter, numberOfStars, clumpStarsInCenter, xStretch, yStretch, zStretch, spiralArms);
+		this(parentLocation, Either.right(coords), axisRotation, fadeOutHandler, starInfo, seed, diameter, numberOfStars, clumpStarsInCenter, xStretch, yStretch, zStretch, spiralArms);
 	}
 	
 	public StarInfo getStarInfo()

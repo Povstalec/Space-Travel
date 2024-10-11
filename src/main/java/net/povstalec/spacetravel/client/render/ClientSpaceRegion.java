@@ -19,6 +19,8 @@ import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 public final class ClientSpaceRegion
 {
@@ -65,10 +67,10 @@ public final class ClientSpaceRegion
 	
 	public void render(RenderCenter viewCenter, SpaceObjectRenderer<?> masterParent, ClientLevel level, Camera camera, float partialTicks, PoseStack stack, Matrix4f projectionMatrix, boolean isFoggy, Runnable setupFog, BufferBuilder bufferbuilder)
 	{
-		for(SpaceObjectRenderer<?> spaceObject : children)
+		for(SpaceObjectRenderer<?> renderer : children)
 		{
-			if(spaceObject != masterParent) // Makes sure the master parent (usually galaxy) is rendered last, that way stars from other galaxies don't get rendered over planets
-				spaceObject.render(viewCenter, level, partialTicks, stack, camera, projectionMatrix, isFoggy, setupFog, bufferbuilder, NULL_VECTOR, new AxisRotation());
+			if(renderer != masterParent) // Makes sure the master parent (usually galaxy) is rendered last, that way stars from other galaxies don't get rendered over planets
+				renderer.render(viewCenter, level, partialTicks, stack, camera, projectionMatrix, isFoggy, setupFog, bufferbuilder, NULL_VECTOR, new AxisRotation());
 		}
 		
 		masterParent.render(viewCenter, level, partialTicks, stack, camera, projectionMatrix, isFoggy, setupFog, bufferbuilder, NULL_VECTOR, new AxisRotation());
@@ -78,7 +80,6 @@ public final class ClientSpaceRegion
 	{
 		for(String childId : childrenTag.getAllKeys())
 		{
-			
 			CompoundTag childTag = childrenTag.getCompound(childId);
 			String objectTypeString = childTag.getString(SpaceObject.OBJECT_TYPE);
 			
@@ -100,7 +101,29 @@ public final class ClientSpaceRegion
 				//TODO Add event for leftover object types
 				
 				if(spaceObjectRenderer != null)
+				{
 					addChild(spaceObjectRenderer);
+					// Adds all of the object's children as renderers
+					addChildRenderers(spaceObjectRenderer);
+				}
+			}
+		}
+	}
+	
+	private static void addChildRenderers(SpaceObjectRenderer renderer)
+	{
+		SpaceObjectRenderer childRenderer = null;
+		for(SpaceObject child : renderer.spaceObject.getChildren())
+		{
+			if(child instanceof Star star)
+				childRenderer = new StarRenderer(star);
+			else if(child instanceof StarField starField)
+				childRenderer = new StarFieldRenderer(starField);
+			
+			if(childRenderer != null)
+			{
+				renderer.addExistingChild(childRenderer);
+				addChildRenderers(childRenderer);
 			}
 		}
 	}
@@ -142,7 +165,7 @@ public final class ClientSpaceRegion
 	{
 		StarField starField = new StarField();
 		starField.deserializeNBT(childTag);
-    	
+		
     	if(starField.isInitialized())
     		return new StarFieldRenderer<StarField>(starField);
 		

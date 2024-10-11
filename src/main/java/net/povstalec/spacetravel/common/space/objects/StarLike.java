@@ -40,11 +40,11 @@ public abstract class StarLike extends OrbitingObject
 	
 	public StarLike() {};
 	
-	public StarLike(ResourceLocation objectType, Optional<String> parentName, Either<SpaceCoords, StellarCoordinates.Equatorial> coords, AxisRotation axisRotation,
+	public StarLike(ResourceLocation objectType, Optional<ResourceLocation> parentLocation, Either<SpaceCoords, StellarCoordinates.Equatorial> coords, AxisRotation axisRotation,
 					FadeOutHandler fadeOutHandler, List<TextureLayer> textureLayers, Optional<OrbitingObject.OrbitInfo> orbitInfo,
 					float minStarSize, float maxStarAlpha, float minStarAlpha)
 	{
-		super(objectType, parentName, coords, axisRotation, fadeOutHandler, textureLayers, orbitInfo);
+		super(objectType, parentLocation, coords, axisRotation, fadeOutHandler, textureLayers, orbitInfo);
 		
 		this.minStarSize = minStarSize;
 		this.maxStarAlpha = maxStarAlpha;

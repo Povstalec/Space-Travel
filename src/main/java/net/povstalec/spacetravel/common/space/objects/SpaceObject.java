@@ -31,7 +31,7 @@ public class SpaceObject implements INBTSerializable<CompoundTag>
 	
 	public static final String OBJECT_TYPE = "object_type";
 	
-	public static final String PARENT_NAME = "parent_name";
+	public static final String PARENT_KEY = "parent_key";
 	
 	public static final String CHILDREN = "children";
 	//TODO Other children types
@@ -43,10 +43,14 @@ public class SpaceObject implements INBTSerializable<CompoundTag>
 
 	public static final String ID = "id";
 	
+	public static final ResourceLocation STAR_FIELD_LOCATION = new ResourceLocation(SpaceTravel.MODID, "star_field");
+	public static final ResourceKey<Registry<SpaceObject>> REGISTRY_KEY = ResourceKey.createRegistryKey(STAR_FIELD_LOCATION);
+	public static final Codec<ResourceKey<SpaceObject>> RESOURCE_KEY_CODEC = ResourceKey.codec(REGISTRY_KEY);
+	
 	private ResourceLocation objectType;
 	
 	@Nullable
-	protected String parentName;
+	protected ResourceLocation parentLocation;
 	@Nullable
 	protected SpaceObject parent;
 	
@@ -63,13 +67,13 @@ public class SpaceObject implements INBTSerializable<CompoundTag>
 	
 	public SpaceObject(){}
 	
-	public SpaceObject(ResourceLocation objectType, Optional<String> parentName, Either<SpaceCoords, StellarCoordinates.Equatorial> coords,
+	public SpaceObject(ResourceLocation objectType, Optional<ResourceLocation> parentLocation, Either<SpaceCoords, StellarCoordinates.Equatorial> coords,
 					   AxisRotation axisRotation, FadeOutHandler fadeOutHandler)
 	{
 		this.objectType = objectType;
 		
-		if(parentName.isPresent())
-				this.parentName = parentName.get();
+		if(parentLocation.isPresent())
+			this.parentLocation = parentLocation.get();
 		
 		if(coords.left().isPresent())
 			this.coords = coords.left().get();
@@ -116,12 +120,14 @@ public class SpaceObject implements INBTSerializable<CompoundTag>
 		return axisRotation;
 	}
 	
-	public Optional<String> getParentName()
+	public Optional<ResourceLocation> getParentLocation()
 	{
-		if(parentName != null)
-			return Optional.of(parentName);
-		
-		return Optional.empty();
+		return Optional.ofNullable(parentLocation);
+	}
+	
+	public Optional<SpaceObject> getParent()
+	{
+		return Optional.ofNullable(parent);
 	}
 	
 	public FadeOutHandler getFadeOutHandler()
@@ -144,6 +150,18 @@ public class SpaceObject implements INBTSerializable<CompoundTag>
 		return 1 / distance;
 	}
 	
+	public void addExistingChild(SpaceObject child)
+	{
+		if(child.parent != null)
+		{
+			SpaceTravel.LOGGER.error(this.toString() + " already has a parent");
+			return;
+		}
+		
+		this.children.add(child);
+		child.parent = this;
+	}
+	
 	public void addChild(SpaceObject child)
 	{
 		if(child.parent != null)
@@ -156,15 +174,24 @@ public class SpaceObject implements INBTSerializable<CompoundTag>
 		child.parent = this;
 		child.coords = child.coords.add(this.coords);
 		
-		child.addCoordsToChildren(this.coords);
+		child.axisRotation = child.axisRotation.add(this.axisRotation);
+		
+		child.addCoordsAndRotationToChildren(this.coords, this.axisRotation);
 	}
 	
-	private void addCoordsToChildren(SpaceCoords coords)
+	public ArrayList<SpaceObject> getChildren()
+	{
+		return children;
+	}
+	
+	protected void addCoordsAndRotationToChildren(SpaceCoords coords, AxisRotation axisRotation)
 	{
 		for(SpaceObject childOfChild : this.children)
 		{
 			childOfChild.coords = childOfChild.coords.add(coords);
-			childOfChild.addCoordsToChildren(coords);
+			childOfChild.axisRotation = childOfChild.axisRotation.add(axisRotation);
+			
+			childOfChild.addCoordsAndRotationToChildren(coords, axisRotation);
 		}
 	}
 	
@@ -184,7 +211,7 @@ public class SpaceObject implements INBTSerializable<CompoundTag>
 	public void writeToBuffer(FriendlyByteBuf buffer)
 	{
 		buffer.writeResourceLocation(objectType);
-		buffer.writeOptional(Optional.ofNullable(parentName), (buf, key) -> buf.writeUtf(key));
+		buffer.writeOptional(Optional.ofNullable(parentLocation), (buf, location) -> buf.writeResourceLocation(location));
 		coords.writeToBuffer(buffer);
 		axisRotation.writeToBuffer(buffer);
 		fadeOutHandler.writeToBuffer(buffer);
@@ -192,7 +219,7 @@ public class SpaceObject implements INBTSerializable<CompoundTag>
 	
 	public static SpaceObject readFromBuffer(FriendlyByteBuf buffer)
 	{
-		return new SpaceObject(buffer.readResourceLocation(), buffer.readOptional((buf) -> buf.readUtf()), Either.left(SpaceCoords.readFromBuffer(buffer)), AxisRotation.readFromBuffer(buffer), FadeOutHandler.readFromBuffer(buffer));
+		return new SpaceObject(buffer.readResourceLocation(), buffer.readOptional((buf) -> buf.readResourceLocation()), Either.left(SpaceCoords.readFromBuffer(buffer)), AxisRotation.readFromBuffer(buffer), FadeOutHandler.readFromBuffer(buffer));
 	}
 	
 	@Override
@@ -216,8 +243,8 @@ public class SpaceObject implements INBTSerializable<CompoundTag>
 		
 		tag.putString(OBJECT_TYPE, objectType.toString());
 		
-		if(parentName != null)
-			tag.putString(PARENT_NAME, parentName);
+		if(parentLocation != null)
+			tag.putString(PARENT_KEY, parentLocation.toString());
 		
 		tag.put(COORDS, coords.serializeNBT());
 		
@@ -246,8 +273,8 @@ public class SpaceObject implements INBTSerializable<CompoundTag>
 		if(tag.contains(ID))
 			this.location = new ResourceLocation(tag.getString(ID));
 		
-		if(tag.contains(PARENT_NAME))
-			this.parentName = tag.getString(PARENT_NAME);
+		if(tag.contains(PARENT_KEY))
+			this.parentLocation = new ResourceLocation(tag.getString(PARENT_KEY));
 		
 		this.coords = new SpaceCoords();
 		coords.deserializeNBT(tag.getCompound(COORDS));
@@ -264,7 +291,7 @@ public class SpaceObject implements INBTSerializable<CompoundTag>
 			SpaceObject spaceObject = SpaceObjectDeserializer.deserialize(childTag.getString(SpaceObject.OBJECT_TYPE), childTag);
 			
 			if(spaceObject != null && spaceObject.isInitialized())
-				addChild(spaceObject);
+				addExistingChild(spaceObject);
 		}
 		
 		this.fadeOutHandler = new FadeOutHandler();

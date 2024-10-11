@@ -8,6 +8,7 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.saveddata.SavedData;
@@ -53,6 +54,8 @@ public class Multiverse extends SavedData
 		registerStarFields(server);
 		registerStars(server);
 		
+		prepareUniverses();
+		
 		this.setDirty();
 	}
 	
@@ -62,6 +65,14 @@ public class Multiverse extends SavedData
 			return Optional.empty();
 		
 		return Optional.of(universes.get(name));
+	}
+	
+	private void prepareUniverses()
+	{
+		for(Map.Entry<String, Universe> universeEntry : universes.entrySet())
+		{
+			universeEntry.getValue().prepareObjects();
+		}
 	}
 
 	//============================================================================================
@@ -77,13 +88,13 @@ public class Multiverse extends SavedData
 		starFieldSet.forEach((starFieldEntry) ->
 		{
 			StarField starField = starFieldEntry.getValue();
-			starField.setResourceLocation(starFieldEntry.getKey().location());
+			ResourceLocation location = starFieldEntry.getKey().location().withPath("star_field/" + starFieldEntry.getKey().location().getPath());
 			
-			System.out.println("Loading Star Field " + starField.toString()); //TODO Remove
+			starField.setResourceLocation(location);
 			
 			Optional<Universe> universe = getUniverse("main");
 			if(universe.isPresent())
-				universe.get().addToRegion(starField, true); //TODO Maybe let datapacks decide?
+				universe.get().addSpaceObject(location, starField);
 		});
 		SpaceTravel.LOGGER.info("Star Fields registered");
 	}
@@ -97,15 +108,15 @@ public class Multiverse extends SavedData
 		starSet.forEach((starEntry) ->
 		{
 			Star star = starEntry.getValue();
-			star.setResourceLocation(starEntry.getKey().location());
+			ResourceLocation location = starEntry.getKey().location().withPath("star/" + starEntry.getKey().location().getPath());
 			
-			System.out.println("Loading Star " + star.toString()); //TODO Remove
+			star.setResourceLocation(location);
 			
 			Optional<Universe> universe = getUniverse("main");
 			if(universe.isPresent())
-				universe.get().addToRegion(star, true); //TODO Maybe let datapacks decide?
+				universe.get().addSpaceObject(location, star);
 		});
-		SpaceTravel.LOGGER.info("Star Fields registered");
+		SpaceTravel.LOGGER.info("Stars registered");
 	}
 
 	//============================================================================================

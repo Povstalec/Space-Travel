@@ -53,8 +53,6 @@ public class StarRenderer extends TexturedObjectRenderer<Star>
 		if(spaceObject.isSupernova())
 			size = spaceObject.supernovaSize(size, ticks, lyDistance);
 		
-		System.out.println("Rendering " + spaceObject.toString() + " size: " + size);
-		
 		renderOnSphere(textureLayer.rgba(), starRGBA, textureLayer.texture(), textureLayer.uv(),
 				level, camera, bufferbuilder, lastMatrix, sphericalCoords,
 				ticks, distance, partialTicks, dayBrightness(viewCenter, size, ticks, level, camera, partialTicks), size, (float) textureLayer.rotation(), textureLayer.shoulBlend());

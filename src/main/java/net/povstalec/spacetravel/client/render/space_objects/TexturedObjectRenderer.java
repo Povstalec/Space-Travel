@@ -117,7 +117,7 @@ public class TexturedObjectRenderer<TO extends TexturedObject> extends SpaceObje
 			for(SpaceObjectRenderer<?> child : clientChildren)
 			{
 				// Render child in front of the parent
-				if(child.spaceObject.lastDistance >= spaceObject.lastDistance)
+				if(child.spaceObject.lastDistance < spaceObject.lastDistance)
 					child.render(viewCenter, level, partialTicks, stack, camera, projectionMatrix, isFoggy, setupFog, bufferbuilder, positionVector, spaceObject.getAxisRotation());
 			}
 		}
@@ -180,6 +180,13 @@ public class TexturedObjectRenderer<TO extends TexturedObject> extends SpaceObje
 		public Generic(TexturedObject spaceObject)
 		{
 			super(spaceObject);
+		}
+		
+		public void render(RenderCenter viewCenter, ClientLevel level, float partialTicks, PoseStack stack, Camera camera,
+						   Matrix4f projectionMatrix, boolean isFoggy, Runnable setupFog, BufferBuilder bufferbuilder,
+						   Vector3f parentVector, AxisRotation parentRotation)
+		{
+		
 		}
 	}
 }

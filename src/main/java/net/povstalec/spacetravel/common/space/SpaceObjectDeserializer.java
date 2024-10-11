@@ -4,10 +4,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.povstalec.spacetravel.common.events.custom.SpaceObjectDeserializationEvent;
 import net.povstalec.spacetravel.common.events.custom.SpaceTravelEvents;
-import net.povstalec.spacetravel.common.space.objects.OrbitingObject;
-import net.povstalec.spacetravel.common.space.objects.SpaceObject;
-import net.povstalec.spacetravel.common.space.objects.StarField;
-import net.povstalec.spacetravel.common.space.objects.TexturedObject;
+import net.povstalec.spacetravel.common.space.objects.*;
 import org.jetbrains.annotations.Nullable;
 
 public class SpaceObjectDeserializer
@@ -18,6 +15,8 @@ public class SpaceObjectDeserializer
 		// Deserializes object based on its type specified in the object_type
 		if(objectType.equals(OrbitingObject.ORBITING_OBJECT_LOCATION))
 			return deserializeOrbitingObject(tag);
+		else if(objectType.equals(Star.STAR_LOCATION))
+			return deserializeStar(tag);
 		if(objectType.equals(TexturedObject.TEXTURED_OBJECT_LOCATION))
 			return deserializeSpaceObject(tag);
 		else if(objectType.equals(StarField.STAR_FIELD_LOCATION))
@@ -63,5 +62,13 @@ public class SpaceObjectDeserializer
 		starField.deserializeNBT(tag);
     	
     	return starField;
+	}
+	
+	private static Star deserializeStar(CompoundTag tag)
+	{
+		Star star = new Star();
+		star.deserializeNBT(tag);
+		
+		return star;
 	}
 }

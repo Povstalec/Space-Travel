@@ -42,7 +42,7 @@ public abstract class SpaceObjectRenderer<RenderedSpaceObject extends SpaceObjec
 		this.spaceObject = spaceObject;
 	}
 	
-	public void addChild(SpaceObjectRenderer<?> child)
+	public void addExistingChild(SpaceObjectRenderer<?> child)
 	{
 		if(child.parent != null)
 		{
@@ -52,18 +52,6 @@ public abstract class SpaceObjectRenderer<RenderedSpaceObject extends SpaceObjec
 		
 		this.clientChildren.add(child);
 		child.parent = this;
-		child.spaceObject.addSpaceCoords(this.spaceObject.getSpaceCoords());
-		
-		child.addCoordsToClientChildren(this.spaceObject.getSpaceCoords());
-	}
-	
-	public void addCoordsToClientChildren(SpaceCoords coords)
-	{
-		for(SpaceObjectRenderer<?> childOfChild : this.clientChildren)
-		{
-			childOfChild.spaceObject.addSpaceCoords(coords);
-			childOfChild.addCoordsToClientChildren(coords);
-		}
 	}
 	
 	//============================================================================================

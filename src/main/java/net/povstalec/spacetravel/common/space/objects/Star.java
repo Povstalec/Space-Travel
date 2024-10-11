@@ -17,13 +17,12 @@ public class Star extends StarLike
 {
 	public static final ResourceLocation STAR_LOCATION = new ResourceLocation(SpaceTravel.MODID, "star");
 	public static final ResourceKey<Registry<Star>> REGISTRY_KEY = ResourceKey.createRegistryKey(STAR_LOCATION);
-	public static final Codec<ResourceKey<Star>> RESOURCE_KEY_CODEC = ResourceKey.codec(REGISTRY_KEY);
 	
 	@Nullable
 	private SupernovaInfo supernovaInfo;
 	
 	public static final Codec<Star> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-			Codec.STRING.optionalFieldOf("parent").forGetter(Star::getParentName),
+			ResourceLocation.CODEC.optionalFieldOf("parent").forGetter(Star::getParentLocation),
 			Codec.either(SpaceCoords.CODEC, StellarCoordinates.Equatorial.CODEC).fieldOf("coords").forGetter(object -> Either.left(object.getSpaceCoords())),
 			AxisRotation.CODEC.fieldOf("axis_rotation").forGetter(Star::getAxisRotation),
 			
@@ -42,11 +41,11 @@ public class Star extends StarLike
 	
 	public Star() {};
 	
-	public Star(Optional<String> parentName, Either<SpaceCoords, StellarCoordinates.Equatorial> coords, AxisRotation axisRotation,
+	public Star(Optional<ResourceLocation> parentLocation, Either<SpaceCoords, StellarCoordinates.Equatorial> coords, AxisRotation axisRotation,
 				FadeOutHandler fadeOutHandler, List<TextureLayer> textureLayers, Optional<OrbitInfo> orbitInfo,
 				float minStarSize, float maxStarAlpha, float minStarAlpha, Optional<SupernovaInfo> supernovaInfo)
 	{
-		super(STAR_LOCATION, parentName, coords, axisRotation, fadeOutHandler, textureLayers, orbitInfo, minStarSize, maxStarAlpha, minStarAlpha);
+		super(STAR_LOCATION, parentLocation, coords, axisRotation, fadeOutHandler, textureLayers, orbitInfo, minStarSize, maxStarAlpha, minStarAlpha);
 		
 		if(supernovaInfo.isPresent())
 			this.supernovaInfo = supernovaInfo.get();
@@ -91,7 +90,6 @@ public class Star extends StarLike
 	{
 		Color.FloatRGBA starRGBA = super.starRGBA(lyDistance);
 		
-		System.out.println("Supernova alpha?");
 		if(!isSupernova() || supernovaInfo.supernovaEnded(ticks) || !supernovaInfo.supernovaStarted(ticks))
 			return starRGBA;
 		
