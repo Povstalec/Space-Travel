@@ -3,7 +3,11 @@ package net.povstalec.spacetravel;
 import java.util.Map;
 import java.util.Optional;
 
+import net.minecraftforge.fml.ModLoadingContext;
+import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.registries.DataPackRegistryEvent;
+import net.povstalec.spacetravel.common.config.SpaceRegionCommonConfig;
+import net.povstalec.spacetravel.common.config.SpaceTravelConfig;
 import net.povstalec.spacetravel.common.space.objects.Star;
 import net.povstalec.spacetravel.common.space.objects.StarField;
 import org.slf4j.Logger;
@@ -54,6 +58,9 @@ public class SpaceTravel
 		
 		modEventBus.addListener(this::commonSetup);
 		
+		ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, SpaceTravelConfig.CLIENT_CONFIG, MODID + "-client.toml");
+		ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, SpaceTravelConfig.COMMON_CONFIG, MODID + "-common.toml");
+		
         WorldGenInit.register(modEventBus);
 		
 		MinecraftForge.EVENT_BUS.register(this);
@@ -93,7 +100,7 @@ public class SpaceTravel
 				{
 					PacketHandlerInit.sendToPlayer(player, new ClientBoundRenderCenterUpdatePacket(new Spaceship())); //TODO Get coords from somewhere
 					PacketHandlerInit.sendToPlayer(player, new ClientBoundSpaceRegionClearPacket());
-					for(Map.Entry<SpaceRegion.Position, SpaceRegion> spaceRegionEntry : universe.get().getRegionsAt(new SpaceRegion.Position(cap.spaceship.getSpaceCoords()), 2).entrySet())
+					for(Map.Entry<SpaceRegion.Position, SpaceRegion> spaceRegionEntry : universe.get().getRegionsAt(new SpaceRegion.Position(cap.spaceship.getSpaceCoords()), SpaceRegion.spaceRegionLoadDistance()).entrySet())
 					{
 						PacketHandlerInit.sendToPlayer(player, new ClientBoundSpaceRegionLoadPacket(spaceRegionEntry.getValue()));
 					}

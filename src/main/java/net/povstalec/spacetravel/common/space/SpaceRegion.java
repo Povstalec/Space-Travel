@@ -10,6 +10,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.RandomSource;
 import net.minecraftforge.common.util.INBTSerializable;
 import net.povstalec.spacetravel.SpaceTravel;
+import net.povstalec.spacetravel.common.config.SpaceRegionCommonConfig;
 import net.povstalec.spacetravel.common.space.objects.SpaceObject;
 import net.povstalec.spacetravel.common.space.objects.StarField;
 import net.povstalec.spacetravel.common.util.AxisRotation;
@@ -24,7 +25,9 @@ public final class SpaceRegion implements INBTSerializable<CompoundTag>
 	public static final String Z = "z";
 
 	public static final String CHILDREN = "children";
+	
 	public static final String GENERATED = "generated";
+	public static final String SAVE = "save";
 	
 	public static final long LY_PER_REGION = 1500000;
 	public static final long LY_PER_REGION_HALF = LY_PER_REGION / 2;
@@ -32,7 +35,9 @@ public final class SpaceRegion implements INBTSerializable<CompoundTag>
 	private Position pos;
 	
 	protected ArrayList<SpaceObject> children = new ArrayList<SpaceObject>();
+	
 	private boolean isGenerated = false;
+	private boolean shouldSave = false;
 	
 	public SpaceRegion(Position pos)
 	{
@@ -66,11 +71,24 @@ public final class SpaceRegion implements INBTSerializable<CompoundTag>
 			this.children.add(child);
 			
 			if(setGenerated)
+			{
 				isGenerated = true;
+				shouldSave = true;
+			}
 		}
 		else
 			SpaceTravel.LOGGER.error("Region " + this.toString() + " already contains " + child.toString());
 		//TODO Handle this somewhere higher, ideally do something similar to the Stargate Network, which needs to be reloaded
+	}
+	
+	public boolean isGenerated()
+	{
+		return isGenerated;
+	}
+	
+	public boolean shouldSave()
+	{
+		return shouldSave;
 	}
 	
 	public static SpaceRegion generateRegion(Position pos, long seed)
@@ -93,6 +111,11 @@ public final class SpaceRegion implements INBTSerializable<CompoundTag>
 		return spaceRegion;
 	}
 	
+	public static int spaceRegionLoadDistance()
+	{
+		return SpaceRegionCommonConfig.space_region_load_distance.get();
+	}
+	
 	//============================================================================================
 	//*************************************Saving and Loading*************************************
 	//============================================================================================
@@ -109,6 +132,7 @@ public final class SpaceRegion implements INBTSerializable<CompoundTag>
 		tag.put(CHILDREN, getChildrenTag());
 		
 		tag.putBoolean(GENERATED, isGenerated);
+		tag.putBoolean(SAVE, shouldSave);
 		
 		return tag;
 	}
@@ -132,6 +156,7 @@ public final class SpaceRegion implements INBTSerializable<CompoundTag>
 		pos = new Position(tag.getLong(X), tag.getLong(Y), tag.getLong(Z));
 		
 		isGenerated = tag.getBoolean(GENERATED);
+		shouldSave = tag.getBoolean(SAVE);
 		
 		CompoundTag childrenTag = tag.getCompound(CHILDREN);
 		for(int i = 0; i < childrenTag.size(); i++)

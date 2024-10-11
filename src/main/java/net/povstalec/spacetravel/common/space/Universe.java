@@ -121,7 +121,8 @@ public class Universe implements INBTSerializable<CompoundTag>
 		
 		for(Map.Entry<SpaceRegion.Position, SpaceRegion> spaceRegionEntry : spaceRegions.entrySet())
 		{
-			spaceRegionsTag.put(spaceRegionEntry.getKey().toString(), spaceRegionEntry.getValue().serializeNBT());
+			if(spaceRegionEntry.getValue().shouldSave())
+				spaceRegionsTag.put(spaceRegionEntry.getKey().toString(), spaceRegionEntry.getValue().serializeNBT());
 		}
 		
 		tag.put(SPACE_REGIONS, spaceRegionsTag);

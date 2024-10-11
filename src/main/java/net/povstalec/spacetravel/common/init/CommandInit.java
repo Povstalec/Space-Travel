@@ -20,6 +20,7 @@ import net.minecraftforge.event.RegisterCommandsEvent;
 import net.povstalec.spacetravel.SpaceTravel;
 import net.povstalec.spacetravel.common.capabilities.SpaceshipCapability;
 import net.povstalec.spacetravel.common.capabilities.SpaceshipCapabilityProvider;
+import net.povstalec.spacetravel.common.config.SpaceRegionCommonConfig;
 import net.povstalec.spacetravel.common.util.DimensionUtil;
 
 public class CommandInit
