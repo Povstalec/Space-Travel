@@ -14,6 +14,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.level.storage.DimensionDataStorage;
 import net.povstalec.spacetravel.SpaceTravel;
+import net.povstalec.spacetravel.common.space.SpaceRegion;
 import net.povstalec.spacetravel.common.space.Universe;
 import net.povstalec.spacetravel.common.space.objects.Star;
 import net.povstalec.spacetravel.common.space.objects.StarField;
@@ -43,13 +44,7 @@ public class Multiverse extends SavedData
 	
 	public void setupUniverse()
 	{
-		if(universes.containsKey("main"))
-			SpaceTravel.LOGGER.error("Already contains main");
-		else
-		{
-			universes.put("main", new Universe());
-			SpaceTravel.LOGGER.info("Created new main");
-		}
+		prepareMainUniverse();
 		
 		registerStarFields(server);
 		registerStars(server);
@@ -57,6 +52,26 @@ public class Multiverse extends SavedData
 		prepareUniverses();
 		
 		this.setDirty();
+	}
+	
+	private void prepareMainUniverse()
+	{
+		if(universes.containsKey("main"))
+			SpaceTravel.LOGGER.error("Already contains main");
+		else
+		{
+			Universe universe = new Universe();
+			
+			Map<SpaceRegion.Position, SpaceRegion> regions = universe.getRegionsAt(new SpaceRegion.Position(0, 0, 0), 3, false);
+			
+			for(Map.Entry<SpaceRegion.Position, SpaceRegion> region : regions.entrySet())
+			{
+				region.getValue().markToSave();
+			}
+			
+			universes.put("main", universe);
+			SpaceTravel.LOGGER.info("Created new main");
+		}
 	}
 	
 	public Optional<Universe> getUniverse(String name)

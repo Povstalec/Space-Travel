@@ -100,7 +100,7 @@ public class SpaceTravel
 				{
 					PacketHandlerInit.sendToPlayer(player, new ClientBoundRenderCenterUpdatePacket(new Spaceship())); //TODO Get coords from somewhere
 					PacketHandlerInit.sendToPlayer(player, new ClientBoundSpaceRegionClearPacket());
-					for(Map.Entry<SpaceRegion.Position, SpaceRegion> spaceRegionEntry : universe.get().getRegionsAt(new SpaceRegion.Position(cap.spaceship.getSpaceCoords()), SpaceRegion.spaceRegionLoadDistance()).entrySet())
+					for(Map.Entry<SpaceRegion.Position, SpaceRegion> spaceRegionEntry : universe.get().getRegionsAt(new SpaceRegion.Position(cap.spaceship.getSpaceCoords()), SpaceRegion.SPACE_REGION_LOAD_DISTANCE, true).entrySet())
 					{
 						PacketHandlerInit.sendToPlayer(player, new ClientBoundSpaceRegionLoadPacket(spaceRegionEntry.getValue()));
 					}

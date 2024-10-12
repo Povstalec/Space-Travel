@@ -160,14 +160,8 @@ public class StarBuffer implements AutoCloseable
 		return rendersystem$autostorageindexbuffer != null ? rendersystem$autostorageindexbuffer.type() : this.indexType;
 	}
 	
-	public void drawWithShader(Matrix4f modelViewMatrix, Matrix4f projectionMatrix, SpaceCoords relativeSpacePos, SpaceCoords oldRelativeSpacePos, StarShaderInstance shaderInstance, float partialTicks)
+	public void drawWithShader(Matrix4f modelViewMatrix, Matrix4f projectionMatrix, Vector3f relativeVectorLy, Vector3f relativeVectorKm, StarShaderInstance shaderInstance)
 	{
-		Vector3f relativeVectorLy = new Vector3f(
-				Mth.lerp(partialTicks, (float) oldRelativeSpacePos.x().ly(), (float) relativeSpacePos.x().ly()),
-				Mth.lerp(partialTicks, (float) oldRelativeSpacePos.y().ly(), (float) relativeSpacePos.y().ly()),
-				Mth.lerp(partialTicks, (float) oldRelativeSpacePos.z().ly(), (float) relativeSpacePos.z().ly()));
-		Vector3f relativeVectorKm = new Vector3f((float) relativeSpacePos.x().km(), (float) relativeSpacePos.y().km(), (float) relativeSpacePos.z().km());
-		
 		if(!RenderSystem.isOnRenderThread())
 		{
 			RenderSystem.recordRenderCall(() ->

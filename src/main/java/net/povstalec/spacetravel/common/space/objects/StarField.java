@@ -174,23 +174,23 @@ public class StarField extends SpaceObject
 	
 	public static StarField randomStarField(RandomSource randomsource, long seed, long xPos, long yPos, long zPos)
 	{
-		long randomX = randomsource.nextLong() % SpaceRegion.LY_PER_REGION - SpaceRegion.LY_PER_REGION_HALF;
-		long randomY = randomsource.nextLong() % SpaceRegion.LY_PER_REGION - SpaceRegion.LY_PER_REGION_HALF;
-		long randomZ = randomsource.nextLong() % SpaceRegion.LY_PER_REGION - SpaceRegion.LY_PER_REGION_HALF;
+		long randomX = Math.abs(randomsource.nextLong() % SpaceRegion.LY_PER_REGION) - SpaceRegion.LY_PER_REGION_HALF;
+		long randomY = Math.abs(randomsource.nextLong() % SpaceRegion.LY_PER_REGION) - SpaceRegion.LY_PER_REGION_HALF;
+		long randomZ = Math.abs(randomsource.nextLong() % SpaceRegion.LY_PER_REGION) - SpaceRegion.LY_PER_REGION_HALF;
 		
 		long x = randomX + xPos;
 		long y = randomY + yPos;
 		long z = randomZ + zPos;
 		
-		double xRot = randomsource.nextDouble() * 360;
-		double yRot = randomsource.nextDouble() * 360;
-		double zRot = randomsource.nextDouble() * 360;
+		double xRot = Math.abs(randomsource.nextDouble()) * 360;
+		double yRot = Math.abs(randomsource.nextDouble()) * 360;
+		double zRot = Math.abs(randomsource.nextDouble()) * 360;
 		
 		AxisRotation axisRotation = new AxisRotation(true, xRot, yRot, zRot);
 		
-		double xStretch = 0.25D + randomsource.nextDouble() * 0.75F;
-		double yStretch = 0.25D + randomsource.nextDouble() * 0.75F;
-		double zStretch = 0.25D + randomsource.nextDouble() * 0.75F;
+		double xStretch = 0.25D + Math.abs(randomsource.nextDouble()) * 0.75F;
+		double yStretch = 0.25D + Math.abs( randomsource.nextDouble()) * 0.75F;
+		double zStretch = 0.25D + Math.abs(randomsource.nextDouble()) * 0.75F;
 		
 		int numberOfArms = Math.abs(randomsource.nextInt()) % 13 - 6;
 		
@@ -201,7 +201,7 @@ public class StarField extends SpaceObject
 		if(numberOfArms > 0)
 			stars = stars / numberOfArms;
 		
-		int diameter = stars * 60; // 90000
+		int diameter = stars * 60;
 		
 		double degrees = 360D / numberOfArms;
 		
@@ -349,7 +349,7 @@ public class StarField extends SpaceObject
 		{
 			int stars = starFieldStars + Math.abs(randomsource.nextInt()) % (starFieldStars / 2);
 			double armLength = 1.5D + randomsource.nextDouble();
-			double armThickness = 1.75D + randomsource.nextDouble();
+			double armThickness = 1.75D + randomsource.nextDouble() * 2;
 			boolean clumpStarsInCenter = true;
 			
 			SpiralArm arm = new SpiralArm(stars, armRotation, armLength, armThickness, clumpStarsInCenter);

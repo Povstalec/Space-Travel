@@ -7,11 +7,13 @@ import net.minecraft.client.Camera;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.FogRenderer;
 import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.povstalec.spacetravel.client.RenderCenter;
 import net.povstalec.spacetravel.client.render.StarBuffer;
 import net.povstalec.spacetravel.client.render.shaders.SpaceTravelShaders;
 import net.povstalec.spacetravel.client.render.shaders.SpaceTravelVertexFormat;
+import net.povstalec.spacetravel.common.space.SpaceRegion;
 import net.povstalec.spacetravel.common.space.objects.StarField;
 import net.povstalec.spacetravel.common.util.*;
 import org.joml.Matrix4f;
@@ -27,6 +29,9 @@ import javax.annotation.Nullable;
 public class StarFieldRenderer<SF extends StarField> extends SpaceObjectRenderer<StarField>
 {
 	private static final Vector3f NULL_VECTOR = new Vector3f();
+	private static final float MAX_RENDER_DISTANCE = new Vector3f(SpaceRegion.LY_PER_REGION * (SpaceRegion.SPACE_REGION_LOAD_DISTANCE - 1), 0, 0).lengthSquared();
+	private static final float FADE_START_DISTANCE = new Vector3f(SpaceRegion.LY_PER_REGION * (SpaceRegion.SPACE_REGION_LOAD_DISTANCE - 2), 0, 0).lengthSquared();
+	private static final float FADE = MAX_RENDER_DISTANCE - FADE_START_DISTANCE;
 	
 	@Nullable
 	protected StarBuffer starBuffer;
@@ -155,23 +160,47 @@ public class StarFieldRenderer<SF extends StarField> extends SpaceObjectRenderer
 		
 		if(starBrightness > 0.0F)
 		{
-			stack.pushPose();
+			Vector3f relativeVectorLy = new Vector3f(
+					Mth.lerp(partialTicks, (float) oldDifference.x().ly(), (float) difference.x().ly()),
+					Mth.lerp(partialTicks, (float) oldDifference.y().ly(), (float) difference.y().ly()),
+					Mth.lerp(partialTicks, (float) oldDifference.z().ly(), (float) difference.z().ly()));
+			Vector3f relativeVectorKm = new Vector3f((float) difference.x().km(), (float) difference.y().km(), (float) difference.z().km());
 			
-			//stack.translate(0, 0, 0);
-			RenderSystem.setShaderColor(1, 1, 1, starBrightness);
-			//RenderSystem.setShaderTexture(0, new ResourceLocation("textures/environment/sun.png"));
-			FogRenderer.setupNoFog();
+			float alpha = 1;
 			
-			Quaternionf q = SpaceCoords.getQuaternionf(level, viewCenter, partialTicks);
+			float lyDistance = relativeVectorLy.lengthSquared();
 			
-			stack.mulPose(q);
-			this.starBuffer.bind();
-			this.starBuffer.drawWithShader(stack.last().pose(), projectionMatrix, difference, oldDifference, SpaceTravelShaders.starShader(), partialTicks);
-			//this.starBuffer.drawWithShader(stack.last().pose(), projectionMatrix, GameRenderer.getPositionColorTexShader());
-			VertexBuffer.unbind();
+			if(lyDistance > MAX_RENDER_DISTANCE)
+				alpha = 0;
+			else if(lyDistance > FADE_START_DISTANCE)
+			{
+				float value = (MAX_RENDER_DISTANCE - lyDistance);
+				alpha = value / FADE;
+				
+				if(alpha > 1)
+					alpha = 1;
+			}
 			
-			setupFog.run();
-			stack.popPose();
+			if(alpha > 0)
+			{
+				stack.pushPose();
+				
+				//stack.translate(0, 0, 0);
+				RenderSystem.setShaderColor(1, 1, 1, starBrightness * alpha);
+				//RenderSystem.setShaderTexture(0, new ResourceLocation("textures/environment/sun.png"));
+				FogRenderer.setupNoFog();
+				
+				Quaternionf q = SpaceCoords.getQuaternionf(level, viewCenter, partialTicks);
+				
+				stack.mulPose(q);
+				this.starBuffer.bind();
+				this.starBuffer.drawWithShader(stack.last().pose(), projectionMatrix, relativeVectorLy, relativeVectorKm, SpaceTravelShaders.starShader());
+				//this.starBuffer.drawWithShader(stack.last().pose(), projectionMatrix, GameRenderer.getPositionColorTexShader());
+				VertexBuffer.unbind();
+				
+				setupFog.run();
+				stack.popPose();
+			}
 		}
 		
 		for(SpaceObjectRenderer<?> child : clientChildren)

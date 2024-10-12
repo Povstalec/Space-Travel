@@ -65,23 +65,26 @@ public class Universe implements INBTSerializable<CompoundTag>
 	
 	/**
 	 * Method that fetches space regions in a certain radius
-	 * @param regionPos
+	 * @param regionPos Position of the center
+	 * @param radius Radius around which to pick regions
+	 * @param generate Whether or not new regions should attempt generating space objects
 	 * @return Returns a map of space region position + space region of regions in some range around coords
 	 */
-	public Map<SpaceRegion.Position, SpaceRegion> getRegionsAt(SpaceRegion.Position regionPos, int radius)
+	public Map<SpaceRegion.Position, SpaceRegion> getRegionsAt(SpaceRegion.Position regionPos, int radius, boolean generate)
 	{
-		return getRegionsAt(regionPos.x(), regionPos.y(), regionPos.z(), radius);
+		return getRegionsAt(regionPos.x(), regionPos.y(), regionPos.z(), radius, generate);
 	}
 	
 	/**
 	 * Method that fetches space regions in a certain radius
-	 * @param xCenter
-	 * @param yCenter
-	 * @param zCenter
-	 * @param radius
+	 * @param xCenter X-position of the center
+	 * @param yCenter Y-position of the center
+	 * @param zCenter Z-position of the center
+	 * @param radius Radius around which to pick regions
+	 * @param generate Whether or not new regions should attempt generating space objects
 	 * @return Returns a map of space region position + space region of regions in some range around coords
 	 */
-	public Map<SpaceRegion.Position, SpaceRegion> getRegionsAt(long xCenter, long yCenter, long zCenter, int radius)
+	public Map<SpaceRegion.Position, SpaceRegion> getRegionsAt(long xCenter, long yCenter, long zCenter, int radius, boolean generate)
 	{
 		HashMap<SpaceRegion.Position, SpaceRegion> spaceRegions = new HashMap<SpaceRegion.Position, SpaceRegion>();
 		
@@ -91,7 +94,7 @@ public class Universe implements INBTSerializable<CompoundTag>
 			{
 				for(long z = -radius + zCenter; z <= radius + zCenter; z++)
 				{
-					SpaceRegion spaceRegion = getRegionAt(x, y, z, true);
+					SpaceRegion spaceRegion = getRegionAt(x, y, z, generate);
 					spaceRegions.put(spaceRegion.getRegionPos(), spaceRegion);
 				}
 			}
@@ -103,19 +106,21 @@ public class Universe implements INBTSerializable<CompoundTag>
 	/**
 	 * Method for adding an object to the Space Region
 	 * @param spaceObject Space Object that should be added
-	 * @return Returns true if
 	 */
-	public void addToRegion(SpaceObject spaceObject, boolean setGenerated)
+	public void addToRegion(SpaceObject spaceObject)
 	{
 		SpaceRegion.Position pos = new SpaceRegion.Position(spaceObject.getSpaceCoords());
 		
-		getRegionAt(pos, false).addChild(spaceObject, setGenerated);
+		getRegionAt(pos, false).addChild(spaceObject);
 	}
 	
 	public void addSpaceObject(ResourceLocation location, SpaceObject spaceObject)
 	{
 		if(!spaceObjects.containsKey(location))
+		{
 			spaceObjects.put(location, spaceObject);
+			SpaceTravel.LOGGER.debug("Added " + spaceObject.toString() + " to Universe " + this.toString());
+		}
 		else
 			SpaceTravel.LOGGER.error("Universe " + this.toString() + " already contains " + spaceObject.toString());
 	}
@@ -145,7 +150,7 @@ public class Universe implements INBTSerializable<CompoundTag>
 					SpaceTravel.LOGGER.error("Failed to find parent for " + spaceObject.toString());
 			}
 			else
-				addToRegion(spaceObjectEntry.getValue(), true); //TODO Maybe let datapacks decide?
+				addToRegion(spaceObjectEntry.getValue());
 		}
 		spaceObjects.clear();
 	}

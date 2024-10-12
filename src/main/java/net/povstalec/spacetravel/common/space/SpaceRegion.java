@@ -20,23 +20,23 @@ import net.povstalec.spacetravel.common.util.TextureLayer;
 
 public final class SpaceRegion implements INBTSerializable<CompoundTag>
 {
+	public static final int SPACE_REGION_LOAD_DISTANCE = SpaceRegionCommonConfig.space_region_load_distance.get();
+	
 	public static final String X = "x";
 	public static final String Y = "y";
 	public static final String Z = "z";
 
 	public static final String CHILDREN = "children";
 	
-	public static final String GENERATED = "generated";
 	public static final String SAVE = "save";
 	
-	public static final long LY_PER_REGION = 1500000;
+	public static final long LY_PER_REGION = 2000000;
 	public static final long LY_PER_REGION_HALF = LY_PER_REGION / 2;
 	
 	private Position pos;
 	
 	protected ArrayList<SpaceObject> children = new ArrayList<SpaceObject>();
 	
-	private boolean isGenerated = false;
 	private boolean shouldSave = false;
 	
 	public SpaceRegion(Position pos)
@@ -64,26 +64,22 @@ public final class SpaceRegion implements INBTSerializable<CompoundTag>
 		return children;
 	}
 	
-	public void addChild(SpaceObject child, boolean setGenerated)
+	public void addChild(SpaceObject child)
 	{
 		if(!this.children.contains(child))
 		{
 			this.children.add(child);
 			
-			if(setGenerated)
-			{
-				isGenerated = true;
-				shouldSave = true;
-			}
+			markToSave();
 		}
 		else
 			SpaceTravel.LOGGER.error("Region " + this.toString() + " already contains " + child.toString());
 		//TODO Handle this somewhere higher, ideally do something similar to the Stargate Network, which needs to be reloaded
 	}
 	
-	public boolean isGenerated()
+	public void markToSave()
 	{
-		return isGenerated;
+		this.shouldSave = true;
 	}
 	
 	public boolean shouldSave()
@@ -105,15 +101,10 @@ public final class SpaceRegion implements INBTSerializable<CompoundTag>
 		if(chance >= 80)
 		{
 			StarField starField = StarField.randomStarField(randomsource, usedSeed, pos.lyX(), pos.lyY(), pos.lyZ());
-			spaceRegion.addChild(starField, false);
+			spaceRegion.addChild(starField);
 		}
 		
 		return spaceRegion;
-	}
-	
-	public static int spaceRegionLoadDistance()
-	{
-		return SpaceRegionCommonConfig.space_region_load_distance.get();
 	}
 	
 	//============================================================================================
@@ -131,7 +122,6 @@ public final class SpaceRegion implements INBTSerializable<CompoundTag>
 		
 		tag.put(CHILDREN, getChildrenTag());
 		
-		tag.putBoolean(GENERATED, isGenerated);
 		tag.putBoolean(SAVE, shouldSave);
 		
 		return tag;
@@ -155,7 +145,6 @@ public final class SpaceRegion implements INBTSerializable<CompoundTag>
 	{
 		pos = new Position(tag.getLong(X), tag.getLong(Y), tag.getLong(Z));
 		
-		isGenerated = tag.getBoolean(GENERATED);
 		shouldSave = tag.getBoolean(SAVE);
 		
 		CompoundTag childrenTag = tag.getCompound(CHILDREN);
@@ -166,7 +155,7 @@ public final class SpaceRegion implements INBTSerializable<CompoundTag>
 			SpaceObject spaceObject = SpaceObjectDeserializer.deserialize(childTag.getString(SpaceObject.OBJECT_TYPE), childTag);
 			
 			if(spaceObject != null && spaceObject.isInitialized())
-				addChild(spaceObject, isGenerated);
+				addChild(spaceObject);
 		}
 	}
 	
