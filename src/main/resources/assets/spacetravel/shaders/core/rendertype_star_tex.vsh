@@ -3,6 +3,7 @@
 in vec3 StarPos;
 in vec4 Color;
 in vec3 HeightWidthSize;
+in vec2 UV0;
 
 uniform mat4 ModelViewMat;
 uniform mat4 ProjMat;
@@ -12,6 +13,7 @@ uniform vec3 RelativeSpaceKm;
 float DEFAULT_DISTANCE = 100;
 
 out vec4 vertexColor;
+out vec2 texCoord0;
 
 float clampStar(float starSize, float distance)
 {
@@ -19,8 +21,8 @@ float clampStar(float starSize, float distance)
 	
 	starSize -= starSize * distance / 1000000.0;
 	
-	if(starSize < 0.04)
-		return 0.04;
+	if(starSize < 0.08)
+		return 0.08;
 	
 	return starSize;// > maxStarSize ? maxStarSize : starSize;
 }
@@ -35,49 +37,17 @@ void main() {
 	// COLOR START - Adjusts the brightness (alpha) of the star based on its distance
 	
 	float alpha = Color.w;
-	float minAlpha = alpha * 0.1;
+	float minAlpha = alpha * 0.1; // Previously used (alpha - 0.66) * 2 / 3
 	
 	// Stars appear dimmer the further away they are
 	alpha -= distance / 100000;
 	
 	if(alpha < minAlpha)
-	{
-		alpha = minAlpha;
-		
-		/*if(distance > 3000000)
-		{
-			if(minAlpha < 0.08)
-			{
-				if(distance < 4000000)
-				{
-					alpha = ( minAlpha * (4000000 - distance) ) / 1000000;
-					
-					if(alpha < 0)
-						alpha = 0;
-				}
-				else
-					alpha = 0;
-			}
-			else
-			{
-				float lowerAlpha = minAlpha * 0.5; // TODO This should ideally be a value provided for the vertex format
-				
-				if(distance < 4000000)
-				{
-					alpha = ( minAlpha * (4000000 - distance) ) / 1000000;
-					
-					if(alpha < lowerAlpha)
-						alpha = lowerAlpha;
-				}
-				else
-					alpha = lowerAlpha;
-			}
-		}*/
-	}
+			alpha = minAlpha;
 	
 	// COLOR END
 	
-	float starSize = clampStar(HeightWidthSize.z, distance);
+	float starSize = clampStar(HeightWidthSize.z * 4, distance);
 	
 	distance = 1.0 / distance;
 	x *= distance;
@@ -140,4 +110,5 @@ void main() {
 	gl_Position = ProjMat * ModelViewMat * vec4(pos, 1.0);
 	
 	vertexColor = vec4(Color.x, Color.y, Color.z, alpha);
+    texCoord0 = UV0;
 }

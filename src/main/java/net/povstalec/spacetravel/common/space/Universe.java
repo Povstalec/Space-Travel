@@ -24,16 +24,26 @@ public class Universe implements INBTSerializable<CompoundTag>
 	public static final Codec<ResourceKey<Universe>> RESOURCE_KEY_CODEC = ResourceKey.codec(REGISTRY_KEY);
 	
 	public static final String SPACE_REGIONS = "space_regions";
+	public static final String SEED = "seed";
 	
 	private final HashMap<SpaceRegion.Position, SpaceRegion> spaceRegions;
 	
 	private final HashMap<ResourceLocation, SpaceObject> spaceObjects; // Map of space objects that need to be added to this Universe
+	
+	private long seed;
 	
 	public Universe()
 	{
 		spaceRegions = new HashMap<SpaceRegion.Position, SpaceRegion>();
 		
 		spaceObjects = new HashMap<ResourceLocation, SpaceObject>();
+	}
+	
+	public Universe(long seed)
+	{
+		this();
+		
+		this.seed = seed;
 	}
 	
 	/**
@@ -60,7 +70,7 @@ public class Universe implements INBTSerializable<CompoundTag>
 		if(!generate)
 			return spaceRegions.computeIfAbsent(pos, position -> new SpaceRegion(pos));
 		else
-			return spaceRegions.computeIfAbsent(pos, position -> SpaceRegion.generateRegion(position, 10428)); // TODO Handle seeds
+			return spaceRegions.computeIfAbsent(pos, position -> SpaceRegion.generateRegion(position, seed)); // TODO Handle seeds
 	}
 	
 	/**
@@ -173,6 +183,7 @@ public class Universe implements INBTSerializable<CompoundTag>
 		}
 		
 		tag.put(SPACE_REGIONS, spaceRegionsTag);
+		tag.putLong(SEED, seed);
 		
 		return tag;
 	}
@@ -188,6 +199,8 @@ public class Universe implements INBTSerializable<CompoundTag>
 			// Take Space Region's deserialized pos and put it in the map
 			spaceRegions.put(spaceRegion.getRegionPos(), spaceRegion);
 		}
+		
+		seed = tag.getLong(SEED);
 	}
 	
 }

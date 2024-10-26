@@ -15,6 +15,7 @@ public class SpaceTravelShaders
 {
 	@Nullable
     private static StarShaderInstance rendertypeStarShater;
+	private static StarShaderInstance rendertypeStarTexShader;
 	
 	@Mod.EventBusSubscriber(modid = SpaceTravel.MODID, value = Dist.CLIENT, bus= Mod.EventBusSubscriber.Bus.MOD)
     public static class ShaderInit
@@ -24,14 +25,25 @@ public class SpaceTravelShaders
         {
             event.registerShader(new StarShaderInstance(event.getResourceProvider(), new ResourceLocation(SpaceTravel.MODID, "rendertype_star"), SpaceTravelVertexFormat.STAR_POS_COLOR_LY),
             		(shaderInstance) ->
-            {
-            	rendertypeStarShater = (StarShaderInstance) shaderInstance;
-            });
+            		{
+            			rendertypeStarShater = (StarShaderInstance) shaderInstance;
+            		});
+			
+			event.registerShader(new StarShaderInstance(event.getResourceProvider(), new ResourceLocation(SpaceTravel.MODID,"rendertype_star_tex"), SpaceTravelVertexFormat.STAR_POS_COLOR_LY_TEX),
+					(shaderInstance) ->
+					{
+						rendertypeStarTexShader = (StarShaderInstance) shaderInstance;
+					});
         }
     }
 	
 	public static StarShaderInstance starShader()
 	{
 		return rendertypeStarShater;
+	}
+	
+	public static StarShaderInstance starTexShader()
+	{
+		return rendertypeStarTexShader;
 	}
 }

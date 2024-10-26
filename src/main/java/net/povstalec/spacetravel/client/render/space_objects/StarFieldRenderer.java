@@ -7,12 +7,16 @@ import net.minecraft.client.Camera;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.FogRenderer;
 import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
+import net.povstalec.spacetravel.SpaceTravel;
 import net.povstalec.spacetravel.client.RenderCenter;
+import net.povstalec.spacetravel.client.render.SpaceRenderer;
 import net.povstalec.spacetravel.client.render.StarBuffer;
 import net.povstalec.spacetravel.client.render.shaders.SpaceTravelShaders;
 import net.povstalec.spacetravel.client.render.shaders.SpaceTravelVertexFormat;
+import net.povstalec.spacetravel.common.config.StarFieldClientConfig;
 import net.povstalec.spacetravel.common.space.SpaceRegion;
 import net.povstalec.spacetravel.common.space.objects.StarField;
 import net.povstalec.spacetravel.common.util.*;
@@ -28,17 +32,18 @@ import javax.annotation.Nullable;
 
 public class StarFieldRenderer<SF extends StarField> extends SpaceObjectRenderer<StarField>
 {
+	private static final float STAR_FIELD_FADE_START_DISTANCE = (float) (SpaceRegion.LY_PER_REGION * SpaceRegion.LY_PER_REGION * 25);
+	private static final float STAR_FIELD_FADE_END_DISTANCE = (float) (SpaceRegion.LY_PER_REGION * SpaceRegion.LY_PER_REGION * 36);
+	private static final float STAR_FIELD_FADE = STAR_FIELD_FADE_END_DISTANCE - STAR_FIELD_FADE_START_DISTANCE;
 	private static final Vector3f NULL_VECTOR = new Vector3f();
-	private static final float MAX_RENDER_DISTANCE = new Vector3f(SpaceRegion.LY_PER_REGION * (SpaceRegion.SPACE_REGION_LOAD_DISTANCE - 1), 0, 0).lengthSquared();
-	private static final float FADE_START_DISTANCE = new Vector3f(SpaceRegion.LY_PER_REGION * (SpaceRegion.SPACE_REGION_LOAD_DISTANCE - 2), 0, 0).lengthSquared();
-	private static final float FADE = MAX_RENDER_DISTANCE - FADE_START_DISTANCE;
-	
 	@Nullable
 	protected StarBuffer starBuffer;
 	
 	protected StarData starData;
 	
 	protected SpaceCoords oldDifference;
+	
+	protected boolean hasTexture = StarFieldClientConfig.textured_stars.get();
 	
 	public StarFieldRenderer(StarField starField)
 	{
@@ -48,6 +53,11 @@ public class StarFieldRenderer<SF extends StarField> extends SpaceObjectRenderer
 	public boolean requiresSetup()
 	{
 		return starBuffer == null;
+	}
+	
+	public boolean requiresReset()
+	{
+		return hasTexture != StarFieldClientConfig.textured_stars.get();
 	}
 	
 	public void reset()
@@ -60,9 +70,9 @@ public class StarFieldRenderer<SF extends StarField> extends SpaceObjectRenderer
 		for(int i = 0; i < spaceObject.getStars(); i++)
 		{
 			// This generates random coordinates for the Star close to the camera
-			double distance = spaceObject.clumpStarsInCenter() ? randomsource.nextDouble() : Math.cbrt(randomsource.nextDouble());
-			double theta = randomsource.nextDouble() * 2F * Math.PI;
-			double phi = Math.acos(2F * randomsource.nextDouble() - 1F); // This prevents the formation of that weird streak that normally happens
+			double distance = spaceObject.clumpStarsInCenter() ? Math.abs(randomsource.nextDouble()) : Math.cbrt(Math.abs(randomsource.nextDouble()));
+			double theta = Math.abs(randomsource.nextDouble()) * 2F * Math.PI;
+			double phi = Math.acos(2F * Math.abs(randomsource.nextDouble()) - 1F); // This prevents the formation of that weird streak that normally happens
 			
 			Vector3d cartesian = new SphericalCoords(distance * spaceObject.getDiameter(), theta, phi).toCartesianD();
 			
@@ -72,14 +82,14 @@ public class StarFieldRenderer<SF extends StarField> extends SpaceObjectRenderer
 			
 			spaceObject.getAxisRotation().quaterniond().transform(cartesian);
 			
-			starData.newStar(spaceObject.getStarInfo(), bufferBuilder, randomsource, cartesian.x, cartesian.y, cartesian.z, i);
+			starData.newStar(spaceObject.getStarInfo(), bufferBuilder, randomsource, cartesian.x, cartesian.y, cartesian.z, hasTexture, i);
 		}
 	}
 	
 	protected BufferBuilder.RenderedBuffer generateStarBuffer(BufferBuilder bufferBuilder)
 	{
 		RandomSource randomsource = RandomSource.create(spaceObject.getSeed());
-		bufferBuilder.begin(VertexFormat.Mode.QUADS, SpaceTravelVertexFormat.STAR_POS_COLOR_LY);
+		bufferBuilder.begin(VertexFormat.Mode.QUADS, hasTexture ? SpaceTravelVertexFormat.STAR_POS_COLOR_LY_TEX : SpaceTravelVertexFormat.STAR_POS_COLOR_LY);
 		
 		double sizeMultiplier = spaceObject.getDiameter() / 30D;
 		
@@ -90,7 +100,7 @@ public class StarFieldRenderer<SF extends StarField> extends SpaceObjectRenderer
 		int numberOfStars = spaceObject.getStars();
 		for(StarField.SpiralArm arm : spaceObject.getSpiralArms()) //Draw each arm
 		{
-			generateArmStars(arm, bufferBuilder, spaceObject.getAxisRotation(), starData, spaceObject.getStarInfo(), randomsource, numberOfStars, sizeMultiplier);
+			generateArmStars(arm, bufferBuilder, spaceObject.getAxisRotation(), starData, spaceObject.getStarInfo(), randomsource, numberOfStars, sizeMultiplier, hasTexture);
 			numberOfStars += arm.armStars();
 		}
 		
@@ -99,20 +109,21 @@ public class StarFieldRenderer<SF extends StarField> extends SpaceObjectRenderer
 	
 	protected BufferBuilder.RenderedBuffer getStarBuffer(BufferBuilder bufferBuilder)
 	{
-		bufferBuilder.begin(VertexFormat.Mode.QUADS, SpaceTravelVertexFormat.STAR_POS_COLOR_LY);
+		bufferBuilder.begin(VertexFormat.Mode.QUADS, hasTexture ? SpaceTravelVertexFormat.STAR_POS_COLOR_LY_TEX : SpaceTravelVertexFormat.STAR_POS_COLOR_LY);
 		
 		for(int i = 0; i < spaceObject.getTotalStars(); i++)
 		{
-			starData.createStar(bufferBuilder, i);
+			starData.createStar(bufferBuilder, hasTexture, i);
 		}
 		return bufferBuilder.end();
 	}
 	
-	public void setStarBuffer(SpaceCoords difference)
+	public void setStarBuffer()
 	{
 		if(starBuffer != null)
 			starBuffer.close();
-		oldDifference = difference;
+		
+		hasTexture = StarFieldClientConfig.textured_stars.get();
 		
 		starBuffer = new StarBuffer();
 		Tesselator tesselator = Tesselator.getInstance();
@@ -127,11 +138,10 @@ public class StarFieldRenderer<SF extends StarField> extends SpaceObjectRenderer
 		VertexBuffer.unbind();
 	}
 	
-	public void setupBuffer(SpaceCoords difference)
+	public void setupBuffer()
 	{
 		if(starBuffer != null)
 			starBuffer.close();
-		oldDifference = difference;
 		
 		starBuffer = new StarBuffer();
 		Tesselator tesselator = Tesselator.getInstance();
@@ -151,10 +161,11 @@ public class StarFieldRenderer<SF extends StarField> extends SpaceObjectRenderer
 					   Matrix4f projectionMatrix, boolean isFoggy, Runnable setupFog, BufferBuilder bufferbuilder,
 					   Vector3f parentVector, AxisRotation parentRotation)
 	{
+		
 		SpaceCoords difference = viewCenter.getCoords().sub(spaceObject.getSpaceCoords());
 		
-		if(requiresSetup())
-			setupBuffer(difference);
+		if(oldDifference == null)
+			oldDifference = difference;
 		
 		float starBrightness = getStarBrightness(level, camera, partialTicks);
 		
@@ -170,12 +181,12 @@ public class StarFieldRenderer<SF extends StarField> extends SpaceObjectRenderer
 			
 			float lyDistance = relativeVectorLy.lengthSquared();
 			
-			if(lyDistance > MAX_RENDER_DISTANCE)
+			if(lyDistance > SpaceRenderer.getMaxRenderDistance())
 				alpha = 0;
-			else if(lyDistance > FADE_START_DISTANCE)
+			else if(lyDistance > SpaceRenderer.getFadeStartDistance())
 			{
-				float value = (MAX_RENDER_DISTANCE - lyDistance);
-				alpha = value / FADE;
+				float value = (SpaceRenderer.getMaxRenderDistance() - lyDistance);
+				alpha = value / SpaceRenderer.getFade();
 				
 				if(alpha > 1)
 					alpha = 1;
@@ -183,29 +194,48 @@ public class StarFieldRenderer<SF extends StarField> extends SpaceObjectRenderer
 			
 			if(alpha > 0)
 			{
+				float distanceBrightness = 1F;
+				
+				if(lyDistance > STAR_FIELD_FADE_END_DISTANCE)
+					distanceBrightness = 0.1F;
+				else if(lyDistance > STAR_FIELD_FADE_START_DISTANCE)
+				{
+					distanceBrightness = 0.9F * ( (STAR_FIELD_FADE_END_DISTANCE - lyDistance) / STAR_FIELD_FADE ) + 0.1F;
+					
+					if(distanceBrightness > 1)
+						distanceBrightness = 1;
+				}
+				
+				if(requiresSetup())
+					setupBuffer();
+				else if(requiresReset())
+					setStarBuffer();
+				
 				stack.pushPose();
 				
 				//stack.translate(0, 0, 0);
-				RenderSystem.setShaderColor(1, 1, 1, starBrightness * alpha);
-				//RenderSystem.setShaderTexture(0, new ResourceLocation("textures/environment/sun.png"));
+				if(hasTexture)
+					RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
+				RenderSystem.setShaderColor(1, 1, 1, starBrightness * alpha * distanceBrightness);
+				if(hasTexture)
+					RenderSystem.setShaderTexture(0, new ResourceLocation(SpaceTravel.MODID,"textures/environment/star.png"));
 				FogRenderer.setupNoFog();
 				
 				Quaternionf q = SpaceCoords.getQuaternionf(level, viewCenter, partialTicks);
 				
 				stack.mulPose(q);
 				this.starBuffer.bind();
-				this.starBuffer.drawWithShader(stack.last().pose(), projectionMatrix, relativeVectorLy, relativeVectorKm, SpaceTravelShaders.starShader());
-				//this.starBuffer.drawWithShader(stack.last().pose(), projectionMatrix, GameRenderer.getPositionColorTexShader());
+				this.starBuffer.drawWithShader(stack.last().pose(), projectionMatrix, relativeVectorLy, relativeVectorKm, hasTexture ? SpaceTravelShaders.starTexShader() : SpaceTravelShaders.starShader());
 				VertexBuffer.unbind();
 				
 				setupFog.run();
 				stack.popPose();
+				
+				for(SpaceObjectRenderer<?> child : clientChildren)
+				{
+					child.render(viewCenter, level, partialTicks, stack, camera, projectionMatrix, isFoggy, setupFog, bufferbuilder, NULL_VECTOR, new AxisRotation());
+				}
 			}
-		}
-		
-		for(SpaceObjectRenderer<?> child : clientChildren)
-		{
-			child.render(viewCenter, level, partialTicks, stack, camera, projectionMatrix, isFoggy, setupFog, bufferbuilder, NULL_VECTOR, new AxisRotation());
 		}
 		
 		oldDifference = difference;
@@ -225,7 +255,7 @@ public class StarFieldRenderer<SF extends StarField> extends SpaceObjectRenderer
 		return 1;//starBrightness; //TODO Change this back
 	}
 	
-	public static void generateArmStars(StarField.SpiralArm arm, BufferBuilder bufferBuilder, AxisRotation axisRotation, StarData starData, StarInfo starInfo, RandomSource randomsource, int numberOfStars, double sizeMultiplier)
+	public static void generateArmStars(StarField.SpiralArm arm, BufferBuilder bufferBuilder, AxisRotation axisRotation, StarData starData, StarInfo starInfo, RandomSource randomsource, int numberOfStars, double sizeMultiplier, boolean hasTexture)
 	{
 		for(int i = 0; i < arm.armStars(); i++)
 		{
@@ -253,7 +283,7 @@ public class StarFieldRenderer<SF extends StarField> extends SpaceObjectRenderer
 			
 			axisRotation.quaterniond().transform(cartesian);
 			
-			starData.newStar(starInfo, bufferBuilder, randomsource, cartesian.x, cartesian.y, cartesian.z, numberOfStars + i);
+			starData.newStar(starInfo, bufferBuilder, randomsource, cartesian.x, cartesian.y, cartesian.z, hasTexture, numberOfStars + i);
 		}
 	}
 }

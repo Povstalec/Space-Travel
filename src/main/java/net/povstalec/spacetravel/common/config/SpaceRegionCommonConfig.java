@@ -11,7 +11,7 @@ public class SpaceRegionCommonConfig
 	{
 		space_region_load_distance = new SpaceTravelConfigValue.IntValue(client,
 				"server.space_region_load_distance",
-				3, 2, 10,
+				8, 2, 12,
 				"Specifies the max distance at which a Space Region can load on the Server");
 	}
 }

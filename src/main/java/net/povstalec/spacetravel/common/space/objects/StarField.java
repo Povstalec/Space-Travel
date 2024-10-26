@@ -197,7 +197,20 @@ public class StarField extends SpaceObject
 		if(numberOfArms < 0)
 			numberOfArms = 0;
 		
-		int stars = Math.abs(randomsource.nextInt()) % 19600 + 400; // 1500
+		int starMax;
+		int starMin;
+		if(Math.abs(randomsource.nextInt()) % 100 >= 80)
+		{
+			starMax = 20000;
+			starMin = 8000;
+		}
+		else
+		{
+			starMax = 10000;
+			starMin = 200;
+		}
+		
+		int stars = Math.abs(randomsource.nextInt()) % starMax + starMin; // 1500
 		if(numberOfArms > 0)
 			stars = stars / numberOfArms;
 		

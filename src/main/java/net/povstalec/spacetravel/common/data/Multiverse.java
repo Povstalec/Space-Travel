@@ -60,9 +60,9 @@ public class Multiverse extends SavedData
 			SpaceTravel.LOGGER.error("Already contains main");
 		else
 		{
-			Universe universe = new Universe();
+			Universe universe = new Universe(server.getWorldData().worldGenOptions().seed());
 			
-			Map<SpaceRegion.Position, SpaceRegion> regions = universe.getRegionsAt(new SpaceRegion.Position(0, 0, 0), 3, false);
+			Map<SpaceRegion.Position, SpaceRegion> regions = universe.getRegionsAt(new SpaceRegion.Position(0, 0, 0), 5, false);
 			
 			for(Map.Entry<SpaceRegion.Position, SpaceRegion> region : regions.entrySet())
 			{

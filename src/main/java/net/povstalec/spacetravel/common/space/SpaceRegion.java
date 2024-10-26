@@ -164,9 +164,7 @@ public final class SpaceRegion implements INBTSerializable<CompoundTag>
 	 */
 	public static final class Position
 	{
-		private long x;
-		private long y;
-		private long z;
+		private long x, y, z;
 		
 		public Position(long x, long y, long z)
 		{
@@ -178,7 +176,7 @@ public final class SpaceRegion implements INBTSerializable<CompoundTag>
 		public Position(SpaceCoords coords)
 		{
 			this(	(coords.x().ly() - LY_PER_REGION_HALF) / LY_PER_REGION,
-					(coords.y().ly() - LY_PER_REGION_HALF)  / LY_PER_REGION,
+					(coords.y().ly() - LY_PER_REGION_HALF) / LY_PER_REGION,
 					(coords.z().ly() - LY_PER_REGION_HALF) / LY_PER_REGION);
 		}
 		
@@ -210,6 +208,11 @@ public final class SpaceRegion implements INBTSerializable<CompoundTag>
 		public long lyZ()
 		{
 			return z * SpaceRegion.LY_PER_REGION;
+		}
+		
+		public boolean isInRange(Position other, int range)
+		{
+			return Math.abs(this.x - other.x) < range && Math.abs(this.y - other.y) < range && Math.abs(this.z - other.z) < range;
 		}
 		
 		@Override
