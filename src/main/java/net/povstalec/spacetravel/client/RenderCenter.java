@@ -2,7 +2,9 @@ package net.povstalec.spacetravel.client;
 
 import javax.annotation.Nullable;
 
+import org.joml.Matrix3f;
 import org.joml.Matrix4f;
+import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
 import com.mojang.blaze3d.systems.RenderSystem;

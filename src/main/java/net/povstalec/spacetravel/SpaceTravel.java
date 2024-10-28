@@ -8,6 +8,7 @@ import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.registries.DataPackRegistryEvent;
 import net.povstalec.spacetravel.common.config.SpaceRegionCommonConfig;
 import net.povstalec.spacetravel.common.config.SpaceTravelConfig;
+import net.povstalec.spacetravel.common.space.objects.BlackHole;
 import net.povstalec.spacetravel.common.space.objects.Star;
 import net.povstalec.spacetravel.common.space.objects.StarField;
 import org.slf4j.Logger;
@@ -54,6 +55,7 @@ public class SpaceTravel
 		{
 			event.dataPackRegistry(StarField.REGISTRY_KEY, StarField.CODEC, StarField.CODEC);
 			event.dataPackRegistry(Star.REGISTRY_KEY, Star.CODEC, Star.CODEC);
+			event.dataPackRegistry(BlackHole.REGISTRY_KEY, BlackHole.CODEC, BlackHole.CODEC);
 		});
 		
 		modEventBus.addListener(this::commonSetup);

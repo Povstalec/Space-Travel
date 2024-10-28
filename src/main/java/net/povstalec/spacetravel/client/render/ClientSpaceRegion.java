@@ -8,10 +8,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.povstalec.spacetravel.SpaceTravel;
 import net.povstalec.spacetravel.client.RenderCenter;
-import net.povstalec.spacetravel.client.render.space_objects.SpaceObjectRenderer;
-import net.povstalec.spacetravel.client.render.space_objects.StarFieldRenderer;
-import net.povstalec.spacetravel.client.render.space_objects.StarRenderer;
-import net.povstalec.spacetravel.client.render.space_objects.TexturedObjectRenderer;
+import net.povstalec.spacetravel.client.render.space_objects.*;
 import net.povstalec.spacetravel.common.space.SpaceRegion.Position;
 import net.povstalec.spacetravel.common.space.objects.*;
 import net.povstalec.spacetravel.common.util.AxisRotation;
@@ -28,7 +25,9 @@ public final class ClientSpaceRegion
 	
 	private Position pos;
 	
-	protected ArrayList<SpaceObjectRenderer<?>> children = new ArrayList<SpaceObjectRenderer<?>>();
+	protected final ArrayList<SpaceObjectRenderer<?>> children = new ArrayList<SpaceObjectRenderer<?>>();
+	
+	protected final ArrayList<BlackHoleRenderer> lensingRenderers = new ArrayList<BlackHoleRenderer>();
 	
 	public ClientSpaceRegion(Position pos, CompoundTag childrenTag)
 	{
@@ -75,6 +74,15 @@ public final class ClientSpaceRegion
 		
 		masterParent.render(viewCenter, level, partialTicks, stack, camera, projectionMatrix, isFoggy, setupFog, bufferbuilder, NULL_VECTOR, new AxisRotation());
 	}
+	
+	public void setBestLensing()
+	{
+		for(BlackHoleRenderer blackHole : lensingRenderers)
+		{
+			if(blackHole.spaceObject.getLensingIntensity() > SpaceRenderer.lensingIntensity)
+				blackHole.setupLensing();
+		}
+	}
 
 	private void deserializeChildren(CompoundTag childrenTag)
 	{
@@ -93,6 +101,8 @@ public final class ClientSpaceRegion
 					spaceObjectRenderer = deserializeOrbitingObject(childTag);
 				else if(objectType.equals(Star.STAR_LOCATION))
 					spaceObjectRenderer = deserializeStar(childTag);
+				else if(objectType.equals(BlackHole.BLACK_HOLE_LOCATION))
+					spaceObjectRenderer = deserializeBlackHole(childTag);
 				else if(objectType.equals(TexturedObject.TEXTURED_OBJECT_LOCATION))
 					spaceObjectRenderer = deserializeTexturedObject(childTag);
 				else if(objectType.equals(StarField.STAR_FIELD_LOCATION))
@@ -157,6 +167,22 @@ public final class ClientSpaceRegion
 		
 		if(star.isInitialized())
 			return new StarRenderer(star);
+		
+		return null;
+	}
+	
+	private BlackHoleRenderer deserializeBlackHole(CompoundTag childTag)
+	{
+		BlackHole blackHole = new BlackHole();
+		blackHole.deserializeNBT(childTag);
+		
+		if(blackHole.isInitialized())
+		{
+			BlackHoleRenderer renderer = new BlackHoleRenderer(blackHole);
+			lensingRenderers.add(renderer);
+			
+			return renderer;
+		}
 		
 		return null;
 	}

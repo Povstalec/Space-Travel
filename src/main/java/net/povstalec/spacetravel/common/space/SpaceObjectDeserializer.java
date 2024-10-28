@@ -17,6 +17,8 @@ public class SpaceObjectDeserializer
 			return deserializeOrbitingObject(tag);
 		else if(objectType.equals(Star.STAR_LOCATION))
 			return deserializeStar(tag);
+		else if(objectType.equals(BlackHole.BLACK_HOLE_LOCATION))
+			return deserializeBlackHole(tag);
 		if(objectType.equals(TexturedObject.TEXTURED_OBJECT_LOCATION))
 			return deserializeSpaceObject(tag);
 		else if(objectType.equals(StarField.STAR_FIELD_LOCATION))
@@ -70,5 +72,13 @@ public class SpaceObjectDeserializer
 		star.deserializeNBT(tag);
 		
 		return star;
+	}
+	
+	private static BlackHole deserializeBlackHole(CompoundTag tag)
+	{
+		BlackHole blackHole = new BlackHole();
+		blackHole.deserializeNBT(tag);
+		
+		return blackHole;
 	}
 }

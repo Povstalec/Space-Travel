@@ -16,6 +16,7 @@ import net.minecraft.world.level.storage.DimensionDataStorage;
 import net.povstalec.spacetravel.SpaceTravel;
 import net.povstalec.spacetravel.common.space.SpaceRegion;
 import net.povstalec.spacetravel.common.space.Universe;
+import net.povstalec.spacetravel.common.space.objects.BlackHole;
 import net.povstalec.spacetravel.common.space.objects.Star;
 import net.povstalec.spacetravel.common.space.objects.StarField;
 
@@ -48,6 +49,7 @@ public class Multiverse extends SavedData
 		
 		registerStarFields(server);
 		registerStars(server);
+		registerBlackHoles(server);
 		
 		prepareUniverses();
 		
@@ -132,6 +134,26 @@ public class Multiverse extends SavedData
 				universe.get().addSpaceObject(location, star);
 		});
 		SpaceTravel.LOGGER.info("Stars registered");
+	}
+	
+	public void registerBlackHoles(MinecraftServer server)
+	{
+		final RegistryAccess registries = server.registryAccess();
+		final Registry<BlackHole> starRegistry = registries.registryOrThrow(BlackHole.REGISTRY_KEY);
+		
+		Set<Map.Entry<ResourceKey<BlackHole>, BlackHole>> blackHoleSet = starRegistry.entrySet();
+		blackHoleSet.forEach((blackHoleEntry) ->
+		{
+			BlackHole blackHole = blackHoleEntry.getValue();
+			ResourceLocation location = blackHoleEntry.getKey().location().withPath("black_hole/" + blackHoleEntry.getKey().location().getPath());
+			
+			blackHole.setResourceLocation(location);
+			
+			Optional<Universe> universe = getUniverse("main");
+			if(universe.isPresent())
+				universe.get().addSpaceObject(location, blackHole);
+		});
+		SpaceTravel.LOGGER.info("Black Holes registered");
 	}
 
 	//============================================================================================
