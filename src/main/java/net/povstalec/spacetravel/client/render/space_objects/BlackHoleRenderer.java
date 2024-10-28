@@ -25,7 +25,7 @@ public class BlackHoleRenderer extends TexturedObjectRenderer<BlackHole>
 	
 	public void setupLensing()
 	{
-		float intensity = spaceObject.getLensingIntensity(spaceObject.lastDistance);
+		float intensity = (float) spaceObject.getLensingIntensity(spaceObject.lastDistance);
 		
 		if(intensity < SpaceRenderer.lensingIntensity)
 			return;
