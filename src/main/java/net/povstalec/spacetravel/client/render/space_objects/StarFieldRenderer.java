@@ -218,7 +218,7 @@ public class StarFieldRenderer<SF extends StarField> extends SpaceObjectRenderer
 					RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
 				RenderSystem.setShaderColor(1, 1, 1, starBrightness * alpha * distanceBrightness);
 				if(hasTexture)
-					RenderSystem.setShaderTexture(0, new ResourceLocation(SpaceTravel.MODID,"textures/environment/star.png"));
+					RenderSystem.setShaderTexture(0, spaceObject.getStarInfo().getStarTexture());
 				FogRenderer.setupNoFog();
 				
 				Quaternionf q = SpaceCoords.getQuaternionf(level, viewCenter, partialTicks);

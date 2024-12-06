@@ -33,6 +33,7 @@ public class StarField extends SpaceObject
 	public static final String X_STRETCH = "x_stretch";
 	public static final String Y_STRETCH = "y_stretch";
 	public static final String Z_STRETCH = "z_stretch";
+	
 	protected StarInfo starInfo;
 	
 	protected long seed;
@@ -103,7 +104,7 @@ public class StarField extends SpaceObject
 	}
 	
 	public StarField(Optional<ResourceLocation> parentLocation, Either<SpaceCoords, StellarCoordinates.Equatorial> coords, AxisRotation axisRotation, FadeOutHandler fadeOutHandler,
-					 StarInfo starInfo, long seed, int diameter, int numberOfStars, boolean clumpStarsInCenter,
+					StarInfo starInfo, long seed, int diameter, int numberOfStars, boolean clumpStarsInCenter,
 					 double xStretch, double yStretch, double zStretch, List<SpiralArm> spiralArms)
 	{
 		this(STAR_FIELD_LOCATION, parentLocation, coords, axisRotation, fadeOutHandler, starInfo, seed, diameter, numberOfStars, clumpStarsInCenter, xStretch, yStretch, zStretch, spiralArms);

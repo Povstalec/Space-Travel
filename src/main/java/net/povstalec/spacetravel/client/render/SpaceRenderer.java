@@ -121,7 +121,7 @@ public class SpaceRenderer
 	
 	public static void render(RenderCenter renderCenter, SpaceObjectRenderer<?> masterParent, ClientLevel level, Camera camera, float partialTicks, PoseStack stack, Matrix4f projectionMatrix, boolean isFoggy, Runnable setupFog, BufferBuilder bufferbuilder)
 	{
-		setBestLensing(renderCenter);
+		setBestLensing();
 		
 		SpaceRegion.Position pos = new SpaceRegion.Position(renderCenter.getCoords());
 		
@@ -143,7 +143,7 @@ public class SpaceRenderer
 	
 	
 	
-	private static void setBestLensing(RenderCenter renderCenter)
+	private static void setBestLensing()
 	{
 		SpaceRenderer.lensingMatrix = SpaceRenderer.IDENTITY_MATRIX;
 		SpaceRenderer.lensingMatrixInv = SpaceRenderer.IDENTITY_MATRIX;

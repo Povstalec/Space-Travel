@@ -40,7 +40,7 @@ public class BlackHole extends StarLike
 			Codec.floatRange(0, Color.MAX_FLOAT_VALUE).optionalFieldOf("min_black_hole_alpha", MIN_ALPHA).forGetter(BlackHole::getMinStarAlpha),
 			
 			Codec.floatRange(1F, Float.MAX_VALUE).optionalFieldOf(LENSING_INTENSITY, 2F).forGetter(BlackHole::getLensingIntensity),
-			Codec.DOUBLE.optionalFieldOf(MAX_LENSING_DISTANCE, 5000000000D).forGetter(BlackHole::getMaxLensingDistance)
+			Codec.DOUBLE.optionalFieldOf(MAX_LENSING_DISTANCE, 10000000000D).forGetter(BlackHole::getMaxLensingDistance)
 			).apply(instance, BlackHole::new));
 	
 	public BlackHole() {};

@@ -3,7 +3,10 @@ package net.povstalec.spacetravel.common.util;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.common.util.INBTSerializable;
+import net.povstalec.spacetravel.SpaceTravel;
+import net.povstalec.spacetravel.common.space.objects.StarField;
 import net.povstalec.spacetravel.common.space.objects.StarLike;
 
 import java.util.ArrayList;
@@ -13,8 +16,14 @@ import java.util.Random;
 
 public class StarInfo implements INBTSerializable<CompoundTag>
 {
+	public static final ResourceLocation DEFAULT_STAR_TEXTURE = new ResourceLocation(SpaceTravel.MODID,"textures/environment/star.png");
+	
+	public static final String STAR_TEXTURE = "star_texture";
 	public static final String STAR_TYPES = "star_types";
 	public static final String TOTAL_WEIGHT = "total_weight";
+	
+	protected ResourceLocation starTexture;
+	
 	private ArrayList<StarLike.StarType> starTypes;
 	private int totalWeight = 0;
 	
@@ -26,22 +35,30 @@ public class StarInfo implements INBTSerializable<CompoundTag>
 	public static final StarLike.StarType K_CLASS = new StarLike.StarType(new Color.IntRGB(255, 239, 223), 0.10F, 0.25F, (short) 120, (short) 200, 12);
 	public static final StarLike.StarType M_CLASS = new StarLike.StarType(new Color.IntRGB(255, 223, 223), 0.10F, 0.25F, (short) 100, (short) 150, 74);
 	public static final List<StarLike.StarType> DEFAULT_STARS = Arrays.asList(O_CLASS, B_CLASS, A_CLASS, F_CLASS, G_CLASS, K_CLASS, M_CLASS);
-	public static final StarInfo DEFAULT_STAR_INFO = new StarInfo(DEFAULT_STARS);
+	public static final StarInfo DEFAULT_STAR_INFO = new StarInfo(DEFAULT_STAR_TEXTURE, DEFAULT_STARS);
 	
 	public static final Codec<StarInfo> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+			ResourceLocation.CODEC.optionalFieldOf("star_texture", DEFAULT_STAR_TEXTURE).forGetter(StarInfo::getStarTexture),
 			StarLike.StarType.CODEC.listOf().fieldOf("star_types").forGetter(starInfo -> starInfo.starTypes)
 			).apply(instance, StarInfo::new));
 	
 	public StarInfo() {}
 	
-	public StarInfo(List<StarLike.StarType> starTypes)
+	public StarInfo(ResourceLocation starTexture, List<StarLike.StarType> starTypes)
 	{
+		this.starTexture = starTexture;
+		
 		this.starTypes = new ArrayList<StarLike.StarType>(starTypes);
 		
 		for(StarLike.StarType starType : starTypes)
 		{
 			this.totalWeight += starType.getWeight();
 		}
+	}
+	
+	public ResourceLocation getStarTexture()
+	{
+		return starTexture;
 	}
 	
 	public StarLike.StarType getRandomStarType(long seed)
@@ -70,6 +87,8 @@ public class StarInfo implements INBTSerializable<CompoundTag>
 	{
 		CompoundTag tag = new CompoundTag();
 		
+		tag.putString(STAR_TEXTURE, starTexture.toString());
+		
 		CompoundTag starTypesTag = new CompoundTag();
 		for(int i = 0; i < starTypes.size(); i++)
 		{
@@ -85,6 +104,8 @@ public class StarInfo implements INBTSerializable<CompoundTag>
 	@Override
 	public void deserializeNBT(CompoundTag tag)
 	{
+		this.starTexture = new ResourceLocation(tag.getString(STAR_TEXTURE));
+		
 		this.starTypes = new ArrayList<StarLike.StarType>();
 		CompoundTag starTypesTag = tag.getCompound(STAR_TYPES);
 		for(String key : starTypesTag.getAllKeys())
