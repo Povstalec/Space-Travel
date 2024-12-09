@@ -45,6 +45,13 @@ public class Spaceship extends OrbitingObject
 		
 		spaceRegionPos = new SpaceRegion.Position(this.getSpaceCoords());
 	}
+
+	public int getxAxisSpeed() { return xAxisSpeed; }
+	public int getyAxisSpeed() { return yAxisSpeed; }
+	public int getzAxisSpeed() { return zAxisSpeed; }
+	public double getxAxisRotation() { return xAxisRotation; }
+	public double getyAxisRotation() { return yAxisRotation; }
+	public double getzAxisRotation() { return zAxisRotation; }
 	
 	public void setSpeed(int xAxisSpeed, int yAxisSpeed, int zAxisSpeed)
 	{
