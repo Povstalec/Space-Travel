@@ -5,6 +5,8 @@ import com.mojang.blaze3d.vertex.BufferBuilder;
 import net.minecraft.util.RandomSource;
 import net.povstalec.spacetravel.common.space.objects.StarLike;
 
+import java.util.Random;
+
 public class StarData
 {
 	private double[][] starCoords;
@@ -42,35 +44,33 @@ public class StarData
 	 * @param z Z coordinate of the star
 	 * @param i Index of the star
 	 */
-	public void newStar(StarInfo starInfo, BufferBuilder builder, RandomSource randomSource, double x, double y, double z, boolean hasTexture, int i)
+	public void newStar(StarInfo starInfo, BufferBuilder builder, Random random, double x, double y, double z, boolean hasTexture, int i)
 	{
-		long seed = randomSource.nextLong();
-		
 		// Set up position
 		
 		starCoords[i][0] = x;
 		starCoords[i][1] = y;
 		starCoords[i][2] = z;
 		
-		StarLike.StarType starType = starInfo.getRandomStarType(seed);
+		StarLike.StarType starType = starInfo.getRandomStarType(random);
 		Color.IntRGB rgb = starType.getRGB();
 		
 		// Set up size
 		
-		starSizes[i] = starType.randomSize(seed); // This randomizes the Star size
+		starSizes[i] = starType.randomSize(random); // This randomizes the Star size
 		
 		// Set up color and alpha
 		
-		short alpha = starType.randomBrightness(seed); // 0xAA is the default
+		short alpha = starType.randomBrightness(random); // 0xAA is the default
 		
 		this.starRGBA[i] = new short[] {(short) rgb.red(), (short) rgb.green(), (short) rgb.blue(), alpha};
 		
 		// sin and cos are used to effectively clamp the random number between two values without actually clamping it,
 		// wwhich would result in some awkward lines as Stars would be brought to the clamped values
 		// Both affect Star size and rotation
-		double random = randomSource.nextDouble() * Math.PI * 2.0D;
-		randoms[i][0] = Math.sin(random); // sin random
-		randoms[i][1] = Math.cos(random); // cos random
+		double randomValue = random.nextDouble() * Math.PI * 2.0D;
+		randoms[i][0] = Math.sin(randomValue); // sin random
+		randoms[i][1] = Math.cos(randomValue); // cos random
 		
 		this.createStar(builder, hasTexture, i);
 	}

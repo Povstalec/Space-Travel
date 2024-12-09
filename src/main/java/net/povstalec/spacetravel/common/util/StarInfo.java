@@ -61,12 +61,10 @@ public class StarInfo implements INBTSerializable<CompoundTag>
 		return starTexture;
 	}
 	
-	public StarLike.StarType getRandomStarType(long seed)
+	public StarLike.StarType getRandomStarType(Random random)
 	{
 		if(starTypes.isEmpty())
 			return F_CLASS;
-		
-		Random random = new Random(seed);
 		
 		int i = 0;
 		
@@ -111,10 +109,10 @@ public class StarInfo implements INBTSerializable<CompoundTag>
 		
 		this.starTypes = new ArrayList<StarLike.StarType>();
 		CompoundTag starTypesTag = tag.getCompound(STAR_TYPES);
-		for(String key : starTypesTag.getAllKeys())
+		for(int i = 0; i < starTypesTag.size(); i++)
 		{
 			StarLike.StarType starType = new StarLike.StarType();
-			starType.deserializeNBT(starTypesTag.getCompound(key));
+			starType.deserializeNBT(starTypesTag.getCompound("star_type_" + i));
 			this.starTypes.add(starType);
 			
 		}

@@ -6,6 +6,7 @@ import java.util.Map;
 
 import net.povstalec.spacetravel.client.render.space_objects.BlackHoleRenderer;
 import net.povstalec.spacetravel.common.config.SpaceRegionClientConfig;
+import net.povstalec.spacetravel.common.config.StarFieldClientConfig;
 import org.joml.Matrix3f;
 import org.joml.Matrix4f;
 
@@ -125,9 +126,9 @@ public class SpaceRenderer
 		
 		SpaceRegion.Position pos = new SpaceRegion.Position(renderCenter.getCoords());
 		
-		if(/*GeneralConfig.dust_clouds.get()*/true)
+		if(StarFieldClientConfig.dust_clouds.get())
 		{
-			float dustCloudBrightness = 0.5F;//StarField.dustCloudBrightness(viewCenter, level, camera, partialTicks);
+			float dustCloudBrightness = 1F;//StarField.dustCloudBrightness(viewCenter, level, camera, partialTicks);
 			for(Map.Entry<SpaceRegion.Position, ClientSpaceRegion> spaceRegionEntry : SPACE_REGIONS.entrySet())
 			{
 				spaceRegionEntry.getValue().renderDustClouds(renderCenter, level, camera, partialTicks, stack, projectionMatrix, setupFog, dustCloudBrightness);

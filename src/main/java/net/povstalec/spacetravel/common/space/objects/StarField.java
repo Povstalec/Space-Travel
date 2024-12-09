@@ -216,34 +216,34 @@ public class StarField extends SpaceObject
 		return spiralArms;
 	}
 	
-	public static StarField randomStarField(RandomSource randomsource, long seed, long xPos, long yPos, long zPos)
+	public static StarField randomStarField(Random random, long seed, long xPos, long yPos, long zPos)
 	{
-		long randomX = Math.abs(randomsource.nextLong() % SpaceRegion.LY_PER_REGION) - SpaceRegion.LY_PER_REGION_HALF;
-		long randomY = Math.abs(randomsource.nextLong() % SpaceRegion.LY_PER_REGION) - SpaceRegion.LY_PER_REGION_HALF;
-		long randomZ = Math.abs(randomsource.nextLong() % SpaceRegion.LY_PER_REGION) - SpaceRegion.LY_PER_REGION_HALF;
+		long randomX = random.nextLong(0, SpaceRegion.LY_PER_REGION) - SpaceRegion.LY_PER_REGION_HALF;
+		long randomY = random.nextLong(0, SpaceRegion.LY_PER_REGION) - SpaceRegion.LY_PER_REGION_HALF;
+		long randomZ = random.nextLong(0, SpaceRegion.LY_PER_REGION) - SpaceRegion.LY_PER_REGION_HALF;
 		
 		long x = randomX + xPos;
 		long y = randomY + yPos;
 		long z = randomZ + zPos;
 		
-		double xRot = Math.abs(randomsource.nextDouble()) * 360;
-		double yRot = Math.abs(randomsource.nextDouble()) * 360;
-		double zRot = Math.abs(randomsource.nextDouble()) * 360;
+		double xRot = random.nextDouble(0, 360);
+		double yRot = random.nextDouble(0, 360);
+		double zRot = random.nextDouble(0, 360);
 		
 		AxisRotation axisRotation = new AxisRotation(true, xRot, yRot, zRot);
 		
-		double xStretch = 0.25D + Math.abs(randomsource.nextDouble()) * 0.75F;
-		double yStretch = 0.25D + Math.abs( randomsource.nextDouble()) * 0.75F;
-		double zStretch = 0.25D + Math.abs(randomsource.nextDouble()) * 0.75F;
+		double xStretch = 0.25D + random.nextDouble() * 0.75F;
+		double yStretch = 0.25D + random.nextDouble() * 0.75F;
+		double zStretch = 0.25D + random.nextDouble() * 0.75F;
 		
-		int numberOfArms = Math.abs(randomsource.nextInt()) % 13 - 6;
+		int numberOfArms = random.nextInt(-6, 7);
 		
 		if(numberOfArms < 0)
 			numberOfArms = 0;
 		
 		int starMax;
 		int starMin;
-		if(Math.abs(randomsource.nextInt()) % 100 >= 80)
+		if(random.nextInt(0, 101) >= 80)
 		{
 			starMax = 20000;
 			starMin = 8000;
@@ -254,7 +254,7 @@ public class StarField extends SpaceObject
 			starMin = 200;
 		}
 		
-		int stars = Math.abs(randomsource.nextInt()) % starMax + starMin; // 1500
+		int stars = random.nextInt(0, starMax + 1) + starMin; // 1500
 		if(numberOfArms > 0)
 			stars = stars / numberOfArms;
 		
@@ -267,11 +267,11 @@ public class StarField extends SpaceObject
 		ArrayList<StarField.SpiralArm> arms = new ArrayList<StarField.SpiralArm>();
 		for(int i = 0; i < numberOfArms; i++)
 		{
-			arms.add(SpiralArm.randomSpiralArm(randomsource, stars, degrees * i));
+			arms.add(SpiralArm.randomSpiralArm(random, stars, degrees * i));
 		}
 		
 		StarField starField = new StarField(Optional.empty(), new SpaceCoords(x, y, z), axisRotation, FadeOutHandler.DEFAULT_STAR_FIELD_HANDLER,
-				dustClouds, DustCloudInfo.DEFAULT_DUST_CLOUD_INFO, DEFAULT_DUST_CLOUD_TEXTURE,
+				dustClouds, DustCloudInfo.randomDustCloudInfo(random), DEFAULT_DUST_CLOUD_TEXTURE,
 				StarInfo.DEFAULT_STAR_INFO, seed, diameter, stars, true, xStretch, yStretch, zStretch, arms);
 		
 		return starField;
@@ -440,14 +440,14 @@ public class StarField extends SpaceObject
 			return clumpStarsInCenter;
 		}
 		
-		public static SpiralArm randomSpiralArm(RandomSource randomsource, int starFieldStars, double armRotation)
+		public static SpiralArm randomSpiralArm(Random random, int starFieldStars, double armRotation)
 		{
-			int stars = starFieldStars + Math.abs(randomsource.nextInt()) % (starFieldStars / 2);
-			double armLength = 1.5D + randomsource.nextDouble();
-			double armThickness = 1.75D + randomsource.nextDouble() * 2;
+			int stars = starFieldStars + random.nextInt(0, starFieldStars / 2 + 1);
+			double armLength = 1.5D + random.nextDouble();
+			double armThickness = 1.75D + random.nextDouble() * 2;
 			boolean clumpStarsInCenter = true;
 			
-			int dustClouds = stars / 20; //TODO Randomizing (Also randomize dust cloud info)
+			int dustClouds = stars / 5; //TODO Randomizing (Also randomize dust cloud info)
 			
 			SpiralArm arm = new SpiralArm(dustClouds, Optional.empty(), stars, armRotation, armLength, armThickness, clumpStarsInCenter);
 			

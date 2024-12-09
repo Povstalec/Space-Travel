@@ -94,13 +94,13 @@ public final class SpaceRegion implements INBTSerializable<CompoundTag>
 		SpaceRegion spaceRegion = new SpaceRegion(pos);
 		
 		//TODO Random generation
-		RandomSource randomsource = RandomSource.create(usedSeed);
+		Random random = new Random(usedSeed);
 		
-		int chance = randomsource.nextInt() % 100;
+		int chance = random.nextInt(0, 101);
 		
 		if(chance >= 80)
 		{
-			StarField starField = StarField.randomStarField(randomsource, usedSeed, pos.lyX(), pos.lyY(), pos.lyZ());
+			StarField starField = StarField.randomStarField(random, usedSeed, pos.lyX(), pos.lyY(), pos.lyZ());
 			spaceRegion.addChild(starField);
 		}
 		

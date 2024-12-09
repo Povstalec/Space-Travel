@@ -19,6 +19,11 @@ public class DustCloudInfo implements INBTSerializable<CompoundTag>
 	private int totalWeight = 0;
 	
 	public static final DustCloudType WHITE_DUST_CLOUD = new DustCloudType(new Color.IntRGB(107, 107, 107), 2.0F, 7.0F, (short) 255, (short) 255, 1);
+	public static final DustCloudType YELLOW_DUST_CLOUD = new DustCloudType(new Color.IntRGB(107, 107, 40), 2.0F, 7.0F, (short) 255, (short) 255, 1);
+	public static final DustCloudType BLUE_DUST_CLOUD = new DustCloudType(new Color.IntRGB(40, 60, 107), 2.0F, 7.0F, (short) 255, (short) 255, 1);
+	public static final DustCloudType RED_DUST_CLOUD = new DustCloudType(new Color.IntRGB(107, 20, 20), 2.0F, 7.0F, (short) 255, (short) 255, 1);
+	public static final DustCloudType GREEN_DUST_CLOUD = new DustCloudType(new Color.IntRGB(60, 120, 120), 2.0F, 7.0F, (short) 255, (short) 255, 1);
+	
 	public static final List<DustCloudType> DEFAULT_DUST_CLOUDS = Arrays.asList(WHITE_DUST_CLOUD);
 	public static final DustCloudInfo DEFAULT_DUST_CLOUD_INFO = new DustCloudInfo(DEFAULT_DUST_CLOUDS);
 	
@@ -38,16 +43,14 @@ public class DustCloudInfo implements INBTSerializable<CompoundTag>
 		}
 	}
 	
-	public DustCloudType getRandomDustCloudType(long seed)
+	public DustCloudType getRandomDustCloudType(Random random)
 	{
 		if(dustCloudTypes.isEmpty())
 			return WHITE_DUST_CLOUD;
 		
-		Random random = new Random(seed);
-		
 		int i = 0;
 		
-		for(int weight = random.nextInt(0, totalWeight); i < dustCloudTypes.size() - 1; i++)
+		for(int weight = random.nextInt(0, totalWeight + 1); i < dustCloudTypes.size() - 1; i++)
 		{
 			weight -= dustCloudTypes.get(i).getWeight();
 			
@@ -56,6 +59,31 @@ public class DustCloudInfo implements INBTSerializable<CompoundTag>
 		}
 		
 		return dustCloudTypes.get(i);
+	}
+	
+	public static DustCloudInfo randomDustCloudInfo(Random random)
+	{
+		DustCloudInfo dustCloudInfo;
+		switch(random.nextInt(0, 5))
+		{
+			case 1:
+				dustCloudInfo = new DustCloudInfo(Arrays.asList(WHITE_DUST_CLOUD, YELLOW_DUST_CLOUD));
+				break;
+			case 2:
+				dustCloudInfo = new DustCloudInfo(Arrays.asList(RED_DUST_CLOUD, BLUE_DUST_CLOUD));
+				break;
+			case 3:
+				dustCloudInfo = new DustCloudInfo(Arrays.asList(BLUE_DUST_CLOUD, GREEN_DUST_CLOUD));
+				break;
+			case 4:
+				dustCloudInfo = new DustCloudInfo(Arrays.asList(RED_DUST_CLOUD, YELLOW_DUST_CLOUD));
+				break;
+			default:
+				dustCloudInfo = new DustCloudInfo(Arrays.asList(WHITE_DUST_CLOUD, BLUE_DUST_CLOUD));
+			
+		}
+		
+		return dustCloudInfo;
 	}
 	
 	//============================================================================================
@@ -70,7 +98,7 @@ public class DustCloudInfo implements INBTSerializable<CompoundTag>
 		CompoundTag dustCloudTypesTag = new CompoundTag();
 		for(int i = 0; i < dustCloudTypes.size(); i++)
 		{
-			dustCloudTypesTag.put("star_type_" + i, dustCloudTypes.get(i).serializeNBT());
+			dustCloudTypesTag.put("dust_cloud_type_" + i, dustCloudTypes.get(i).serializeNBT());
 		}
 		tag.put(DUST_CLOUD_TYPES, dustCloudTypesTag);
 		
@@ -84,10 +112,10 @@ public class DustCloudInfo implements INBTSerializable<CompoundTag>
 	{
 		this.dustCloudTypes = new ArrayList<DustCloudType>();
 		CompoundTag dustCloudTypesTag = tag.getCompound(DUST_CLOUD_TYPES);
-		for(String key : dustCloudTypesTag.getAllKeys())
+		for(int i = 0; i < dustCloudTypesTag.size(); i++)
 		{
 			DustCloudType dustCloudType = new DustCloudType();
-			dustCloudType.deserializeNBT(dustCloudTypesTag.getCompound(key));
+			dustCloudType.deserializeNBT(dustCloudTypesTag.getCompound("dust_cloud_type_" + i));
 			this.dustCloudTypes.add(dustCloudType);
 			
 		}
@@ -153,22 +181,18 @@ public class DustCloudInfo implements INBTSerializable<CompoundTag>
 			return weight;
 		}
 		
-		public float randomSize(long seed)
+		public float randomSize(Random random)
 		{
 			if(minSize == maxSize)
 				return maxSize;
 			
-			Random random = new Random(seed);
-			
 			return random.nextFloat(minSize, maxSize);
 		}
 		
-		public short randomBrightness(long seed)
+		public short randomBrightness(Random random)
 		{
 			if(minBrightness == maxBrightness)
 				return maxBrightness;
-			
-			Random random = new Random(seed);
 			
 			return (short) random.nextInt(minBrightness, maxBrightness);
 		}

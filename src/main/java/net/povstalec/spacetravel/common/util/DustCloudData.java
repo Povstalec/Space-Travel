@@ -3,6 +3,8 @@ package net.povstalec.spacetravel.common.util;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import net.minecraft.util.RandomSource;
 
+import java.util.Random;
+
 public class DustCloudData
 {
 	private double[][] dustCloudCoords;
@@ -40,35 +42,33 @@ public class DustCloudData
 	 * @param z Z coordinate of the star
 	 * @param i Index of the star
 	 */
-	public void newDustCloud(DustCloudInfo dustCloudInfo, BufferBuilder builder, RandomSource randomSource, double x, double y, double z, double sizeMultiplier, int i)
+	public void newDustCloud(DustCloudInfo dustCloudInfo, BufferBuilder builder, Random random, double x, double y, double z, double sizeMultiplier, int i)
 	{
-		long seed = randomSource.nextLong();
-		
 		// Set up position
 		
 		dustCloudCoords[i][0] = x;
 		dustCloudCoords[i][1] = y;
 		dustCloudCoords[i][2] = z;
 		
-		DustCloudInfo.DustCloudType dustCloudType = dustCloudInfo.getRandomDustCloudType(seed);
+		DustCloudInfo.DustCloudType dustCloudType = dustCloudInfo.getRandomDustCloudType(random);
 		Color.IntRGB rgb = dustCloudType.getRGB();
 		
 		// Set up size
 		
-		dustCloudSizes[i] = dustCloudType.randomSize(seed) * sizeMultiplier; // This randomizes the Star size
+		dustCloudSizes[i] = dustCloudType.randomSize(random) * sizeMultiplier; // This randomizes the Star size
 		
 		// Set up color and alpha
 		
-		short alpha = dustCloudType.randomBrightness(seed); // 0xAA is the default
+		short alpha = dustCloudType.randomBrightness(random); // 0xAA is the default
 		
 		this.dustCloudRGBA[i] = new short[] {(short) rgb.red(), (short) rgb.green(), (short) rgb.blue(), alpha};
 		
 		// sin and cos are used to effectively clamp the random number between two values without actually clamping it,
 		// wwhich would result in some awkward lines as Stars would be brought to the clamped values
 		// Both affect Star size and rotation
-		double random = randomSource.nextDouble() * Math.PI * 2.0D;
-		randoms[i][0] = Math.sin(random); // sin random
-		randoms[i][1] = Math.cos(random); // cos random
+		double randomValue = random.nextDouble() * Math.PI * 2.0D;
+		randoms[i][0] = Math.sin(randomValue); // sin random
+		randoms[i][1] = Math.cos(randomValue); // cos random
 		
 		this.createDustCloud(builder, i);
 	}
