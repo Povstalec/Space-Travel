@@ -63,6 +63,9 @@ public class StarInfo implements INBTSerializable<CompoundTag>
 	
 	public StarLike.StarType getRandomStarType(long seed)
 	{
+		if(starTypes.isEmpty())
+			return F_CLASS;
+		
 		Random random = new Random(seed);
 		
 		int i = 0;

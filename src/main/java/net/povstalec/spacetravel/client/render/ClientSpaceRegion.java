@@ -6,7 +6,6 @@ import net.minecraft.client.Camera;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
-import net.povstalec.spacetravel.SpaceTravel;
 import net.povstalec.spacetravel.client.RenderCenter;
 import net.povstalec.spacetravel.client.render.space_objects.*;
 import net.povstalec.spacetravel.common.space.SpaceRegion.Position;
@@ -16,8 +15,6 @@ import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 
 public final class ClientSpaceRegion
 {
@@ -28,6 +25,7 @@ public final class ClientSpaceRegion
 	protected final ArrayList<SpaceObjectRenderer<?>> children = new ArrayList<SpaceObjectRenderer<?>>();
 	
 	protected final ArrayList<BlackHoleRenderer> lensingRenderers = new ArrayList<BlackHoleRenderer>();
+	protected final ArrayList<StarFieldRenderer> starFieldRenderers = new ArrayList<StarFieldRenderer>();
 	
 	public ClientSpaceRegion(Position pos, CompoundTag childrenTag)
 	{
@@ -62,6 +60,14 @@ public final class ClientSpaceRegion
 		
 		this.children.add(child);
 		return true;
+	}
+	
+	public void renderDustClouds(RenderCenter viewCenter,ClientLevel level, Camera camera, float partialTicks, PoseStack stack, Matrix4f projectionMatrix, Runnable setupFog, float brightness)
+	{
+		for(StarFieldRenderer starField : starFieldRenderers)
+		{
+			starField.renderDustClouds(viewCenter, level, partialTicks, stack, camera, projectionMatrix, setupFog, brightness);
+		}
 	}
 	
 	public void render(RenderCenter viewCenter, SpaceObjectRenderer<?> masterParent, ClientLevel level, Camera camera, float partialTicks, PoseStack stack, Matrix4f projectionMatrix, boolean isFoggy, Runnable setupFog, BufferBuilder bufferbuilder)
@@ -106,7 +112,7 @@ public final class ClientSpaceRegion
 				else if(objectType.equals(TexturedObject.TEXTURED_OBJECT_LOCATION))
 					spaceObjectRenderer = deserializeTexturedObject(childTag);
 				else if(objectType.equals(StarField.STAR_FIELD_LOCATION))
-					spaceObjectRenderer = deserializeSpiralGalaxy(childTag);
+					spaceObjectRenderer = deserializeStarField(childTag);
 				
 				//TODO Add event for leftover object types
 				
@@ -187,13 +193,18 @@ public final class ClientSpaceRegion
 		return null;
 	}
 	
-	private StarFieldRenderer<StarField> deserializeSpiralGalaxy(CompoundTag childTag)
+	private StarFieldRenderer<StarField> deserializeStarField(CompoundTag childTag)
 	{
 		StarField starField = new StarField();
 		starField.deserializeNBT(childTag);
 		
     	if(starField.isInitialized())
-    		return new StarFieldRenderer<StarField>(starField);
+		{
+			StarFieldRenderer renderer = new StarFieldRenderer<StarField>(starField);
+			starFieldRenderers.add(renderer);
+			
+			return renderer;
+		}
 		
     	return null;
 	}

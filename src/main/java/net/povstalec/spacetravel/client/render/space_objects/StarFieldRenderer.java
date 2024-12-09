@@ -12,6 +12,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.povstalec.spacetravel.SpaceTravel;
 import net.povstalec.spacetravel.client.RenderCenter;
+import net.povstalec.spacetravel.client.render.DustCloudBuffer;
 import net.povstalec.spacetravel.client.render.SpaceRenderer;
 import net.povstalec.spacetravel.client.render.StarBuffer;
 import net.povstalec.spacetravel.client.render.shaders.SpaceTravelShaders;
@@ -36,9 +37,13 @@ public class StarFieldRenderer<SF extends StarField> extends SpaceObjectRenderer
 	private static final float STAR_FIELD_FADE_END_DISTANCE = (float) (SpaceRegion.LY_PER_REGION * SpaceRegion.LY_PER_REGION * 36);
 	private static final float STAR_FIELD_FADE = STAR_FIELD_FADE_END_DISTANCE - STAR_FIELD_FADE_START_DISTANCE;
 	private static final Vector3f NULL_VECTOR = new Vector3f();
+	
+	@Nullable
+	protected DustCloudBuffer dustCloudBuffer;
+	protected DustCloudData dustCloudData;
+	
 	@Nullable
 	protected StarBuffer starBuffer;
-	
 	protected StarData starData;
 	
 	protected SpaceCoords oldDifference;
@@ -85,6 +90,29 @@ public class StarFieldRenderer<SF extends StarField> extends SpaceObjectRenderer
 			starData.newStar(spaceObject.getStarInfo(), bufferBuilder, randomsource, cartesian.x, cartesian.y, cartesian.z, hasTexture, i);
 		}
 	}
+	
+	protected void generateDustClouds(BufferBuilder bufferBuilder, RandomSource randomsource)
+	{
+		for(int i = 0; i < spaceObject.getDustClouds(); i++)
+		{
+			// This generates random coordinates for the Star close to the camera
+			double distance = spaceObject.clumpStarsInCenter() ? randomsource.nextDouble() : Math.cbrt(randomsource.nextDouble());
+			double theta = randomsource.nextDouble() * 2F * Math.PI;
+			double phi = Math.acos(2F * randomsource.nextDouble() - 1F); // This prevents the formation of that weird streak that normally happens
+			
+			Vector3d cartesian = new SphericalCoords(distance * spaceObject.getDiameter(), theta, phi).toCartesianD();
+			
+			cartesian.x *= spaceObject.xStretch();
+			cartesian.y *= spaceObject.yStretch();
+			cartesian.z *= spaceObject.zStretch();
+			
+			spaceObject.getAxisRotation().quaterniond().transform(cartesian);
+			
+			dustCloudData.newDustCloud(spaceObject.getDustCloudInfo(), bufferBuilder, randomsource, cartesian.x, cartesian.y, cartesian.z, 1, i);
+		}
+	}
+	
+	
 	
 	protected BufferBuilder.RenderedBuffer generateStarBuffer(BufferBuilder bufferBuilder)
 	{
@@ -154,6 +182,78 @@ public class StarFieldRenderer<SF extends StarField> extends SpaceObjectRenderer
 		starBuffer.bind();
 		starBuffer.upload(bufferbuilder$renderedbuffer, this.spaceObject.getTotalStars());
 		VertexBuffer.unbind();
+	}
+	
+	protected BufferBuilder.RenderedBuffer generateDustCloudBuffer(BufferBuilder bufferBuilder)
+	{
+		RandomSource randomsource = RandomSource.create(spaceObject.getSeed());
+		bufferBuilder.begin(VertexFormat.Mode.QUADS, SpaceTravelVertexFormat.STAR_POS_COLOR_LY_TEX);
+		
+		double sizeMultiplier = spaceObject.getDiameter() / 30D;
+		
+		dustCloudData = new DustCloudData(spaceObject.getTotalDustClouds());
+		
+		generateDustClouds(bufferBuilder, randomsource);
+		
+		int numberOfDustClouds = spaceObject.getDustClouds();
+		System.out.println("PRE ARMS: " + numberOfDustClouds);
+		for(StarField.SpiralArm arm : spaceObject.getSpiralArms()) //Draw each arm
+		{
+			generateArmDustClouds(arm, bufferBuilder, spaceObject.getAxisRotation(), dustCloudData, spaceObject.getDustCloudInfo(), randomsource, numberOfDustClouds, sizeMultiplier);
+			numberOfDustClouds += arm.armDustClouds();
+		}
+		System.out.println("POST ARMS: " + numberOfDustClouds);
+		return bufferBuilder.end();
+	}
+	
+	public void setupDustCloudBuffer()
+	{
+		if(dustCloudBuffer != null)
+			dustCloudBuffer.close();
+		
+		dustCloudBuffer = new DustCloudBuffer();
+		Tesselator tesselator = Tesselator.getInstance();
+		BufferBuilder bufferBuilder = tesselator.getBuilder();
+		RenderSystem.setShader(GameRenderer::getPositionShader);
+		BufferBuilder.RenderedBuffer bufferbuilder$renderedbuffer;
+		
+		bufferbuilder$renderedbuffer = generateDustCloudBuffer(bufferBuilder);
+		
+		dustCloudBuffer.bind();
+		dustCloudBuffer.upload(bufferbuilder$renderedbuffer);
+		VertexBuffer.unbind();
+	}
+	
+	
+	
+	public void renderDustClouds(RenderCenter renderCenter, ClientLevel level, float partialTicks, PoseStack stack, Camera camera,
+								 Matrix4f projectionMatrix, Runnable setupFog, float brightness)
+	{
+		SpaceCoords difference = renderCenter.getCoords().sub(spaceObject.getSpaceCoords());
+		
+		if(dustCloudBuffer == null)
+			setupDustCloudBuffer();
+		
+		if(brightness > 0.0F)
+		{
+			stack.pushPose();
+			
+			RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
+			RenderSystem.setShaderColor(1, 1, 1, brightness);
+			RenderSystem.setShaderTexture(0, spaceObject.getDustCloudTexture());
+			FogRenderer.setupNoFog();
+			
+			Quaternionf q = SpaceCoords.getQuaternionf(level, renderCenter, partialTicks);
+			
+			stack.mulPose(q);
+			
+			this.dustCloudBuffer.bind();
+			this.dustCloudBuffer.drawWithShader(stack.last().pose(), projectionMatrix, difference, SpaceTravelShaders.starDustCloudShader());
+			VertexBuffer.unbind();
+			
+			setupFog.run();
+			stack.popPose();
+		}
 	}
 	
 	@Override
@@ -284,6 +384,39 @@ public class StarFieldRenderer<SF extends StarField> extends SpaceObjectRenderer
 			axisRotation.quaterniond().transform(cartesian);
 			
 			starData.newStar(starInfo, bufferBuilder, randomsource, cartesian.x, cartesian.y, cartesian.z, hasTexture, numberOfStars + i);
+		}
+	}
+	
+	protected static void generateArmDustClouds(StarField.SpiralArm arm, BufferBuilder bufferBuilder, AxisRotation axisRotation, DustCloudData dustCloudData, DustCloudInfo dustCloudInfo, RandomSource randomsource, int numberOfDustClouds, double sizeMultiplier)
+	{
+		for(int i = 0; i < arm.armDustClouds(); i++)
+		{
+			// Milky Way is 90 000 ly across
+			
+			double progress = (double) i / arm.armDustClouds();
+			
+			double phi = arm.armLength() * Math.PI * progress - arm.armRotation();
+			double r = StellarCoordinates.spiralR(5, phi, arm.armRotation());
+			progress++;
+			
+			// This generates random coordinates for the Star close to the camera
+			double distance = arm.clumpStarsInCenter() ? randomsource.nextDouble() : Math.cbrt(randomsource.nextDouble());
+			double theta = randomsource.nextDouble() * 2F * Math.PI;
+			double sphericalphi = Math.acos(2F * randomsource.nextDouble() - 1F); // This prevents the formation of that weird streak that normally happens
+			
+			Vector3d cartesian = new SphericalCoords(distance * arm.armThickness(), theta, sphericalphi).toCartesianD();
+			
+			double x =  r * Math.cos(phi) + cartesian.x * arm.armThickness() / (progress * 1.5);
+			double z =  r * Math.sin(phi) + cartesian.z * arm.armThickness() / (progress * 1.5);
+			double y =  cartesian.y * arm.armThickness() / (progress * 1.5);
+			
+			cartesian.x = x * sizeMultiplier;
+			cartesian.y = y * sizeMultiplier;
+			cartesian.z = z * sizeMultiplier;
+			
+			axisRotation.quaterniond().transform(cartesian);
+			
+			dustCloudData.newDustCloud(arm.getDustCloudInfo().isEmpty() ? dustCloudInfo : arm.getDustCloudInfo().get(), bufferBuilder, randomsource, cartesian.x, cartesian.y, cartesian.z, (1 / progress) + 0.2, numberOfDustClouds + i);
 		}
 	}
 }

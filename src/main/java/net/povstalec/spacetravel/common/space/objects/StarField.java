@@ -13,6 +13,7 @@ import net.povstalec.spacetravel.SpaceTravel;
 import net.povstalec.spacetravel.common.space.SpaceRegion;
 import net.povstalec.spacetravel.common.util.*;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -22,6 +23,8 @@ public class StarField extends SpaceObject
 {
 	public static final ResourceLocation STAR_FIELD_LOCATION = new ResourceLocation(SpaceTravel.MODID, "star_field");
 	public static final ResourceKey<Registry<StarField>> REGISTRY_KEY = ResourceKey.createRegistryKey(STAR_FIELD_LOCATION);
+	
+	public static final ResourceLocation DEFAULT_DUST_CLOUD_TEXTURE = new ResourceLocation(SpaceTravel.MODID,"textures/environment/dust_cloud.png");
 	
 	public static final String SEED = "seed";
 	public static final String DIAMETER_LY = "diameter_ly";
@@ -33,6 +36,15 @@ public class StarField extends SpaceObject
 	public static final String X_STRETCH = "x_stretch";
 	public static final String Y_STRETCH = "y_stretch";
 	public static final String Z_STRETCH = "z_stretch";
+	public static final String DUST_CLOUDS = "dust_clouds";
+	public static final String TOTAL_DUST_CLOUDS = "total_dust_clouds";
+	public static final String DUST_CLOUD_INFO = "dust_cloud_info";
+	public static final String DUST_CLOUD_TEXTURE = "dust_cloud_texture";
+	
+	protected DustCloudInfo dustCloudInfo;
+	protected int dustClouds;
+	protected int totalDustClouds;
+	protected ResourceLocation dustCloudTexture;
 	
 	protected StarInfo starInfo;
 	
@@ -57,11 +69,15 @@ public class StarField extends SpaceObject
 			
 			SpaceObject.FadeOutHandler.CODEC.optionalFieldOf("fade_out_handler", SpaceObject.FadeOutHandler.DEFAULT_STAR_FIELD_HANDLER).forGetter(StarField::getFadeOutHandler),
 			
+			Codec.intRange(0, 4000).optionalFieldOf(DUST_CLOUDS, 0).forGetter(StarField::getDustClouds),
+			DustCloudInfo.CODEC.optionalFieldOf(DUST_CLOUD_INFO, DustCloudInfo.DEFAULT_DUST_CLOUD_INFO).forGetter(StarField::getDustCloudInfo),
+			ResourceLocation.CODEC.optionalFieldOf(DUST_CLOUD_TEXTURE, DEFAULT_DUST_CLOUD_TEXTURE).forGetter(StarField::getDustCloudTexture),
+			
 			StarInfo.CODEC.optionalFieldOf("star_info", StarInfo.DEFAULT_STAR_INFO).forGetter(StarField::getStarInfo),
 			Codec.LONG.fieldOf(SEED).forGetter(StarField::getSeed),
 			Codec.INT.fieldOf(DIAMETER_LY).forGetter(StarField::getDiameter),
 			
-			Codec.intRange(1, 30000).fieldOf(STARS).forGetter(StarField::getStars),
+			Codec.intRange(0, 30000).fieldOf(STARS).forGetter(StarField::getStars),
 			Codec.BOOL.optionalFieldOf("clump_stars_in_center", true).forGetter(StarField::clumpStarsInCenter),
 			
 			Codec.DOUBLE.optionalFieldOf("x_stretch", 1.0).forGetter(StarField::xStretch),
@@ -74,11 +90,15 @@ public class StarField extends SpaceObject
 	public StarField() {}
 	
 	public StarField(ResourceLocation objectType, Optional<ResourceLocation> parentLocation, Either<SpaceCoords, StellarCoordinates.Equatorial> coords,
-					 AxisRotation axisRotation, FadeOutHandler fadeOutHandler, StarInfo starInfo,
+					 AxisRotation axisRotation, FadeOutHandler fadeOutHandler, int dustClouds, DustCloudInfo dustCloudInfo, ResourceLocation dustCloudTexture, StarInfo starInfo,
 					 long seed, int diameter, int numberOfStars, boolean clumpStarsInCenter,
 					 double xStretch, double yStretch, double zStretch, List<SpiralArm> spiralArms)
 	{
 		super(objectType, parentLocation, coords, axisRotation, fadeOutHandler);
+		
+		this.dustClouds = dustClouds;
+		this.dustCloudInfo = dustCloudInfo;
+		this.dustCloudTexture = dustCloudTexture;
 		
 		this.starInfo = starInfo;
 		this.seed = seed;
@@ -95,33 +115,55 @@ public class StarField extends SpaceObject
 		
 		// Calculate the total amount of stars
 		int totalStars = stars;
+		int totalDustClouds = dustClouds;
 		for(SpiralArm arm : this.spiralArms)
 		{
 			totalStars += arm.armStars();
+			totalDustClouds += arm.armDustClouds();
 		}
 		
 		this.totalStars = totalStars;
+		this.totalDustClouds = totalDustClouds;
 	}
 	
 	public StarField(Optional<ResourceLocation> parentLocation, Either<SpaceCoords, StellarCoordinates.Equatorial> coords, AxisRotation axisRotation, FadeOutHandler fadeOutHandler,
-					StarInfo starInfo, long seed, int diameter, int numberOfStars, boolean clumpStarsInCenter,
+					 int dustClouds, DustCloudInfo dustCloudInfo, ResourceLocation dustCloudTexture, StarInfo starInfo, long seed, int diameter, int numberOfStars, boolean clumpStarsInCenter,
 					 double xStretch, double yStretch, double zStretch, List<SpiralArm> spiralArms)
 	{
-		this(STAR_FIELD_LOCATION, parentLocation, coords, axisRotation, fadeOutHandler, starInfo, seed, diameter, numberOfStars, clumpStarsInCenter, xStretch, yStretch, zStretch, spiralArms);
+		this(STAR_FIELD_LOCATION, parentLocation, coords, axisRotation, fadeOutHandler, dustClouds, dustCloudInfo, dustCloudTexture, starInfo, seed, diameter, numberOfStars, clumpStarsInCenter, xStretch, yStretch, zStretch, spiralArms);
 	}
 	
 	public StarField(Optional<ResourceLocation> parentLocation, SpaceCoords coords, AxisRotation axisRotation, FadeOutHandler fadeOutHandler,
-					 StarInfo starInfo, long seed, int diameter, int numberOfStars, boolean clumpStarsInCenter,
+					 int dustClouds, DustCloudInfo dustCloudInfo, ResourceLocation dustCloudTexture, StarInfo starInfo, long seed, int diameter, int numberOfStars, boolean clumpStarsInCenter,
 					 double xStretch, double yStretch, double zStretch, List<SpiralArm> spiralArms)
 	{
-		this(parentLocation, Either.left(coords), axisRotation, fadeOutHandler, starInfo, seed, diameter, numberOfStars, clumpStarsInCenter, xStretch, yStretch, zStretch, spiralArms);
+		this(parentLocation, Either.left(coords), axisRotation, fadeOutHandler, dustClouds, dustCloudInfo, dustCloudTexture, starInfo, seed, diameter, numberOfStars, clumpStarsInCenter, xStretch, yStretch, zStretch, spiralArms);
 	}
 	
 	public StarField(Optional<ResourceLocation> parentLocation, StellarCoordinates.Equatorial coords, AxisRotation axisRotation, FadeOutHandler fadeOutHandler,
-					 StarInfo starInfo, long seed, int diameter, int numberOfStars, boolean clumpStarsInCenter,
+					 int dustClouds, DustCloudInfo dustCloudInfo, ResourceLocation dustCloudTexture, StarInfo starInfo, long seed, int diameter, int numberOfStars, boolean clumpStarsInCenter,
 					 double xStretch, double yStretch, double zStretch, List<SpiralArm> spiralArms)
 	{
-		this(parentLocation, Either.right(coords), axisRotation, fadeOutHandler, starInfo, seed, diameter, numberOfStars, clumpStarsInCenter, xStretch, yStretch, zStretch, spiralArms);
+		this(parentLocation, Either.right(coords), axisRotation, fadeOutHandler, dustClouds, dustCloudInfo, dustCloudTexture, starInfo, seed, diameter, numberOfStars, clumpStarsInCenter, xStretch, yStretch, zStretch, spiralArms);
+	}
+	
+	public int getDustClouds()
+	{
+		return dustClouds;
+	}
+	
+	public DustCloudInfo getDustCloudInfo()
+	{
+		return dustCloudInfo;
+	}
+	
+	public ResourceLocation getDustCloudTexture()
+	{
+		return dustCloudTexture;
+	}
+	public int getTotalDustClouds()
+	{
+		return totalDustClouds;
 	}
 	
 	public StarInfo getStarInfo()
@@ -143,6 +185,7 @@ public class StarField extends SpaceObject
 	{
 		return stars;
 	}
+	
 	public int getTotalStars()
 	{
 		return totalStars;
@@ -217,6 +260,8 @@ public class StarField extends SpaceObject
 		
 		int diameter = stars * 60;
 		
+		int dustClouds = stars / 20; //TODO Randomizing
+		
 		double degrees = 360D / numberOfArms;
 		
 		ArrayList<StarField.SpiralArm> arms = new ArrayList<StarField.SpiralArm>();
@@ -226,6 +271,7 @@ public class StarField extends SpaceObject
 		}
 		
 		StarField starField = new StarField(Optional.empty(), new SpaceCoords(x, y, z), axisRotation, FadeOutHandler.DEFAULT_STAR_FIELD_HANDLER,
+				dustClouds, DustCloudInfo.DEFAULT_DUST_CLOUD_INFO, DEFAULT_DUST_CLOUD_TEXTURE,
 				StarInfo.DEFAULT_STAR_INFO, seed, diameter, stars, true, xStretch, yStretch, zStretch, arms);
 		
 		return starField;
@@ -239,6 +285,10 @@ public class StarField extends SpaceObject
 	public CompoundTag serializeNBT()
 	{
 		CompoundTag tag = super.serializeNBT();
+		
+		tag.putInt(DUST_CLOUDS, dustClouds);
+		tag.putInt(TOTAL_DUST_CLOUDS, totalDustClouds);
+		tag.putString(DUST_CLOUD_TEXTURE, dustCloudTexture.toString());
 		
 		tag.putLong(SEED, seed);
 		
@@ -261,6 +311,7 @@ public class StarField extends SpaceObject
 		tag.put(SPIRAL_ARMS, armsTag);
 		
 		tag.put(STAR_INFO, starInfo.serializeNBT());
+		tag.put(DUST_CLOUD_INFO, dustCloudInfo.serializeNBT());
 		
 		return tag;
 	}
@@ -269,6 +320,10 @@ public class StarField extends SpaceObject
 	public void deserializeNBT(CompoundTag tag)
 	{
 		super.deserializeNBT(tag);
+		
+		dustClouds = tag.getInt(DUST_CLOUDS);
+		totalDustClouds = tag.getInt(TOTAL_DUST_CLOUDS);
+		dustCloudTexture = new ResourceLocation(tag.getString(DUST_CLOUD_TEXTURE));
 		
 		seed = tag.getLong(SEED);
 		
@@ -293,6 +348,9 @@ public class StarField extends SpaceObject
 		
 		this.starInfo = new StarInfo();
 		this.starInfo.deserializeNBT(tag.getCompound(STAR_INFO));
+		
+		this.dustCloudInfo = new DustCloudInfo();
+		this.dustCloudInfo.deserializeNBT(tag.getCompound(DUST_CLOUD_INFO));
 	}
 	
 	public static class SpiralArm implements INBTSerializable<CompoundTag>
@@ -303,6 +361,10 @@ public class StarField extends SpaceObject
 		public static final String ARM_THICKNESS = "arm_thickness";
 		public static final String CLUMP_STARS_IN_CENTER = "clump_stars_in_center";
 		
+		@Nullable
+		protected DustCloudInfo armDustCloudInfo;
+		protected int armDustClouds;
+		
 		protected int armStars;
 		protected double armRotation;
 		protected double armLength;
@@ -310,6 +372,9 @@ public class StarField extends SpaceObject
 		protected boolean clumpStarsInCenter;
 		
 		public static final Codec<SpiralArm> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+				Codec.INT.optionalFieldOf(DUST_CLOUDS, 0).forGetter(SpiralArm::armDustClouds),
+				DustCloudInfo.CODEC.optionalFieldOf(DUST_CLOUD_INFO).forGetter(SpiralArm::getDustCloudInfo),
+				
 				Codec.INT.fieldOf(STARS).forGetter(SpiralArm::armStars),
 				Codec.DOUBLE.fieldOf(ARM_ROTATION).forGetter(SpiralArm::armRotation),
 				Codec.DOUBLE.fieldOf(ARM_LENGTH).forGetter(SpiralArm::armLength),
@@ -319,8 +384,14 @@ public class StarField extends SpaceObject
 		
 		public SpiralArm() {}
 		
-		public SpiralArm(int armStars, boolean inDegrees, double armRotation, double armLength, double armThickness, boolean clumpStarsInCenter)
+		public SpiralArm(int armDustClouds, Optional<DustCloudInfo> dustCloudInfo, int armStars, boolean inDegrees, double armRotation, double armLength, double armThickness, boolean clumpStarsInCenter)
 		{
+			this.armDustClouds = armDustClouds;
+			if(dustCloudInfo.isPresent())
+				this.armDustCloudInfo = dustCloudInfo.get();
+			else
+				this.armDustCloudInfo = null;
+			
 			this.armStars = armStars;
 			this.armRotation = inDegrees ? Math.toRadians(armRotation) : armRotation;
 			this.armLength = armLength;
@@ -329,9 +400,19 @@ public class StarField extends SpaceObject
 			this.clumpStarsInCenter = clumpStarsInCenter;
 		}
 		
-		public SpiralArm(int armStars, double armRotation, double armLength, double armThickness, boolean clumpStarsInCenter)
+		public SpiralArm(int armDustClouds, Optional<DustCloudInfo> dustCloudInfo, int armStars, double armRotation, double armLength, double armThickness, boolean clumpStarsInCenter)
 		{
-			this(armStars, true, armRotation, armLength, armThickness, clumpStarsInCenter);
+			this(armDustClouds, dustCloudInfo, armStars, true, armRotation, armLength, armThickness, clumpStarsInCenter);
+		}
+		
+		public int armDustClouds()
+		{
+			return armDustClouds;
+		}
+		
+		public Optional<DustCloudInfo> getDustCloudInfo()
+		{
+			return Optional.ofNullable(armDustCloudInfo);
 		}
 		
 		public int armStars()
@@ -366,7 +447,9 @@ public class StarField extends SpaceObject
 			double armThickness = 1.75D + randomsource.nextDouble() * 2;
 			boolean clumpStarsInCenter = true;
 			
-			SpiralArm arm = new SpiralArm(stars, armRotation, armLength, armThickness, clumpStarsInCenter);
+			int dustClouds = stars / 20; //TODO Randomizing (Also randomize dust cloud info)
+			
+			SpiralArm arm = new SpiralArm(dustClouds, Optional.empty(), stars, armRotation, armLength, armThickness, clumpStarsInCenter);
 			
 			return arm;
 		}
@@ -379,6 +462,11 @@ public class StarField extends SpaceObject
 		public CompoundTag serializeNBT()
 		{
 			CompoundTag tag = new CompoundTag();
+			
+			tag.putInt(DUST_CLOUDS, armDustClouds);
+			
+			if(armDustCloudInfo != null)
+				tag.put(DUST_CLOUD_INFO, armDustCloudInfo.serializeNBT());
 			
 			tag.putInt(STARS, armStars);
 			
@@ -394,6 +482,16 @@ public class StarField extends SpaceObject
 		@Override
 		public void deserializeNBT(CompoundTag tag)
 		{
+			armDustClouds = tag.getInt(DUST_CLOUDS);
+			
+			if(tag.contains(DUST_CLOUD_INFO))
+			{
+				armDustCloudInfo = new DustCloudInfo();
+				armDustCloudInfo.deserializeNBT(tag.getCompound(DUST_CLOUD_INFO));
+			}
+			else
+				armDustCloudInfo = null;
+			
 			armStars = tag.getInt(STARS);
 			
 			armRotation = tag.getDouble(ARM_ROTATION);

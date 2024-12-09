@@ -16,6 +16,7 @@ public class SpaceTravelShaders
 	@Nullable
     private static StarShaderInstance rendertypeStarShater;
 	private static StarShaderInstance rendertypeStarTexShader;
+	private static DustCloudShaderInstance rendertypeDustCloudShader;
 	
 	@Mod.EventBusSubscriber(modid = SpaceTravel.MODID, value = Dist.CLIENT, bus= Mod.EventBusSubscriber.Bus.MOD)
     public static class ShaderInit
@@ -34,6 +35,12 @@ public class SpaceTravelShaders
 					{
 						rendertypeStarTexShader = (StarShaderInstance) shaderInstance;
 					});
+			
+			event.registerShader(new DustCloudShaderInstance(event.getResourceProvider(), new ResourceLocation(SpaceTravel.MODID,"rendertype_dust_cloud"), SpaceTravelVertexFormat.STAR_POS_COLOR_LY_TEX),
+					(shaderInstance) ->
+					{
+						rendertypeDustCloudShader = (DustCloudShaderInstance) shaderInstance;
+					});
         }
     }
 	
@@ -45,5 +52,10 @@ public class SpaceTravelShaders
 	public static StarShaderInstance starTexShader()
 	{
 		return rendertypeStarTexShader;
+	}
+	
+	public static DustCloudShaderInstance starDustCloudShader()
+	{
+		return rendertypeDustCloudShader;
 	}
 }
