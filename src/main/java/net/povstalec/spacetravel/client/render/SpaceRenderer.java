@@ -127,7 +127,7 @@ public class SpaceRenderer
 		
 		if(/*GeneralConfig.dust_clouds.get()*/true)
 		{
-			float dustCloudBrightness = 1;//StarField.dustCloudBrightness(viewCenter, level, camera, partialTicks);
+			float dustCloudBrightness = 0.5F;//StarField.dustCloudBrightness(viewCenter, level, camera, partialTicks);
 			for(Map.Entry<SpaceRegion.Position, ClientSpaceRegion> spaceRegionEntry : SPACE_REGIONS.entrySet())
 			{
 				spaceRegionEntry.getValue().renderDustClouds(renderCenter, level, camera, partialTicks, stack, projectionMatrix, setupFog, dustCloudBrightness);
