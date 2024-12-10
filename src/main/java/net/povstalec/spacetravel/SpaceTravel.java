@@ -8,6 +8,7 @@ import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.registries.DataPackRegistryEvent;
 import net.povstalec.spacetravel.common.config.SpaceRegionCommonConfig;
 import net.povstalec.spacetravel.common.config.SpaceTravelConfig;
+import net.povstalec.spacetravel.common.space.generation.StarFieldTemplate;
 import net.povstalec.spacetravel.common.space.objects.BlackHole;
 import net.povstalec.spacetravel.common.space.objects.Star;
 import net.povstalec.spacetravel.common.space.objects.StarField;
@@ -53,6 +54,10 @@ public class SpaceTravel
 		
 		modEventBus.addListener((DataPackRegistryEvent.NewRegistry event) ->
 		{
+			event.dataPackRegistry(Universe.REGISTRY_KEY, Universe.CODEC, Universe.CODEC);
+			
+			event.dataPackRegistry(StarFieldTemplate.REGISTRY_KEY, StarFieldTemplate.CODEC, StarFieldTemplate.CODEC);
+			
 			event.dataPackRegistry(StarField.REGISTRY_KEY, StarField.CODEC, StarField.CODEC);
 			event.dataPackRegistry(Star.REGISTRY_KEY, Star.CODEC, Star.CODEC);
 			event.dataPackRegistry(BlackHole.REGISTRY_KEY, BlackHole.CODEC, BlackHole.CODEC);
@@ -96,7 +101,7 @@ public class SpaceTravel
 		{
 			if(cap != null)
 			{
-				Optional<Universe> universe = Multiverse.get(level).getUniverse("main"); //TODO There can be other universes
+				Optional<Universe> universe = Multiverse.get(level).getUniverse(Multiverse.PRIME_UNIVERSE); //TODO There can be other universes
 				
 				if(universe.isPresent())
 				{

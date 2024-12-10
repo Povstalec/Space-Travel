@@ -1,22 +1,18 @@
 package net.povstalec.spacetravel.common.space;
 
-import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.common.util.INBTSerializable;
 import net.povstalec.spacetravel.SpaceTravel;
+import net.povstalec.spacetravel.common.space.generation.StarFieldTemplate;
 import net.povstalec.spacetravel.common.space.objects.SpaceObject;
-import net.povstalec.spacetravel.common.space.objects.StarField;
-import net.povstalec.spacetravel.common.util.*;
-import org.joml.Vector3f;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import javax.annotation.Nullable;
+import java.util.*;
 
 public class Universe implements INBTSerializable<CompoundTag>
 {
@@ -26,24 +22,98 @@ public class Universe implements INBTSerializable<CompoundTag>
 	public static final String SPACE_REGIONS = "space_regions";
 	public static final String SEED = "seed";
 	
-	private final HashMap<SpaceRegion.Position, SpaceRegion> spaceRegions;
+	//TODO Change it to list
+	private final ArrayList<StarFieldTemplate> starFieldTemplates = new ArrayList<StarFieldTemplate>();
+	private int totalStarFieldTemplateWeight = 0;
 	
+	private final HashMap<SpaceRegion.Position, SpaceRegion> spaceRegions;
 	private final HashMap<ResourceLocation, SpaceObject> spaceObjects; // Map of space objects that need to be added to this Universe
 	
-	private long seed;
+	@Nullable
+	private ResourceLocation location;
+	@Nullable
+	private Long seed;
+	
+	public static final Codec<Universe> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+			Codec.LONG.optionalFieldOf(SEED).forGetter(universe -> Optional.ofNullable(universe.seed)),
+			Area.CODEC.listOf().optionalFieldOf("saved_regions", new ArrayList<Area>()).forGetter(universe -> new ArrayList<Area>())
+	).apply(instance, Universe::new));
 	
 	public Universe()
 	{
 		spaceRegions = new HashMap<SpaceRegion.Position, SpaceRegion>();
-		
 		spaceObjects = new HashMap<ResourceLocation, SpaceObject>();
 	}
 	
-	public Universe(long seed)
+	public Universe(Optional<Long> seed, List<Area> forceSavedRegions)
 	{
 		this();
 		
-		this.seed = seed;
+		if(seed.isPresent())
+			this.seed = seed.get();
+		
+		for(Area area : forceSavedRegions)
+		{
+			for(long x = area.x; x <= area.xEnd; x++)
+			{
+				for(long y = area.y; y <= area.yEnd; y++)
+				{
+					for(long z = area.z; z <= area.zEnd; z++)
+					{
+						getRegionAt(x, y, z, false).markToSave();
+					}
+				}
+			}
+		}
+	}
+	
+	public void setupSeed(long seed)
+	{
+		if(this.seed == null)
+			this.seed = seed;
+	}
+	
+	public long getSeed()
+	{
+		if(seed == null)
+			return 0;
+		
+		return seed;
+	}
+	
+	public void setResourceLocation(ResourceLocation location)
+	{
+		this.location = location;
+	}
+	
+	@Nullable
+	public ResourceLocation getLocation()
+	{
+		return location;
+	}
+	
+	public void addStarFieldTemplate(StarFieldTemplate template)
+	{
+		starFieldTemplates.add(template);
+		totalStarFieldTemplateWeight += template.getWeight();
+	}
+	
+	public StarFieldTemplate randomStarFieldTemplate(Random random)
+	{
+		if(starFieldTemplates.isEmpty())
+			return StarFieldTemplate.DEFAULT_STAR_FIELD_TEMPLATE;
+		
+		int i = 0;
+		
+		for(int weight = random.nextInt(0, totalStarFieldTemplateWeight); i < starFieldTemplates.size() - 1; i++)
+		{
+			weight -= starFieldTemplates.get(i).getWeight();
+			
+			if(weight <= 0)
+				break;
+		}
+		
+		return starFieldTemplates.get(i);
 	}
 	
 	/**
@@ -70,7 +140,7 @@ public class Universe implements INBTSerializable<CompoundTag>
 		if(!generate)
 			return spaceRegions.computeIfAbsent(pos, position -> new SpaceRegion(pos));
 		else
-			return spaceRegions.computeIfAbsent(pos, position -> SpaceRegion.generateRegion(position, seed)); // TODO Handle seeds
+			return spaceRegions.computeIfAbsent(pos, position -> SpaceRegion.generateRegion(this, position, getSeed())); // TODO Handle seeds
 	}
 	
 	/**
@@ -183,7 +253,7 @@ public class Universe implements INBTSerializable<CompoundTag>
 		}
 		
 		tag.put(SPACE_REGIONS, spaceRegionsTag);
-		tag.putLong(SEED, seed);
+		tag.putLong(SEED, getSeed());
 		
 		return tag;
 	}
@@ -203,4 +273,43 @@ public class Universe implements INBTSerializable<CompoundTag>
 		seed = tag.getLong(SEED);
 	}
 	
+	
+	
+	public static class Area
+	{
+		public long x, y, z;
+		public long xEnd, yEnd, zEnd;
+		
+		public static final Codec<Area> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+				Codec.LONG.fieldOf("x").forGetter(area -> area.x),
+				Codec.LONG.fieldOf("y").forGetter(area -> area.y),
+				Codec.LONG.fieldOf("z").forGetter(area -> area.z),
+				
+				Codec.LONG.optionalFieldOf("x_end").forGetter(area -> Optional.ofNullable(area.xEnd)),
+				Codec.LONG.optionalFieldOf("y_end").forGetter(area -> Optional.ofNullable(area.yEnd)),
+				Codec.LONG.optionalFieldOf("z_end").forGetter(area -> Optional.ofNullable(area.zEnd))
+		).apply(instance, Area::new));
+		
+		public Area(long x, long y, long z, Optional<Long> xEnd, Optional<Long> yEnd, Optional<Long> zEnd)
+		{
+			this.x = x;
+			this.y = y;
+			this.z = z;
+			
+			if(xEnd.isPresent())
+				this.xEnd = xEnd.get();
+			else
+				this.xEnd = x;
+			
+			if(yEnd.isPresent())
+				this.yEnd = yEnd.get();
+			else
+				this.yEnd = y;
+			
+			if(zEnd.isPresent())
+				this.zEnd = zEnd.get();
+			else
+				this.zEnd = z;
+		}
+	}
 }

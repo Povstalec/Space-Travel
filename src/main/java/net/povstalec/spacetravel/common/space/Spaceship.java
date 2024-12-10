@@ -97,7 +97,7 @@ public class Spaceship extends OrbitingObject
 	@Nullable
 	private Map<SpaceRegion.Position, SpaceRegion> newSpaceRegions(MinecraftServer server, SpaceRegion.Position spaceRegionPos)
 	{
-		Optional<Universe> universe = Multiverse.get(server).getUniverse("main");
+		Optional<Universe> universe = Multiverse.get(server).getUniverse(Multiverse.PRIME_UNIVERSE);
 		
 		if(universe.isPresent())
 			return universe.get().getRegionsAt(spaceRegionPos, SpaceRegion.SPACE_REGION_LOAD_DISTANCE, true);

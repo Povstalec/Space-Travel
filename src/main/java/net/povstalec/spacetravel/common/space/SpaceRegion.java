@@ -6,7 +6,12 @@ import java.util.Optional;
 import java.util.Random;
 
 import com.mojang.datafixers.util.Either;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
 import net.minecraftforge.common.util.INBTSerializable;
 import net.povstalec.spacetravel.SpaceTravel;
@@ -87,7 +92,7 @@ public final class SpaceRegion implements INBTSerializable<CompoundTag>
 		return shouldSave;
 	}
 	
-	public static SpaceRegion generateRegion(Position pos, long seed)
+	public static SpaceRegion generateRegion(Universe universe, Position pos, long seed)
 	{
 		long usedSeed = seed + pos.hashCode();
 		
@@ -98,9 +103,21 @@ public final class SpaceRegion implements INBTSerializable<CompoundTag>
 		
 		int chance = random.nextInt(0, 101);
 		
-		if(chance >= 80)
+		if(chance > 90)
 		{
-			StarField starField = StarField.randomStarField(random, usedSeed, pos.lyX(), pos.lyY(), pos.lyZ());
+			long randomX = random.nextLong(0, SpaceRegion.LY_PER_REGION) - SpaceRegion.LY_PER_REGION_HALF;
+			long randomY = random.nextLong(0, SpaceRegion.LY_PER_REGION) - SpaceRegion.LY_PER_REGION_HALF;
+			long randomZ = random.nextLong(0, SpaceRegion.LY_PER_REGION) - SpaceRegion.LY_PER_REGION_HALF;
+			
+			long x = randomX + pos.lyX();
+			long y = randomY + pos.lyY();
+			long z = randomZ + pos.lyZ();
+			
+			double xRot = random.nextDouble(0, 360);
+			double yRot = random.nextDouble(0, 360);
+			double zRot = random.nextDouble(0, 360);
+			
+			StarField starField = universe.randomStarFieldTemplate(random).generateStarField(random, usedSeed, new SpaceCoords(x, y, z), new AxisRotation(true, xRot, yRot, zRot));
 			spaceRegion.addChild(starField);
 		}
 		

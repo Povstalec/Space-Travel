@@ -75,7 +75,7 @@ public class StarField extends SpaceObject
 			
 			StarInfo.CODEC.optionalFieldOf("star_info", StarInfo.DEFAULT_STAR_INFO).forGetter(StarField::getStarInfo),
 			Codec.LONG.fieldOf(SEED).forGetter(StarField::getSeed),
-			Codec.INT.fieldOf(DIAMETER_LY).forGetter(StarField::getDiameter),
+			Codec.intRange(0, Integer.MAX_VALUE).fieldOf(DIAMETER_LY).forGetter(StarField::getDiameter),
 			
 			Codec.intRange(0, 30000).fieldOf(STARS).forGetter(StarField::getStars),
 			Codec.BOOL.optionalFieldOf("clump_stars_in_center", true).forGetter(StarField::clumpStarsInCenter),
@@ -216,7 +216,7 @@ public class StarField extends SpaceObject
 		return spiralArms;
 	}
 	
-	public static StarField randomStarField(Random random, long seed, long xPos, long yPos, long zPos)
+	/*public static StarField randomStarField(Random random, long seed, long xPos, long yPos, long zPos)
 	{
 		long randomX = random.nextLong(0, SpaceRegion.LY_PER_REGION) - SpaceRegion.LY_PER_REGION_HALF;
 		long randomY = random.nextLong(0, SpaceRegion.LY_PER_REGION) - SpaceRegion.LY_PER_REGION_HALF;
@@ -275,7 +275,7 @@ public class StarField extends SpaceObject
 				StarInfo.DEFAULT_STAR_INFO, seed, diameter, stars, true, xStretch, yStretch, zStretch, arms);
 		
 		return starField;
-	}
+	}*/
 	
 	//============================================================================================
 	//*************************************Saving and Loading*************************************
@@ -440,7 +440,7 @@ public class StarField extends SpaceObject
 			return clumpStarsInCenter;
 		}
 		
-		public static SpiralArm randomSpiralArm(Random random, int starFieldStars, double armRotation)
+		/*public static SpiralArm randomSpiralArm(Random random, int starFieldStars, double armRotation)
 		{
 			int stars = starFieldStars + random.nextInt(0, starFieldStars / 2 + 1);
 			double armLength = 1.5D + random.nextDouble();
@@ -452,7 +452,7 @@ public class StarField extends SpaceObject
 			SpiralArm arm = new SpiralArm(dustClouds, Optional.empty(), stars, armRotation, armLength, armThickness, clumpStarsInCenter);
 			
 			return arm;
-		}
+		}*/
 		
 		//============================================================================================
 		//*************************************Saving and Loading*************************************

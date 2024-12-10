@@ -16,7 +16,9 @@ import net.minecraft.world.level.storage.DimensionDataStorage;
 import net.povstalec.spacetravel.SpaceTravel;
 import net.povstalec.spacetravel.common.space.SpaceRegion;
 import net.povstalec.spacetravel.common.space.Universe;
+import net.povstalec.spacetravel.common.space.generation.StarFieldTemplate;
 import net.povstalec.spacetravel.common.space.objects.BlackHole;
+import net.povstalec.spacetravel.common.space.objects.SpaceObject;
 import net.povstalec.spacetravel.common.space.objects.Star;
 import net.povstalec.spacetravel.common.space.objects.StarField;
 
@@ -25,8 +27,10 @@ public class Multiverse extends SavedData
 	private static final String FILE_NAME = SpaceTravel.MODID + "-multiverse";
 
 	private static final String UNIVERSES = "universes";
+	
+	public static final ResourceLocation PRIME_UNIVERSE = new ResourceLocation(SpaceTravel.MODID, "universe/prime");
 
-	private HashMap<String, Universe> universes = new HashMap<String, Universe>(); // TODO Maybe change it from String to something better?
+	private HashMap<ResourceLocation, Universe> universes = new HashMap<ResourceLocation, Universe>();
 	
 	private MinecraftServer server;
 	
@@ -45,7 +49,9 @@ public class Multiverse extends SavedData
 	
 	public void setupUniverse()
 	{
-		prepareMainUniverse();
+		registerUniverses(server);
+		
+		registerStarFieldTemplates(server);
 		
 		registerStarFields(server);
 		registerStars(server);
@@ -56,45 +62,75 @@ public class Multiverse extends SavedData
 		this.setDirty();
 	}
 	
-	private void prepareMainUniverse()
+	public void registerUniverses(MinecraftServer server)
 	{
-		if(universes.containsKey("main"))
-			SpaceTravel.LOGGER.error("Already contains main");
-		else
+		final RegistryAccess registries = server.registryAccess();
+		final Registry<Universe> starRegistry = registries.registryOrThrow(Universe.REGISTRY_KEY);
+		
+		Set<Map.Entry<ResourceKey<Universe>, Universe>> universeSet = starRegistry.entrySet();
+		universeSet.forEach((universeEntry) ->
 		{
-			Universe universe = new Universe(server.getWorldData().worldGenOptions().seed());
+			Universe universe = universeEntry.getValue();
+			ResourceLocation location = universeEntry.getKey().location().withPath("universe/" + universeEntry.getKey().location().getPath());
 			
-			Map<SpaceRegion.Position, SpaceRegion> regions = universe.getRegionsAt(new SpaceRegion.Position(0, 0, 0), 5, false);
+			universe.setResourceLocation(location);
+			universe.setupSeed(server.getWorldData().worldGenOptions().seed());
 			
-			for(Map.Entry<SpaceRegion.Position, SpaceRegion> region : regions.entrySet())
-			{
-				region.getValue().markToSave();
-			}
-			
-			universes.put("main", universe);
-			SpaceTravel.LOGGER.info("Created new main");
-		}
+			universes.put(location, universe);
+		});
+		SpaceTravel.LOGGER.info("Universes registered");
 	}
 	
-	public Optional<Universe> getUniverse(String name)
+	public Optional<Universe> getUniverse(ResourceLocation location)
 	{
-		if(!universes.containsKey(name))
+		if(!universes.containsKey(location))
 			return Optional.empty();
 		
-		return Optional.of(universes.get(name));
+		return Optional.of(universes.get(location));
 	}
 	
 	private void prepareUniverses()
 	{
-		for(Map.Entry<String, Universe> universeEntry : universes.entrySet())
+		for(Map.Entry<ResourceLocation, Universe> universeEntry : universes.entrySet())
 		{
 			universeEntry.getValue().prepareObjects();
+		}
+	}
+	
+	public void registerStarFieldTemplates(MinecraftServer server)
+	{
+		final RegistryAccess registries = server.registryAccess();
+		final Registry<StarFieldTemplate> templateRegistry = registries.registryOrThrow(StarFieldTemplate.REGISTRY_KEY);
+		
+		Set<Map.Entry<ResourceKey<StarFieldTemplate>, StarFieldTemplate>> templateSet = templateRegistry.entrySet();
+		templateSet.forEach((templateEntry) ->
+		{
+			StarFieldTemplate template = templateEntry.getValue();
+			
+			addStarFieldTemplateToAllUniverses(template);
+		});
+		SpaceTravel.LOGGER.info("Star Field Templates registered");
+	}
+	
+	private void addStarFieldTemplateToAllUniverses(StarFieldTemplate template)
+	{
+		for(Map.Entry<ResourceLocation, Universe> universeEntry : universes.entrySet())
+		{
+			universeEntry.getValue().addStarFieldTemplate(template);
 		}
 	}
 
 	//============================================================================================
 	//*********************************Registering Space Objects**********************************
 	//============================================================================================
+	
+	private void addObjectToAllUniverses(ResourceLocation location, SpaceObject spaceObject)
+	{
+		for(Map.Entry<ResourceLocation, Universe> universeEntry : universes.entrySet())
+		{
+			universeEntry.getValue().addSpaceObject(location, spaceObject);
+		}
+	}
 	
 	public void registerStarFields(MinecraftServer server)
 	{
@@ -109,9 +145,7 @@ public class Multiverse extends SavedData
 			
 			starField.setResourceLocation(location);
 			
-			Optional<Universe> universe = getUniverse("main");
-			if(universe.isPresent())
-				universe.get().addSpaceObject(location, starField);
+			addObjectToAllUniverses(location, starField);
 		});
 		SpaceTravel.LOGGER.info("Star Fields registered");
 	}
@@ -129,9 +163,7 @@ public class Multiverse extends SavedData
 			
 			star.setResourceLocation(location);
 			
-			Optional<Universe> universe = getUniverse("main");
-			if(universe.isPresent())
-				universe.get().addSpaceObject(location, star);
+			addObjectToAllUniverses(location, star);
 		});
 		SpaceTravel.LOGGER.info("Stars registered");
 	}
@@ -149,9 +181,7 @@ public class Multiverse extends SavedData
 			
 			blackHole.setResourceLocation(location);
 			
-			Optional<Universe> universe = getUniverse("main");
-			if(universe.isPresent())
-				universe.get().addSpaceObject(location, blackHole);
+			addObjectToAllUniverses(location, blackHole);
 		});
 		SpaceTravel.LOGGER.info("Black Holes registered");
 	}
@@ -173,7 +203,7 @@ public class Multiverse extends SavedData
 	{
 		CompoundTag tag = new CompoundTag();
 		
-		for(Map.Entry<String, Universe> universeEntry : universes.entrySet())
+		for(Map.Entry<ResourceLocation, Universe> universeEntry : universes.entrySet())
 		{
 			tag.put(universeEntry.getKey().toString(), universeEntry.getValue().serializeNBT());
 		}
@@ -195,7 +225,7 @@ public class Multiverse extends SavedData
 			Universe universe = new Universe();
 			universe.deserializeNBT(tag.getCompound(name));
 			
-			universes.put(name, universe);
+			universes.put(new ResourceLocation(name), universe);
 			
 			SpaceTravel.LOGGER.info("Deserialized " + name);
 		}
