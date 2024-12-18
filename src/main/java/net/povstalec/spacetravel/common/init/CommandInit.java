@@ -41,16 +41,32 @@ public class CommandInit
 		
 		dispatcher.register(Commands.literal(SpaceTravel.MODID)
 				.then(Commands.literal("spaceship")
-					.then(Commands.literal("speed")
-							.then(Commands.argument("x_axis", IntegerArgumentType.integer())
-									.then(Commands.argument("y_axis", IntegerArgumentType.integer())
-											.then(Commands.argument("z_axis", IntegerArgumentType.integer()).executes(CommandInit::setSpaceshipSpeed))))
-							.requires(commandSourceStack -> commandSourceStack.hasPermission(2)))
-					.then(Commands.literal("rotate")
-							.then(Commands.argument("x_axis", DoubleArgumentType.doubleArg())
-									.then(Commands.argument("y_axis", DoubleArgumentType.doubleArg())
-											.then(Commands.argument("z_axis", DoubleArgumentType.doubleArg()).executes(CommandInit::rotateSpaceship)
-													.requires(commandSourceStack -> commandSourceStack.hasPermission(2))))))));
+						.then(Commands.literal("velocity")
+								.then(Commands.literal("get").executes(CommandInit::getSpaceshipSpeed))
+								.then(Commands.literal("set")
+										.then(Commands.argument("x_axis", IntegerArgumentType.integer())
+												.then(Commands.argument("y_axis", IntegerArgumentType.integer())
+														.then(Commands.argument("z_axis", IntegerArgumentType.integer()).executes(CommandInit::setSpaceshipSpeed))))
+																.requires(commandSourceStack -> commandSourceStack.hasPermission(2)))
+								.then(Commands.literal("add")
+										.then(Commands.argument("x_axis", IntegerArgumentType.integer())
+												.then(Commands.argument("y_axis", IntegerArgumentType.integer())
+														.then(Commands.argument("z_axis", IntegerArgumentType.integer()).executes(CommandInit::addSpaceshipSpeed))))
+																.requires(commandSourceStack -> commandSourceStack.hasPermission(2))))
+						.then(Commands.literal("rotation")
+								.then(Commands.literal("get").executes(CommandInit::getSpaceshipRotation))
+								.then(Commands.literal("set")
+										.then(Commands.argument("x_axis", DoubleArgumentType.doubleArg())
+												.then(Commands.argument("y_axis", DoubleArgumentType.doubleArg())
+														.then(Commands.argument("z_axis", DoubleArgumentType.doubleArg()).executes(CommandInit::setSpaceshipRotation)
+																.requires(commandSourceStack -> commandSourceStack.hasPermission(2))))))
+								.then(Commands.literal("add")
+										.then(Commands.argument("x_axis", DoubleArgumentType.doubleArg())
+												.then(Commands.argument("y_axis", DoubleArgumentType.doubleArg())
+														.then(Commands.argument("z_axis", DoubleArgumentType.doubleArg()).executes(CommandInit::addSpaceshipRotation)
+																.requires(commandSourceStack -> commandSourceStack.hasPermission(2)))))))
+						.then(Commands.literal("freeze").executes(CommandInit::freezeSpaceship)
+								.requires(commandSourceStack -> commandSourceStack.hasPermission(2)))));
 		
 		dispatcher.register(Commands.literal(SpaceTravel.MODID)
 				.then(Commands.literal("spaceship")
@@ -135,13 +151,63 @@ public class CommandInit
 			{
 				if(cap != null)
 					cap.spaceship.setSpeed(xAxis, yAxis, zAxis);
+				context.getSource().sendSuccess(() -> Component.literal("Set velocity → vx="+cap.spaceship.getxAxisSpeed()+
+						"ly/t, vy="+cap.spaceship.getyAxisSpeed()+
+						"ly/t, vz="+cap.spaceship.getzAxisSpeed()+"ly/t"), false); //TODO Translation
 			});
 		}
 		
 		return Command.SINGLE_SUCCESS;
 	}
+
+	private static int addSpaceshipSpeed(CommandContext<CommandSourceStack> context) throws CommandSyntaxException
+	{
+		ServerLevel level = context.getSource().getLevel();
+		int xAxis = IntegerArgumentType.getInteger(context, "x_axis");
+		int yAxis = IntegerArgumentType.getInteger(context, "y_axis");
+		int zAxis = IntegerArgumentType.getInteger(context, "z_axis");
+
+		if(level != null)
+		{
+			LazyOptional<SpaceshipCapability> spaceshipCapability = level.getCapability(SpaceshipCapabilityProvider.SPACESHIP);
+
+			spaceshipCapability.ifPresent(cap ->
+			{
+				if(cap != null)
+					cap.spaceship.setSpeed(cap.spaceship.getxAxisSpeed()+xAxis,
+							cap.spaceship.getyAxisSpeed()+yAxis,
+							cap.spaceship.getzAxisSpeed()+zAxis);
+				context.getSource().sendSuccess(() -> Component.literal("Added velocity vx="+xAxis+"ly/t, vy="+yAxis+"ly/t, vz="+zAxis+
+						"ly/t → vx="+cap.spaceship.getxAxisSpeed()+
+						"ly/t, vy="+cap.spaceship.getyAxisSpeed()+
+						"ly/t, vz="+cap.spaceship.getzAxisSpeed()+"ly/t"), false); //TODO Translation
+			});
+		}
+
+		return Command.SINGLE_SUCCESS;
+	}
+
+	private static int getSpaceshipSpeed(CommandContext<CommandSourceStack> context) throws CommandSyntaxException
+	{
+		ServerLevel level = context.getSource().getLevel();
+
+		if(level != null)
+		{
+			LazyOptional<SpaceshipCapability> spaceshipCapability = level.getCapability(SpaceshipCapabilityProvider.SPACESHIP);
+
+			spaceshipCapability.ifPresent(cap ->
+			{
+				if(cap != null)
+					context.getSource().sendSuccess(() -> Component.literal("vx="+cap.spaceship.getxAxisSpeed()+
+							"ly/t, vy="+cap.spaceship.getyAxisSpeed()+
+							"ly/t, vz="+cap.spaceship.getzAxisSpeed()+"ly/t"), false); //TODO Translation
+			});
+		}
+
+		return Command.SINGLE_SUCCESS;
+	}
 	
-	private static int rotateSpaceship(CommandContext<CommandSourceStack> context) throws CommandSyntaxException
+	private static int setSpaceshipRotation(CommandContext<CommandSourceStack> context) throws CommandSyntaxException
 	{
 		ServerLevel level = context.getSource().getLevel();
 		double xAxis = DoubleArgumentType.getDouble(context, "x_axis");
@@ -156,9 +222,79 @@ public class CommandInit
 			{
 				if(cap != null)
 					cap.spaceship.rotate(xAxis, yAxis, zAxis);
+				context.getSource().sendSuccess(() -> Component.literal("Set rotation → xRot="+cap.spaceship.getxAxisRotation()+
+						"deg/t, yRot="+cap.spaceship.getyAxisRotation()+
+						"deg/t, zRot="+cap.spaceship.getzAxisRotation()+"deg/t"), false); //TODO Translation
 			});
 		}
 		
+		return Command.SINGLE_SUCCESS;
+	}
+
+	private static int addSpaceshipRotation(CommandContext<CommandSourceStack> context) throws CommandSyntaxException
+	{
+		ServerLevel level = context.getSource().getLevel();
+		double xAxis = DoubleArgumentType.getDouble(context, "x_axis");
+		double yAxis = DoubleArgumentType.getDouble(context, "y_axis");
+		double zAxis = DoubleArgumentType.getDouble(context, "z_axis");
+
+		if(level != null)
+		{
+			LazyOptional<SpaceshipCapability> spaceshipCapability = level.getCapability(SpaceshipCapabilityProvider.SPACESHIP);
+
+			spaceshipCapability.ifPresent(cap ->
+			{
+				if(cap != null)
+					cap.spaceship.rotate(cap.spaceship.getxAxisRotation()+xAxis,
+							cap.spaceship.getyAxisRotation()+yAxis,
+							cap.spaceship.getzAxisRotation()+zAxis);
+				context.getSource().sendSuccess(() -> Component.literal("Added rotation xRot="+xAxis+"deg/t, yRot="+yAxis+"deg/t, zRot="+zAxis+
+						"deg/t → xRot="+cap.spaceship.getxAxisRotation()+
+						"deg/t, yRot="+cap.spaceship.getyAxisRotation()+
+						"deg/t, zRot="+cap.spaceship.getzAxisRotation()+"deg/t"), false); //TODO Translation
+			});
+		}
+
+		return Command.SINGLE_SUCCESS;
+	}
+
+	private static int getSpaceshipRotation(CommandContext<CommandSourceStack> context) throws CommandSyntaxException
+	{
+		ServerLevel level = context.getSource().getLevel();
+
+		if(level != null)
+		{
+			LazyOptional<SpaceshipCapability> spaceshipCapability = level.getCapability(SpaceshipCapabilityProvider.SPACESHIP);
+
+			spaceshipCapability.ifPresent(cap ->
+			{
+				if(cap != null)
+					context.getSource().sendSuccess(() -> Component.literal("xRot="+cap.spaceship.getxAxisRotation()+
+							"deg/t, yRot="+cap.spaceship.getyAxisRotation()+
+							"deg/t, zRot="+cap.spaceship.getzAxisRotation()+"deg/t"), false); //TODO Translation
+			});
+		}
+
+		return Command.SINGLE_SUCCESS;
+	}
+
+	private static int freezeSpaceship(CommandContext<CommandSourceStack> context) throws CommandSyntaxException
+	{
+		ServerLevel level = context.getSource().getLevel();
+
+		if(level != null)
+		{
+			LazyOptional<SpaceshipCapability> spaceshipCapability = level.getCapability(SpaceshipCapabilityProvider.SPACESHIP);
+
+			spaceshipCapability.ifPresent(cap ->
+			{
+				if(cap != null)
+					cap.spaceship.setSpeed(0, 0, 0);
+					cap.spaceship.rotate(0,0,0);
+					context.getSource().sendSuccess(() -> Component.literal("Cancelled all velocity and rotation!"), false); //TODO Translation
+			});
+		}
+
 		return Command.SINGLE_SUCCESS;
 	}
 }
