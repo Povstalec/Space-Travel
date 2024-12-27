@@ -2,7 +2,6 @@ package net.povstalec.spacetravel.client.render.level;
 
 import javax.annotation.Nullable;
 
-import net.povstalec.spacetravel.client.render.SpaceRenderer;
 import org.joml.Matrix4f;
 
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -59,23 +58,5 @@ public class SpaceTravelDimensionSpecialEffects extends DimensionSpecialEffects
 	public static void register(RegisterDimensionSpecialEffectsEvent event)
 	{
 		event.register(SpaceTravelDimensionSpecialEffects.SPACE_EFFECTS, new SpaceShipSpecialEffects());
-	}
-	
-	
-	public static class Space extends SpaceTravelDimensionSpecialEffects
-	{
-		public Space()
-		{
-			super(Float.NaN, false, DimensionSpecialEffects.SkyType.NONE, false, false);
-		}
-		
-		@Override
-	    public boolean renderSky(ClientLevel level, int ticks, float partialTicks, PoseStack poseStack, Camera camera, Matrix4f projectionMatrix, boolean isFoggy, Runnable setupFog)
-	    {
-			if(SpaceRenderer.renderCenter == null)
-				return false;
-			
-			return SpaceRenderer.renderCenter.renderSky(level, ticks, partialTicks, poseStack, camera, projectionMatrix, isFoggy, setupFog);
-	    }
 	}
 }

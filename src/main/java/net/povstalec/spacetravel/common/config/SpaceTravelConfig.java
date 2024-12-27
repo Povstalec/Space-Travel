@@ -34,13 +34,7 @@ public class SpaceTravelConfig
 
 		CLIENT_BUILDER.push("Space Travel Client Config");
 		
-		CLIENT_BUILDER.push("Space Region Config");
-		SpaceRegionClientConfig.init(CLIENT_BUILDER);
-		CLIENT_BUILDER.pop();
-		
-		CLIENT_BUILDER.push("Star Field Config");
-		StarFieldClientConfig.init(CLIENT_BUILDER);
-		CLIENT_BUILDER.pop();
+		//TODO Is a client config even needed?
 		
 		CLIENT_BUILDER.pop();
 		CLIENT_CONFIG = CLIENT_BUILDER.build();

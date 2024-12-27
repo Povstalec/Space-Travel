@@ -101,7 +101,6 @@ public class ClientAccess
 			{
 				SpaceObject spaceObject = null;
 				ResourceLocation objectType = new ResourceLocation(objectTypeString);
-				System.out.println("Deserializing " + objectTypeString);
 				// Deserializes object based on its type specified in the object_type
 				if(objectType.equals(ORBITING_OBJECT_LOCATION))
 					spaceObject = deserializeOrbitingObject(childTag);
@@ -121,15 +120,15 @@ public class ClientAccess
 	private static StarField deserializeStarField(CompoundTag childTag)
 	{
 		StarField starField = new StarField();
-		starField.fromTag(childTag);System.out.println("STAR FIELD");
+		starField.fromTag(childTag);
 		
 		return starField;
 	}
 	
 	private static Star deserializeStar(CompoundTag childTag)
-	{System.out.println("STAR A");
-		Star star = new Star();System.out.println("STAR B");
-		star.fromTag(childTag);System.out.println("STAR C");
+	{
+		Star star = new Star();
+		star.fromTag(childTag);
 		
 		return star;
 	}
@@ -137,7 +136,7 @@ public class ClientAccess
 	private static BlackHole deserializeBlackHole(CompoundTag childTag)
 	{
 		BlackHole blackHole = new BlackHole();
-		blackHole.fromTag(childTag);System.out.println("BLACK_HOLE");
+		blackHole.fromTag(childTag);
 		
 		return blackHole;
 	}
@@ -145,7 +144,7 @@ public class ClientAccess
 	private static OrbitingObject deserializeOrbitingObject(CompoundTag childTag)
 	{
 		OrbitingObject orbitingObject = new OrbitingObject();
-		orbitingObject.fromTag(childTag);System.out.println("ORBITING OBJECT");
+		orbitingObject.fromTag(childTag);
 		
 		return orbitingObject;
 	}
