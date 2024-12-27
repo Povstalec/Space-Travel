@@ -1,13 +1,14 @@
 package net.povstalec.spacetravel.common.space.objects;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 
 import javax.annotation.Nullable;
 
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.povstalec.spacetravel.common.util.AxisRot;
+import net.povstalec.spacetravel.common.util.SpacePos;
 import net.povstalec.spacetravel.common.util.StellarCoordinates;
 import org.joml.Vector3f;
 
@@ -21,14 +22,9 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.common.util.INBTSerializable;
 import net.povstalec.spacetravel.SpaceTravel;
 import net.povstalec.spacetravel.common.space.SpaceObjectDeserializer;
-import net.povstalec.spacetravel.common.util.AxisRotation;
-import net.povstalec.spacetravel.common.util.SpaceCoords;
-import net.povstalec.spacetravel.common.util.TextureLayer;
 
 public class SpaceObject implements INBTSerializable<CompoundTag>
 {
-	public static final float DEFAULT_DISTANCE = 100.0F;
-	
 	public static final String OBJECT_TYPE = "object_type";
 	
 	public static final String PARENT_KEY = "parent_key";
@@ -56,8 +52,8 @@ public class SpaceObject implements INBTSerializable<CompoundTag>
 	
 	protected ArrayList<SpaceObject> children = new ArrayList<SpaceObject>();
 	
-	protected SpaceCoords coords; // Absolute coordinates of the center (not necessarily the object itself, since it can be orbiting some other object for example)
-	protected AxisRotation axisRotation;
+	protected SpacePos coords; // Absolute coordinates of the center (not necessarily the object itself, since it can be orbiting some other object for example)
+	protected AxisRot axisRot;
 	
 	protected FadeOutHandler fadeOutHandler;
 	
@@ -67,8 +63,8 @@ public class SpaceObject implements INBTSerializable<CompoundTag>
 	
 	public SpaceObject(){}
 	
-	public SpaceObject(ResourceLocation objectType, Optional<ResourceLocation> parentLocation, Either<SpaceCoords, StellarCoordinates.Equatorial> coords,
-					   AxisRotation axisRotation, FadeOutHandler fadeOutHandler)
+	public SpaceObject(ResourceLocation objectType, Optional<ResourceLocation> parentLocation, Either<SpacePos, StellarCoordinates.Equatorial> coords,
+					   AxisRot axisRot, FadeOutHandler fadeOutHandler)
 	{
 		this.objectType = objectType;
 		
@@ -80,7 +76,7 @@ public class SpaceObject implements INBTSerializable<CompoundTag>
 		else
 			this.coords = coords.right().get().toGalactic().toSpaceCoords();
 		
-		this.axisRotation = axisRotation;
+		this.axisRot = axisRot;
 		
 		this.fadeOutHandler = fadeOutHandler;
 	}
@@ -92,20 +88,20 @@ public class SpaceObject implements INBTSerializable<CompoundTag>
 	
 	public boolean isInitialized()
 	{
-		return objectType != null && coords != null && axisRotation != null;
+		return objectType != null && coords != null && axisRot != null;
 	}
 	
-	public SpaceCoords getSpaceCoords()
+	public SpacePos getSpaceCoords()
 	{
 		return this.coords;
 	}
 	
-	public SpaceCoords addSpaceCoords(SpaceCoords other)
+	public SpacePos addSpaceCoords(SpacePos other)
 	{
 		return this.coords.add(other);
 	}
 	
-	public Vector3f getPosition(boolean canClamp, AxisRotation axisRotation, long ticks, float partialTicks)
+	public Vector3f getPosition(boolean canClamp, AxisRot axisRot, long ticks, float partialTicks)
 	{
 		return new Vector3f();
 	}
@@ -115,9 +111,9 @@ public class SpaceObject implements INBTSerializable<CompoundTag>
 		return new Vector3f();
 	}
 	
-	public AxisRotation getAxisRotation()
+	public AxisRot getAxisRotation()
 	{
-		return axisRotation;
+		return axisRot;
 	}
 	
 	public Optional<ResourceLocation> getParentLocation()
@@ -174,9 +170,9 @@ public class SpaceObject implements INBTSerializable<CompoundTag>
 		child.parent = this;
 		child.coords = child.coords.add(this.coords);
 		
-		child.axisRotation = child.axisRotation.add(this.axisRotation);
+		child.axisRot = child.axisRot.add(this.axisRot);
 		
-		child.addCoordsAndRotationToChildren(this.coords, this.axisRotation);
+		child.addCoordsAndRotationToChildren(this.coords, this.axisRot);
 	}
 	
 	public ArrayList<SpaceObject> getChildren()
@@ -184,14 +180,14 @@ public class SpaceObject implements INBTSerializable<CompoundTag>
 		return children;
 	}
 	
-	protected void addCoordsAndRotationToChildren(SpaceCoords coords, AxisRotation axisRotation)
+	protected void addCoordsAndRotationToChildren(SpacePos coords, AxisRot axisRot)
 	{
 		for(SpaceObject childOfChild : this.children)
 		{
 			childOfChild.coords = childOfChild.coords.add(coords);
-			childOfChild.axisRotation = childOfChild.axisRotation.add(axisRotation);
+			childOfChild.axisRot = childOfChild.axisRot.add(axisRot);
 			
-			childOfChild.addCoordsAndRotationToChildren(coords, axisRotation);
+			childOfChild.addCoordsAndRotationToChildren(coords, axisRot);
 		}
 	}
 	
@@ -208,18 +204,30 @@ public class SpaceObject implements INBTSerializable<CompoundTag>
 	//*************************************Saving and Loading*************************************
 	//============================================================================================
 	
+	protected void toBufferAdditional(FriendlyByteBuf buffer)
+	{
+	
+	}
+	
+	public final void toBuffer(FriendlyByteBuf buffer)
+	{
+		buffer.writeResourceLocation(objectType);
+		
+		toBufferAdditional(buffer);
+	}
+	
 	public void writeToBuffer(FriendlyByteBuf buffer)
 	{
 		buffer.writeResourceLocation(objectType);
 		buffer.writeOptional(Optional.ofNullable(parentLocation), (buf, location) -> buf.writeResourceLocation(location));
 		coords.writeToBuffer(buffer);
-		axisRotation.writeToBuffer(buffer);
+		axisRot.writeToBuffer(buffer);
 		fadeOutHandler.writeToBuffer(buffer);
 	}
 	
 	public static SpaceObject readFromBuffer(FriendlyByteBuf buffer)
 	{
-		return new SpaceObject(buffer.readResourceLocation(), buffer.readOptional((buf) -> buf.readResourceLocation()), Either.left(SpaceCoords.readFromBuffer(buffer)), AxisRotation.readFromBuffer(buffer), FadeOutHandler.readFromBuffer(buffer));
+		return new SpaceObject(buffer.readResourceLocation(), buffer.readOptional((buf) -> buf.readResourceLocation()), Either.left(SpacePos.readFromBuffer(buffer)), AxisRot.readFromBuffer(buffer), FadeOutHandler.readFromBuffer(buffer));
 	}
 	
 	@Override
@@ -248,7 +256,7 @@ public class SpaceObject implements INBTSerializable<CompoundTag>
 		
 		tag.put(COORDS, coords.serializeNBT());
 		
-		tag.put(AXIS_ROTATION, axisRotation.serializeNBT());
+		tag.put(AXIS_ROTATION, axisRot.serializeNBT());
 
 		// Serialize Children
 		CompoundTag childrenTag = new CompoundTag();
@@ -276,11 +284,11 @@ public class SpaceObject implements INBTSerializable<CompoundTag>
 		if(tag.contains(PARENT_KEY))
 			this.parentLocation = new ResourceLocation(tag.getString(PARENT_KEY));
 		
-		this.coords = new SpaceCoords();
+		this.coords = new SpacePos();
 		coords.deserializeNBT(tag.getCompound(COORDS));
 		
-		this.axisRotation = new AxisRotation();
-		axisRotation.deserializeNBT(tag.getCompound(AXIS_ROTATION));
+		this.axisRot = new AxisRot();
+		axisRot.deserializeNBT(tag.getCompound(AXIS_ROTATION));
 		
 		// Deserialize Children
 		CompoundTag childrenTag = tag.getCompound(CHILDREN);
@@ -304,40 +312,40 @@ public class SpaceObject implements INBTSerializable<CompoundTag>
 		public static final String FADE_OUT_END_DISTANCE = "fade_out_end_distance";
 		public static final String MAX_CHILD_RENDER_DISTANCE = "max_child_render_distance";
 		
-		public static final FadeOutHandler DEFAULT_PLANET_HANDLER = new FadeOutHandler(new SpaceCoords.SpaceDistance(70000000000D), new SpaceCoords.SpaceDistance(100000000000D), new SpaceCoords.SpaceDistance(100000000000D));
-		public static final FadeOutHandler DEFAULT_STAR_HANDLER = new FadeOutHandler(new SpaceCoords.SpaceDistance(3000000L), new SpaceCoords.SpaceDistance(5000000L), new SpaceCoords.SpaceDistance(100000000000D));
-		public static final FadeOutHandler DEFAULT_STAR_FIELD_HANDLER = new FadeOutHandler(new SpaceCoords.SpaceDistance(3000000L), new SpaceCoords.SpaceDistance(5000000L), new SpaceCoords.SpaceDistance(5000000L));
+		public static final FadeOutHandler DEFAULT_PLANET_HANDLER = new FadeOutHandler(new SpacePos.SpaceDist(70000000000D), new SpacePos.SpaceDist(100000000000D), new SpacePos.SpaceDist(100000000000D));
+		public static final FadeOutHandler DEFAULT_STAR_HANDLER = new FadeOutHandler(new SpacePos.SpaceDist(3000000L), new SpacePos.SpaceDist(5000000L), new SpacePos.SpaceDist(100000000000D));
+		public static final FadeOutHandler DEFAULT_STAR_FIELD_HANDLER = new FadeOutHandler(new SpacePos.SpaceDist(3000000L), new SpacePos.SpaceDist(5000000L), new SpacePos.SpaceDist(5000000L));
 		
-		private SpaceCoords.SpaceDistance fadeOutStartDistance;
-		private SpaceCoords.SpaceDistance fadeOutEndDistance;
-		private SpaceCoords.SpaceDistance maxChildRenderDistance;
+		private SpacePos.SpaceDist fadeOutStartDistance;
+		private SpacePos.SpaceDist fadeOutEndDistance;
+		private SpacePos.SpaceDist maxChildRenderDistance;
 		
 		public static final Codec<FadeOutHandler> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-				SpaceCoords.SpaceDistance.CODEC.fieldOf(FADE_OUT_START_DISTANCE).forGetter(FadeOutHandler::getFadeOutStartDistance),
-				SpaceCoords.SpaceDistance.CODEC.fieldOf(FADE_OUT_END_DISTANCE).forGetter(FadeOutHandler::getFadeOutEndDistance),
-				SpaceCoords.SpaceDistance.CODEC.fieldOf(MAX_CHILD_RENDER_DISTANCE).forGetter(FadeOutHandler::getMaxChildRenderDistance)
+				SpacePos.SpaceDist.CODEC.fieldOf(FADE_OUT_START_DISTANCE).forGetter(FadeOutHandler::getFadeOutStartDistance),
+				SpacePos.SpaceDist.CODEC.fieldOf(FADE_OUT_END_DISTANCE).forGetter(FadeOutHandler::getFadeOutEndDistance),
+				SpacePos.SpaceDist.CODEC.fieldOf(MAX_CHILD_RENDER_DISTANCE).forGetter(FadeOutHandler::getMaxChildRenderDistance)
 		).apply(instance, FadeOutHandler::new));
 		
 		public FadeOutHandler() {};
 		
-		public FadeOutHandler(SpaceCoords.SpaceDistance fadeOutStartDistance, SpaceCoords.SpaceDistance fadeOutEndDistance, SpaceCoords.SpaceDistance maxChildRenderDistance)
+		public FadeOutHandler(SpacePos.SpaceDist fadeOutStartDistance, SpacePos.SpaceDist fadeOutEndDistance, SpacePos.SpaceDist maxChildRenderDistance)
 		{
 			this.fadeOutStartDistance = fadeOutStartDistance;
 			this.fadeOutEndDistance = fadeOutEndDistance;
 			this.maxChildRenderDistance = maxChildRenderDistance;
 		}
 		
-		public SpaceCoords.SpaceDistance getFadeOutStartDistance()
+		public SpacePos.SpaceDist getFadeOutStartDistance()
 		{
 			return fadeOutStartDistance;
 		}
 		
-		public SpaceCoords.SpaceDistance getFadeOutEndDistance()
+		public SpacePos.SpaceDist getFadeOutEndDistance()
 		{
 			return fadeOutEndDistance;
 		}
 		
-		public SpaceCoords.SpaceDistance getMaxChildRenderDistance()
+		public SpacePos.SpaceDist getMaxChildRenderDistance()
 		{
 			return maxChildRenderDistance;
 		}
@@ -351,7 +359,7 @@ public class SpaceObject implements INBTSerializable<CompoundTag>
 		
 		public static FadeOutHandler readFromBuffer(FriendlyByteBuf buffer)
 		{
-			return new FadeOutHandler(SpaceCoords.SpaceDistance.readFromBuffer(buffer), SpaceCoords.SpaceDistance.readFromBuffer(buffer), SpaceCoords.SpaceDistance.readFromBuffer(buffer));
+			return new FadeOutHandler(SpacePos.SpaceDist.readFromBuffer(buffer), SpacePos.SpaceDist.readFromBuffer(buffer), SpacePos.SpaceDist.readFromBuffer(buffer));
 		}
 		
 		@Override
@@ -369,13 +377,13 @@ public class SpaceObject implements INBTSerializable<CompoundTag>
 		@Override
 		public void deserializeNBT(CompoundTag tag)
 		{
-			fadeOutStartDistance = new SpaceCoords.SpaceDistance(0);
+			fadeOutStartDistance = new SpacePos.SpaceDist(0);
 			fadeOutStartDistance.deserializeNBT(tag.getCompound(FADE_OUT_START_DISTANCE));
 			
-			fadeOutEndDistance = new SpaceCoords.SpaceDistance(0);
+			fadeOutEndDistance = new SpacePos.SpaceDist(0);
 			fadeOutEndDistance.deserializeNBT(tag.getCompound(FADE_OUT_END_DISTANCE));
 			
-			maxChildRenderDistance = new SpaceCoords.SpaceDistance(0);
+			maxChildRenderDistance = new SpacePos.SpaceDist(0);
 			maxChildRenderDistance.deserializeNBT(tag.getCompound(MAX_CHILD_RENDER_DISTANCE));
 		}
 	}

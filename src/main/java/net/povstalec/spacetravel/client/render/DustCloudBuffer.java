@@ -8,7 +8,7 @@ import com.mojang.blaze3d.vertex.BufferUploader;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import net.minecraft.client.Minecraft;
 import net.povstalec.spacetravel.client.render.shaders.DustCloudShaderInstance;
-import net.povstalec.spacetravel.common.util.SpaceCoords;
+import net.povstalec.spacetravel.common.util.SpacePos;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.lwjgl.opengl.GL15C;
@@ -124,7 +124,7 @@ public class DustCloudBuffer implements AutoCloseable
 		return rendersystem$autostorageindexbuffer != null ? rendersystem$autostorageindexbuffer.type() : this.indexType;
 	}
 	
-	public void drawWithShader(Matrix4f modelViewMatrix, Matrix4f projectionMatrix, SpaceCoords relativeSpacePos, DustCloudShaderInstance shaderInstance)
+	public void drawWithShader(Matrix4f modelViewMatrix, Matrix4f projectionMatrix, SpacePos relativeSpacePos, DustCloudShaderInstance shaderInstance)
 	{
 		Vector3f relativeVectorLy = new Vector3f((float) relativeSpacePos.x().ly(), (float) relativeSpacePos.y().ly(), (float) relativeSpacePos.z().ly());
 		Vector3f relativeVectorKm = new Vector3f((float) relativeSpacePos.x().km(), (float) relativeSpacePos.y().km(), (float) relativeSpacePos.z().km());

@@ -2,9 +2,7 @@ package net.povstalec.spacetravel.client;
 
 import javax.annotation.Nullable;
 
-import org.joml.Matrix3f;
 import org.joml.Matrix4f;
-import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -26,8 +24,8 @@ import net.povstalec.spacetravel.client.effects.SkyEffects;
 import net.povstalec.spacetravel.client.render.SpaceRenderer;
 import net.povstalec.spacetravel.client.render.space_objects.SpaceObjectRenderer;
 import net.povstalec.spacetravel.common.space.objects.SpaceObject;
-import net.povstalec.spacetravel.common.util.AxisRotation;
-import net.povstalec.spacetravel.common.util.SpaceCoords;
+import net.povstalec.spacetravel.common.util.AxisRot;
+import net.povstalec.spacetravel.common.util.SpacePos;
 
 public class RenderCenter
 {
@@ -42,8 +40,8 @@ public class RenderCenter
 	@Nullable
 	private VertexBuffer darkBuffer = SkyEffects.createDarkSky();
 	
-	private SpaceCoords coords;
-	private AxisRotation axisRotation = new AxisRotation(); //TODO Is this really necessary? I'd say the viewCenter axis rotation could be used here instead
+	private SpacePos coords;
+	private AxisRot axisRot = new AxisRot(); //TODO Is this really necessary? I'd say the viewCenter axis rotation could be used here instead
 	
 	public RenderCenter(/*Optional<ResourceKey<RenderableSpaceObject>> viewCenterKey*/)
 	{
@@ -76,20 +74,20 @@ public class RenderCenter
 		return Optional.empty();
 	}*/
 	
-	public AxisRotation getObjectAxisRotation()
+	public AxisRot getObjectAxisRotation()
 	{
 		if(viewCenter != null && viewCenter.spaceObject != null)
 			return viewCenter.spaceObject.getAxisRotation();
 		
-		return new AxisRotation();
+		return new AxisRot();
 	}
 	
-	public SpaceCoords getCoords()
+	public SpacePos getCoords()
 	{
 		return coords;
 	}
 	
-	public void addCoords(SpaceCoords other)
+	public void addCoords(SpacePos other)
 	{
 		this.coords = this.coords.add(other);
 	}
@@ -99,14 +97,14 @@ public class RenderCenter
 		this.coords = this.coords.add(vector);
 	}
 	
-	public void subCoords(SpaceCoords other)
+	public void subCoords(SpacePos other)
 	{
 		this.coords = this.coords.sub(other);
 	}
 	
-	public AxisRotation getAxisRotation()
+	public AxisRot getAxisRotation()
 	{
-		return axisRotation;
+		return axisRot;
 	}
 	
 	public boolean objectEquals(SpaceObject spaceObject)

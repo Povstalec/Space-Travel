@@ -23,8 +23,8 @@ public class Star extends StarLike
 	
 	public static final Codec<Star> CODEC = RecordCodecBuilder.create(instance -> instance.group(
 			ResourceLocation.CODEC.optionalFieldOf("parent").forGetter(Star::getParentLocation),
-			Codec.either(SpaceCoords.CODEC, StellarCoordinates.Equatorial.CODEC).fieldOf("coords").forGetter(object -> Either.left(object.getSpaceCoords())),
-			AxisRotation.CODEC.fieldOf("axis_rotation").forGetter(Star::getAxisRotation),
+			Codec.either(SpacePos.CODEC, StellarCoordinates.Equatorial.CODEC).fieldOf("coords").forGetter(object -> Either.left(object.getSpaceCoords())),
+			AxisRot.CODEC.fieldOf("axis_rotation").forGetter(Star::getAxisRotation),
 			
 			SpaceObject.FadeOutHandler.CODEC.optionalFieldOf("fade_out_handler", SpaceObject.FadeOutHandler.DEFAULT_STAR_HANDLER).forGetter(Star::getFadeOutHandler),
 			
@@ -41,11 +41,11 @@ public class Star extends StarLike
 	
 	public Star() {};
 	
-	public Star(Optional<ResourceLocation> parentLocation, Either<SpaceCoords, StellarCoordinates.Equatorial> coords, AxisRotation axisRotation,
+	public Star(Optional<ResourceLocation> parentLocation, Either<SpacePos, StellarCoordinates.Equatorial> coords, AxisRot axisRot,
 				FadeOutHandler fadeOutHandler, List<TextureLayer> textureLayers, Optional<OrbitInfo> orbitInfo,
 				float minStarSize, float maxStarAlpha, float minStarAlpha, Optional<SupernovaInfo> supernovaInfo)
 	{
-		super(STAR_LOCATION, parentLocation, coords, axisRotation, fadeOutHandler, textureLayers, orbitInfo, minStarSize, maxStarAlpha, minStarAlpha);
+		super(STAR_LOCATION, parentLocation, coords, axisRot, fadeOutHandler, textureLayers, orbitInfo, minStarSize, maxStarAlpha, minStarAlpha);
 		
 		if(supernovaInfo.isPresent())
 			this.supernovaInfo = supernovaInfo.get();

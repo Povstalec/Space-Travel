@@ -1,7 +1,8 @@
-package net.povstalec.spacetravel.client;
+package net.povstalec.spacetravel.client.render.level;
 
 import javax.annotation.Nullable;
 
+import net.povstalec.spacetravel.client.render.SpaceRenderer;
 import org.joml.Matrix4f;
 
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -13,8 +14,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.client.event.RegisterDimensionSpecialEffectsEvent;
 import net.povstalec.spacetravel.SpaceTravel;
-import net.povstalec.spacetravel.client.render.SpaceRenderer;
-import net.povstalec.spacetravel.client.render.TestBuffer;
 
 public class SpaceTravelDimensionSpecialEffects extends DimensionSpecialEffects
 {
@@ -59,7 +58,7 @@ public class SpaceTravelDimensionSpecialEffects extends DimensionSpecialEffects
 	
 	public static void register(RegisterDimensionSpecialEffectsEvent event)
 	{
-		event.register(SpaceTravelDimensionSpecialEffects.SPACE_EFFECTS, new SpaceTravelDimensionSpecialEffects.Space());
+		event.register(SpaceTravelDimensionSpecialEffects.SPACE_EFFECTS, new SpaceShipSpecialEffects());
 	}
 	
 	

@@ -1,23 +1,13 @@
 package net.povstalec.spacetravel.common.space.objects;
 
-import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.client.Camera;
-import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.common.util.INBTSerializable;
-import net.povstalec.spacetravel.SpaceTravel;
-import net.povstalec.spacetravel.common.space.objects.OrbitingObject;
-import net.povstalec.spacetravel.common.space.objects.SpaceObject;
 import net.povstalec.spacetravel.common.util.*;
-import org.joml.Matrix4f;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
@@ -40,11 +30,11 @@ public abstract class StarLike extends OrbitingObject
 	
 	public StarLike() {};
 	
-	public StarLike(ResourceLocation objectType, Optional<ResourceLocation> parentLocation, Either<SpaceCoords, StellarCoordinates.Equatorial> coords, AxisRotation axisRotation,
+	public StarLike(ResourceLocation objectType, Optional<ResourceLocation> parentLocation, Either<SpacePos, StellarCoordinates.Equatorial> coords, AxisRot axisRot,
 					FadeOutHandler fadeOutHandler, List<TextureLayer> textureLayers, Optional<OrbitingObject.OrbitInfo> orbitInfo,
 					float minStarSize, float maxStarAlpha, float minStarAlpha)
 	{
-		super(objectType, parentLocation, coords, axisRotation, fadeOutHandler, textureLayers, orbitInfo);
+		super(objectType, parentLocation, coords, axisRot, fadeOutHandler, textureLayers, orbitInfo);
 		
 		this.minStarSize = minStarSize;
 		this.maxStarAlpha = maxStarAlpha;

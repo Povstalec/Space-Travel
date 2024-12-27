@@ -7,10 +7,7 @@ import net.minecraft.client.Camera;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.FogRenderer;
 import net.minecraft.client.renderer.GameRenderer;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
-import net.minecraft.util.RandomSource;
-import net.povstalec.spacetravel.SpaceTravel;
 import net.povstalec.spacetravel.client.RenderCenter;
 import net.povstalec.spacetravel.client.render.DustCloudBuffer;
 import net.povstalec.spacetravel.client.render.SpaceRenderer;
@@ -25,9 +22,6 @@ import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 import org.joml.Vector3d;
 import org.joml.Vector3f;
-import org.lwjgl.opengl.GL15;
-import org.lwjgl.opengl.GL15C;
-import org.lwjgl.opengl.GL33C;
 
 import javax.annotation.Nullable;
 import java.util.Random;
@@ -47,7 +41,7 @@ public class StarFieldRenderer<SF extends StarField> extends SpaceObjectRenderer
 	protected StarBuffer starBuffer;
 	protected StarData starData;
 	
-	protected SpaceCoords oldDifference;
+	protected SpacePos oldDifference;
 	
 	protected boolean hasTexture = StarFieldClientConfig.textured_stars.get();
 	
@@ -71,26 +65,31 @@ public class StarFieldRenderer<SF extends StarField> extends SpaceObjectRenderer
 		starBuffer = null;
 	}
 	
+	protected void randomCoreStar(BufferBuilder bufferBuilder, Random random, int index)
+	{
+		// This generates random coordinates for the Star close to the camera
+		double distance = spaceObject.clumpStarsInCenter() ? Math.abs(random.nextDouble()) : Math.cbrt(Math.abs(random.nextDouble()));
+		double theta = Math.abs(random.nextDouble()) * 2F * Math.PI;
+		double phi = Math.acos(2F * Math.abs(random.nextDouble()) - 1F); // This prevents the formation of that weird streak that normally happens
+		
+		Vector3d cartesian = new SphericalCoords(distance * spaceObject.getDiameter(), theta, phi).toCartesianD();
+		
+		cartesian.x *= spaceObject.xStretch();
+		cartesian.y *= spaceObject.yStretch();
+		cartesian.z *= spaceObject.zStretch();
+		
+		spaceObject.getAxisRotation().quaterniond().transform(cartesian);
+		
+		starData.newStar(spaceObject.getStarInfo(), bufferBuilder, random, cartesian.x, cartesian.y, cartesian.z, hasTexture, index);
+	}
+	
 	protected void generateStars(BufferBuilder bufferBuilder, long seed)
 	{
 		Random random = new Random(seed);
 		
 		for(int i = 0; i < spaceObject.getStars(); i++)
 		{
-			// This generates random coordinates for the Star close to the camera
-			double distance = spaceObject.clumpStarsInCenter() ? Math.abs(random.nextDouble()) : Math.cbrt(Math.abs(random.nextDouble()));
-			double theta = Math.abs(random.nextDouble()) * 2F * Math.PI;
-			double phi = Math.acos(2F * Math.abs(random.nextDouble()) - 1F); // This prevents the formation of that weird streak that normally happens
-			
-			Vector3d cartesian = new SphericalCoords(distance * spaceObject.getDiameter(), theta, phi).toCartesianD();
-			
-			cartesian.x *= spaceObject.xStretch();
-			cartesian.y *= spaceObject.yStretch();
-			cartesian.z *= spaceObject.zStretch();
-			
-			spaceObject.getAxisRotation().quaterniond().transform(cartesian);
-			
-			starData.newStar(spaceObject.getStarInfo(), bufferBuilder, random, cartesian.x, cartesian.y, cartesian.z, hasTexture, i);
+			randomCoreStar(bufferBuilder, random, i);
 		}
 	}
 	
@@ -230,7 +229,7 @@ public class StarFieldRenderer<SF extends StarField> extends SpaceObjectRenderer
 	public void renderDustClouds(RenderCenter renderCenter, ClientLevel level, float partialTicks, PoseStack stack, Camera camera,
 								 Matrix4f projectionMatrix, Runnable setupFog, float brightness)
 	{
-		SpaceCoords difference = renderCenter.getCoords().sub(spaceObject.getSpaceCoords());
+		SpacePos difference = renderCenter.getCoords().sub(spaceObject.getSpaceCoords());
 		
 		if(oldDifference == null)
 			oldDifference = difference;
@@ -282,7 +281,7 @@ public class StarFieldRenderer<SF extends StarField> extends SpaceObjectRenderer
 				RenderSystem.setShaderTexture(0, spaceObject.getDustCloudTexture());
 				FogRenderer.setupNoFog();
 				
-				Quaternionf q = SpaceCoords.getQuaternionf(level, renderCenter, partialTicks);
+				Quaternionf q = SpacePos.getQuaternionf(level, renderCenter, partialTicks);
 				
 				stack.mulPose(q);
 				
@@ -301,10 +300,10 @@ public class StarFieldRenderer<SF extends StarField> extends SpaceObjectRenderer
 	@Override
 	public void render(RenderCenter viewCenter, ClientLevel level, float partialTicks, PoseStack stack, Camera camera,
 					   Matrix4f projectionMatrix, boolean isFoggy, Runnable setupFog, BufferBuilder bufferbuilder,
-					   Vector3f parentVector, AxisRotation parentRotation)
+					   Vector3f parentVector, AxisRot parentRotation)
 	{
 		
-		SpaceCoords difference = viewCenter.getCoords().sub(spaceObject.getSpaceCoords());
+		SpacePos difference = viewCenter.getCoords().sub(spaceObject.getSpaceCoords());
 		
 		if(oldDifference == null)
 			oldDifference = difference;
@@ -363,7 +362,7 @@ public class StarFieldRenderer<SF extends StarField> extends SpaceObjectRenderer
 					RenderSystem.setShaderTexture(0, spaceObject.getStarInfo().getStarTexture());
 				FogRenderer.setupNoFog();
 				
-				Quaternionf q = SpaceCoords.getQuaternionf(level, viewCenter, partialTicks);
+				Quaternionf q = SpacePos.getQuaternionf(level, viewCenter, partialTicks);
 				
 				stack.mulPose(q);
 				this.starBuffer.bind();
@@ -375,7 +374,7 @@ public class StarFieldRenderer<SF extends StarField> extends SpaceObjectRenderer
 				
 				for(SpaceObjectRenderer<?> child : clientChildren)
 				{
-					child.render(viewCenter, level, partialTicks, stack, camera, projectionMatrix, isFoggy, setupFog, bufferbuilder, NULL_VECTOR, new AxisRotation());
+					child.render(viewCenter, level, partialTicks, stack, camera, projectionMatrix, isFoggy, setupFog, bufferbuilder, NULL_VECTOR, new AxisRot());
 				}
 			}
 		}
@@ -397,7 +396,7 @@ public class StarFieldRenderer<SF extends StarField> extends SpaceObjectRenderer
 		return 1;//starBrightness; //TODO Change this back
 	}
 	
-	public static void generateArmStars(StarField.SpiralArm arm, BufferBuilder bufferBuilder, AxisRotation axisRotation, StarData starData, StarInfo starInfo, Random random, int numberOfStars, double sizeMultiplier, boolean hasTexture)
+	public static void generateArmStars(StarField.SpiralArm arm, BufferBuilder bufferBuilder, AxisRot axisRot, StarData starData, StarInfo starInfo, Random random, int numberOfStars, double sizeMultiplier, boolean hasTexture)
 	{
 		for(int i = 0; i < arm.armStars(); i++)
 		{
@@ -423,13 +422,13 @@ public class StarFieldRenderer<SF extends StarField> extends SpaceObjectRenderer
 			cartesian.y = y * sizeMultiplier;
 			cartesian.z = z * sizeMultiplier;
 			
-			axisRotation.quaterniond().transform(cartesian);
+			axisRot.quaterniond().transform(cartesian);
 			
 			starData.newStar(starInfo, bufferBuilder, random, cartesian.x, cartesian.y, cartesian.z, hasTexture, numberOfStars + i);
 		}
 	}
 	
-	protected static void generateArmDustClouds(StarField.SpiralArm arm, BufferBuilder bufferBuilder, AxisRotation axisRotation, DustCloudData dustCloudData, DustCloudInfo dustCloudInfo, Random random, int numberOfDustClouds, double sizeMultiplier)
+	public static void generateArmDustClouds(StarField.SpiralArm arm, BufferBuilder bufferBuilder, AxisRot axisRot, DustCloudData dustCloudData, DustCloudInfo dustCloudInfo, Random random, int numberOfDustClouds, double sizeMultiplier)
 	{
 		for(int i = 0; i < arm.armDustClouds(); i++)
 		{
@@ -456,7 +455,7 @@ public class StarFieldRenderer<SF extends StarField> extends SpaceObjectRenderer
 			cartesian.y = y * sizeMultiplier;
 			cartesian.z = z * sizeMultiplier;
 			
-			axisRotation.quaterniond().transform(cartesian);
+			axisRot.quaterniond().transform(cartesian);
 			
 			dustCloudData.newDustCloud(arm.getDustCloudInfo().isEmpty() ? dustCloudInfo : arm.getDustCloudInfo().get(), bufferBuilder, random, cartesian.x, cartesian.y, cartesian.z, (1 / progress) + 0.2, numberOfDustClouds + i);
 		}

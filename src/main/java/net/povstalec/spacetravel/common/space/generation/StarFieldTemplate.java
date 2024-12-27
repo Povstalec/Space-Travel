@@ -106,7 +106,7 @@ public class StarFieldTemplate
 	}
 	
 	//TODO Should this also decide Space Coords and Axis Rotation instead of them being completely random?
-	public StarField generateStarField(Random random, long seed, SpaceCoords spaceCoords, AxisRotation axisRotation)
+	public StarField generateStarField(Random random, long seed, SpacePos spacePos, AxisRot axisRot)
 	{
 		int dustClouds = dustCloudsRange.nextInt(random);
 		
@@ -125,7 +125,7 @@ public class StarFieldTemplate
 			arms.add(randomArmTemplate(random).generateSpiralArm(random, degrees * i));
 		}
 		
-		return new StarField(Optional.empty(), spaceCoords, axisRotation, SpaceObject.FadeOutHandler.DEFAULT_STAR_FIELD_HANDLER,
+		return new StarField(Optional.empty(), spacePos, axisRot, SpaceObject.FadeOutHandler.DEFAULT_STAR_FIELD_HANDLER,
 				dustClouds, DustCloudInfo.randomDustCloudInfo(random), dustCloudTexture,
 				starInfo, seed, diameter, stars, clumpStarsInCenter, xStretch, yStretch, zStretch, arms);
 	}

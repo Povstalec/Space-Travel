@@ -20,8 +20,8 @@ import net.povstalec.spacetravel.common.packets.ClientBoundSpaceRegionLoadPacket
 import net.povstalec.spacetravel.common.packets.ClientBoundSpaceRegionUnloadPacket;
 import net.povstalec.spacetravel.common.packets.ClientBoundSpaceshipUpdatePacket;
 import net.povstalec.spacetravel.common.space.objects.OrbitingObject;
-import net.povstalec.spacetravel.common.util.AxisRotation;
-import net.povstalec.spacetravel.common.util.SpaceCoords;
+import net.povstalec.spacetravel.common.util.AxisRot;
+import net.povstalec.spacetravel.common.util.SpacePos;
 import net.povstalec.spacetravel.common.util.TextureLayer;
 
 public class Spaceship extends OrbitingObject
@@ -41,7 +41,7 @@ public class Spaceship extends OrbitingObject
 	
 	public Spaceship()
 	{
-		super(SPACESHIP_LOCATION, Optional.empty(), Either.left(new SpaceCoords()), new AxisRotation(), FadeOutHandler.DEFAULT_PLANET_HANDLER, new ArrayList<TextureLayer>(), Optional.empty());
+		super(SPACESHIP_LOCATION, Optional.empty(), Either.left(new SpacePos()), new AxisRot(), FadeOutHandler.DEFAULT_PLANET_HANDLER, new ArrayList<TextureLayer>(), Optional.empty());
 		
 		spaceRegionPos = new SpaceRegion.Position(this.getSpaceCoords());
 	}
@@ -53,7 +53,7 @@ public class Spaceship extends OrbitingObject
 		this.zAxisSpeed = zAxisSpeed;
 	}
 	
-	public SpaceCoords getSpaceCoords()
+	public SpacePos getSpaceCoords()
 	{
 		return this.coords;
 	}
@@ -67,9 +67,9 @@ public class Spaceship extends OrbitingObject
 	
 	public void travel(ServerLevel level)
 	{
-		this.coords = this.coords.add(new SpaceCoords(xAxisSpeed, yAxisSpeed, zAxisSpeed));
+		this.coords = this.coords.add(new SpacePos(xAxisSpeed, yAxisSpeed, zAxisSpeed));
 
-		this.axisRotation = this.axisRotation.add(xAxisRotation, yAxisRotation, zAxisRotation);
+		this.axisRot = this.axisRot.add(xAxisRotation, yAxisRotation, zAxisRotation);
 		
 		SpaceRegion.Position spaceRegionPos = new SpaceRegion.Position(this.getSpaceCoords());
 		if(!this.spaceRegionPos.equals(spaceRegionPos))

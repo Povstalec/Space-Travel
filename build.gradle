@@ -117,9 +117,9 @@ repositories {
 
     // If you have mod jar dependencies in ./libs, you can declare them as a repository like so.
     // See https://docs.gradle.org/current/userguide/declaring_repositories.html#sub:flat_dir_resolver
-    // flatDir {
-    //     dir 'libs'
-    // }
+    flatDir {
+         dir 'libs'
+    }
 }
 
 dependencies {
@@ -144,6 +144,8 @@ dependencies {
     // For more info:
     // http://www.gradle.org/docs/current/userguide/artifact_dependencies_tutorial.html
     // http://www.gradle.org/docs/current/userguide/dependency_management.html
+
+    implementation(fg.deobf("blank:Stellar-View-1.20.1:0.3.3"))
 }
 
 // This block of code expands all declared replace properties in the specified resource targets.

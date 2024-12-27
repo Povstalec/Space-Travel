@@ -134,7 +134,7 @@ public class StarData
 			double width = bLocation * cosRandom + aLocation * sinRandom;
 			
 			builder.vertex(starCoords[i][0], starCoords[i][1], starCoords[i][2]).color(starRGBA[i][0], starRGBA[i][1], starRGBA[i][2], starRGBA[i][3]);
-			// These next few lines add a "custom" element defined as HeightWidthSize in StellarViewVertexFormat
+			// These next few lines add a "custom" element defined as HeightWidthSize in SpaceTravelVertexFormat
 			builder.putFloat(0, (float) height);
 			builder.putFloat(4, (float) width);
 			builder.putFloat(8, (float) starSizes[i]);

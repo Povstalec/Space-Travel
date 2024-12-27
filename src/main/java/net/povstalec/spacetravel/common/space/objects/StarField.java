@@ -7,17 +7,14 @@ import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.RandomSource;
 import net.minecraftforge.common.util.INBTSerializable;
 import net.povstalec.spacetravel.SpaceTravel;
-import net.povstalec.spacetravel.common.space.SpaceRegion;
 import net.povstalec.spacetravel.common.util.*;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.Random;
 
 public class StarField extends SpaceObject
 {
@@ -64,8 +61,8 @@ public class StarField extends SpaceObject
 	
 	public static final Codec<StarField> CODEC = RecordCodecBuilder.create(instance -> instance.group(
 			ResourceLocation.CODEC.optionalFieldOf("parent").forGetter(StarField::getParentLocation),
-			Codec.either(SpaceCoords.CODEC, StellarCoordinates.Equatorial.CODEC).fieldOf("coords").forGetter(object -> Either.left(object.getSpaceCoords())),
-			AxisRotation.CODEC.fieldOf("axis_rotation").forGetter(StarField::getAxisRotation),
+			Codec.either(SpacePos.CODEC, StellarCoordinates.Equatorial.CODEC).fieldOf("coords").forGetter(object -> Either.left(object.getSpaceCoords())),
+			AxisRot.CODEC.fieldOf("axis_rotation").forGetter(StarField::getAxisRotation),
 			
 			SpaceObject.FadeOutHandler.CODEC.optionalFieldOf("fade_out_handler", SpaceObject.FadeOutHandler.DEFAULT_STAR_FIELD_HANDLER).forGetter(StarField::getFadeOutHandler),
 			
@@ -89,12 +86,12 @@ public class StarField extends SpaceObject
 	
 	public StarField() {}
 	
-	public StarField(ResourceLocation objectType, Optional<ResourceLocation> parentLocation, Either<SpaceCoords, StellarCoordinates.Equatorial> coords,
-					 AxisRotation axisRotation, FadeOutHandler fadeOutHandler, int dustClouds, DustCloudInfo dustCloudInfo, ResourceLocation dustCloudTexture, StarInfo starInfo,
+	public StarField(ResourceLocation objectType, Optional<ResourceLocation> parentLocation, Either<SpacePos, StellarCoordinates.Equatorial> coords,
+					 AxisRot axisRot, FadeOutHandler fadeOutHandler, int dustClouds, DustCloudInfo dustCloudInfo, ResourceLocation dustCloudTexture, StarInfo starInfo,
 					 long seed, int diameter, int numberOfStars, boolean clumpStarsInCenter,
 					 double xStretch, double yStretch, double zStretch, List<SpiralArm> spiralArms)
 	{
-		super(objectType, parentLocation, coords, axisRotation, fadeOutHandler);
+		super(objectType, parentLocation, coords, axisRot, fadeOutHandler);
 		
 		this.dustClouds = dustClouds;
 		this.dustCloudInfo = dustCloudInfo;
@@ -126,25 +123,25 @@ public class StarField extends SpaceObject
 		this.totalDustClouds = totalDustClouds;
 	}
 	
-	public StarField(Optional<ResourceLocation> parentLocation, Either<SpaceCoords, StellarCoordinates.Equatorial> coords, AxisRotation axisRotation, FadeOutHandler fadeOutHandler,
+	public StarField(Optional<ResourceLocation> parentLocation, Either<SpacePos, StellarCoordinates.Equatorial> coords, AxisRot axisRot, FadeOutHandler fadeOutHandler,
 					 int dustClouds, DustCloudInfo dustCloudInfo, ResourceLocation dustCloudTexture, StarInfo starInfo, long seed, int diameter, int numberOfStars, boolean clumpStarsInCenter,
 					 double xStretch, double yStretch, double zStretch, List<SpiralArm> spiralArms)
 	{
-		this(STAR_FIELD_LOCATION, parentLocation, coords, axisRotation, fadeOutHandler, dustClouds, dustCloudInfo, dustCloudTexture, starInfo, seed, diameter, numberOfStars, clumpStarsInCenter, xStretch, yStretch, zStretch, spiralArms);
+		this(STAR_FIELD_LOCATION, parentLocation, coords, axisRot, fadeOutHandler, dustClouds, dustCloudInfo, dustCloudTexture, starInfo, seed, diameter, numberOfStars, clumpStarsInCenter, xStretch, yStretch, zStretch, spiralArms);
 	}
 	
-	public StarField(Optional<ResourceLocation> parentLocation, SpaceCoords coords, AxisRotation axisRotation, FadeOutHandler fadeOutHandler,
+	public StarField(Optional<ResourceLocation> parentLocation, SpacePos coords, AxisRot axisRot, FadeOutHandler fadeOutHandler,
 					 int dustClouds, DustCloudInfo dustCloudInfo, ResourceLocation dustCloudTexture, StarInfo starInfo, long seed, int diameter, int numberOfStars, boolean clumpStarsInCenter,
 					 double xStretch, double yStretch, double zStretch, List<SpiralArm> spiralArms)
 	{
-		this(parentLocation, Either.left(coords), axisRotation, fadeOutHandler, dustClouds, dustCloudInfo, dustCloudTexture, starInfo, seed, diameter, numberOfStars, clumpStarsInCenter, xStretch, yStretch, zStretch, spiralArms);
+		this(parentLocation, Either.left(coords), axisRot, fadeOutHandler, dustClouds, dustCloudInfo, dustCloudTexture, starInfo, seed, diameter, numberOfStars, clumpStarsInCenter, xStretch, yStretch, zStretch, spiralArms);
 	}
 	
-	public StarField(Optional<ResourceLocation> parentLocation, StellarCoordinates.Equatorial coords, AxisRotation axisRotation, FadeOutHandler fadeOutHandler,
+	public StarField(Optional<ResourceLocation> parentLocation, StellarCoordinates.Equatorial coords, AxisRot axisRot, FadeOutHandler fadeOutHandler,
 					 int dustClouds, DustCloudInfo dustCloudInfo, ResourceLocation dustCloudTexture, StarInfo starInfo, long seed, int diameter, int numberOfStars, boolean clumpStarsInCenter,
 					 double xStretch, double yStretch, double zStretch, List<SpiralArm> spiralArms)
 	{
-		this(parentLocation, Either.right(coords), axisRotation, fadeOutHandler, dustClouds, dustCloudInfo, dustCloudTexture, starInfo, seed, diameter, numberOfStars, clumpStarsInCenter, xStretch, yStretch, zStretch, spiralArms);
+		this(parentLocation, Either.right(coords), axisRot, fadeOutHandler, dustClouds, dustCloudInfo, dustCloudTexture, starInfo, seed, diameter, numberOfStars, clumpStarsInCenter, xStretch, yStretch, zStretch, spiralArms);
 	}
 	
 	public int getDustClouds()

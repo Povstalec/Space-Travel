@@ -80,7 +80,7 @@ public class TexturedObjectRenderer<TO extends TexturedObject> extends SpaceObje
 	 */
 	public void render(RenderCenter viewCenter, ClientLevel level, float partialTicks, PoseStack stack, Camera camera,
 			Matrix4f projectionMatrix, boolean isFoggy, Runnable setupFog, BufferBuilder bufferbuilder,
-			Vector3f parentVector, AxisRotation parentRotation)
+			Vector3f parentVector, AxisRot parentRotation)
 	{
 		long ticks = level.getDayTime();
 		
@@ -91,7 +91,7 @@ public class TexturedObjectRenderer<TO extends TexturedObject> extends SpaceObje
 		boolean isViewCenter = viewCenter.objectEquals(spaceObject);
 		
 		// Add parent vector to current coords
-		SpaceCoords coords = spaceObject.getSpaceCoords().add(positionVector);
+		SpacePos coords = spaceObject.getSpaceCoords().add(positionVector);
 		
 		// Subtract coords of this from View Center coords to get relative coords
 		SphericalCoords sphericalCoords = coords.skyPosition(viewCenter.getCoords());
@@ -184,7 +184,7 @@ public class TexturedObjectRenderer<TO extends TexturedObject> extends SpaceObje
 		
 		public void render(RenderCenter viewCenter, ClientLevel level, float partialTicks, PoseStack stack, Camera camera,
 						   Matrix4f projectionMatrix, boolean isFoggy, Runnable setupFog, BufferBuilder bufferbuilder,
-						   Vector3f parentVector, AxisRotation parentRotation)
+						   Vector3f parentVector, AxisRot parentRotation)
 		{
 		
 		}

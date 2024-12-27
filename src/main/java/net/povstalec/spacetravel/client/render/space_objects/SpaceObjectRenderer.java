@@ -4,27 +4,18 @@ import java.util.ArrayList;
 
 import javax.annotation.Nullable;
 
-import net.povstalec.spacetravel.common.util.AxisRotation;
+import net.povstalec.spacetravel.common.util.AxisRot;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
-import com.mojang.blaze3d.platform.GlStateManager;
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
-import com.mojang.blaze3d.vertex.BufferUploader;
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexFormat;
 
 import net.minecraft.client.Camera;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.client.renderer.GameRenderer;
 import net.povstalec.spacetravel.SpaceTravel;
 import net.povstalec.spacetravel.client.RenderCenter;
 import net.povstalec.spacetravel.common.space.objects.SpaceObject;
-import net.povstalec.spacetravel.common.util.SpaceCoords;
-import net.povstalec.spacetravel.common.util.SphericalCoords;
-import net.povstalec.spacetravel.common.util.TextureLayer;
 
 public abstract class SpaceObjectRenderer<RenderedSpaceObject extends SpaceObject>
 {
@@ -73,7 +64,7 @@ public abstract class SpaceObjectRenderer<RenderedSpaceObject extends SpaceObjec
 	 */
 	public abstract void render(RenderCenter viewCenter, ClientLevel level, float partialTicks, PoseStack stack, Camera camera,
 			Matrix4f projectionMatrix, boolean isFoggy, Runnable setupFog, BufferBuilder bufferbuilder,
-			Vector3f parentVector, AxisRotation parentRotation);
+			Vector3f parentVector, AxisRot parentRotation);
 	
 	/**
 	 * Method used for rendering the sky from some Space Object's point of view

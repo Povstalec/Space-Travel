@@ -26,8 +26,8 @@ public class BlackHole extends StarLike
 	
 	public static final Codec<BlackHole> CODEC = RecordCodecBuilder.create(instance -> instance.group(
 			ResourceLocation.CODEC.optionalFieldOf("parent").forGetter(BlackHole::getParentLocation),
-			Codec.either(SpaceCoords.CODEC, StellarCoordinates.Equatorial.CODEC).fieldOf("coords").forGetter(object -> Either.left(object.getSpaceCoords())),
-			AxisRotation.CODEC.fieldOf("axis_rotation").forGetter(BlackHole::getAxisRotation),
+			Codec.either(SpacePos.CODEC, StellarCoordinates.Equatorial.CODEC).fieldOf("coords").forGetter(object -> Either.left(object.getSpaceCoords())),
+			AxisRot.CODEC.fieldOf("axis_rotation").forGetter(BlackHole::getAxisRotation),
 			
 			FadeOutHandler.CODEC.optionalFieldOf("fade_out_handler", FadeOutHandler.DEFAULT_STAR_HANDLER).forGetter(BlackHole::getFadeOutHandler),
 			
@@ -45,12 +45,12 @@ public class BlackHole extends StarLike
 	
 	public BlackHole() {};
 	
-	public BlackHole(Optional<ResourceLocation> parentLocation, Either<SpaceCoords, StellarCoordinates.Equatorial> coords, AxisRotation axisRotation,
+	public BlackHole(Optional<ResourceLocation> parentLocation, Either<SpacePos, StellarCoordinates.Equatorial> coords, AxisRot axisRot,
 					 FadeOutHandler fadeOutHandler, List<TextureLayer> textureLayers, Optional<OrbitInfo> orbitInfo,
 					 float minStarSize, float maxStarAlpha, float minStarAlpha,
 					 float lensingIntensity, double maxLensingDistance)
 	{
-		super(BLACK_HOLE_LOCATION, parentLocation, coords, axisRotation, fadeOutHandler, textureLayers, orbitInfo, minStarSize, maxStarAlpha, minStarAlpha);
+		super(BLACK_HOLE_LOCATION, parentLocation, coords, axisRot, fadeOutHandler, textureLayers, orbitInfo, minStarSize, maxStarAlpha, minStarAlpha);
 		
 		this.lensingIntensity = lensingIntensity;
 		this.maxLensingDistance = maxLensingDistance;

@@ -6,7 +6,8 @@ import java.util.Optional;
 import javax.annotation.Nullable;
 
 import com.mojang.datafixers.util.Either;
-import net.minecraft.resources.ResourceKey;
+import net.povstalec.spacetravel.common.util.AxisRot;
+import net.povstalec.spacetravel.common.util.SpacePos;
 import net.povstalec.spacetravel.common.util.StellarCoordinates;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
@@ -17,8 +18,6 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 
 import net.minecraft.resources.ResourceLocation;
 import net.povstalec.spacetravel.SpaceTravel;
-import net.povstalec.spacetravel.common.util.AxisRotation;
-import net.povstalec.spacetravel.common.util.SpaceCoords;
 import net.povstalec.spacetravel.common.util.TextureLayer;
 
 public class OrbitingObject extends TexturedObject
@@ -32,10 +31,10 @@ public class OrbitingObject extends TexturedObject
 	
 	public OrbitingObject() {}
 	
-	public OrbitingObject(ResourceLocation objectType, Optional<ResourceLocation> parentLocation, Either<SpaceCoords, StellarCoordinates.Equatorial> coords,
-						  AxisRotation axisRotation, FadeOutHandler fadeOutHandler, List<TextureLayer> textureLayers, Optional<OrbitInfo> orbitInfo)
+	public OrbitingObject(ResourceLocation objectType, Optional<ResourceLocation> parentLocation, Either<SpacePos, StellarCoordinates.Equatorial> coords,
+						  AxisRot axisRot, FadeOutHandler fadeOutHandler, List<TextureLayer> textureLayers, Optional<OrbitInfo> orbitInfo)
 	{
-		super(objectType, parentLocation, coords, axisRotation, fadeOutHandler, textureLayers);
+		super(objectType, parentLocation, coords, axisRot, fadeOutHandler, textureLayers);
 		
 		if(orbitInfo.isPresent())
 			this.orbitInfo = orbitInfo.get();
@@ -49,9 +48,9 @@ public class OrbitingObject extends TexturedObject
 		return Optional.empty();
 	}
 	
-	public Vector3f getPosition(boolean canClamp, AxisRotation axisRotation, long ticks, float partialTicks)
+	public Vector3f getPosition(boolean canClamp, AxisRot axisRot, long ticks, float partialTicks)
 	{
-		return axisRotation.quaterniond().transform(getPosition(canClamp, ticks, partialTicks));
+		return axisRot.quaterniond().transform(getPosition(canClamp, ticks, partialTicks));
 	}
 	
 	public Vector3f getPosition(boolean canClamp, long ticks, float partialTicks)

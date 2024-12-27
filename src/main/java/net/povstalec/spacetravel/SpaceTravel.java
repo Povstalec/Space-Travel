@@ -6,12 +6,12 @@ import java.util.Optional;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.registries.DataPackRegistryEvent;
-import net.povstalec.spacetravel.common.config.SpaceRegionCommonConfig;
 import net.povstalec.spacetravel.common.config.SpaceTravelConfig;
 import net.povstalec.spacetravel.common.space.generation.StarFieldTemplate;
 import net.povstalec.spacetravel.common.space.objects.BlackHole;
 import net.povstalec.spacetravel.common.space.objects.Star;
 import net.povstalec.spacetravel.common.space.objects.StarField;
+import net.povstalec.stellarview.client.events.StellarViewReloadEvent;
 import org.slf4j.Logger;
 
 import com.mojang.logging.LogUtils;
@@ -27,7 +27,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import net.povstalec.spacetravel.client.SpaceTravelDimensionSpecialEffects;
+import net.povstalec.spacetravel.client.render.level.SpaceTravelDimensionSpecialEffects;
 import net.povstalec.spacetravel.common.capabilities.SpaceshipCapability;
 import net.povstalec.spacetravel.common.capabilities.SpaceshipCapabilityProvider;
 import net.povstalec.spacetravel.common.data.Multiverse;
@@ -90,6 +90,16 @@ public class SpaceTravel
 		public static void registerDimensionalEffects(RegisterDimensionSpecialEffectsEvent event)
 		{
 			SpaceTravelDimensionSpecialEffects.register(event);
+		}
+	}
+	
+	@Mod.EventBusSubscriber(modid = MODID, bus = Mod.EventBusSubscriber.Bus.FORGE, value = Dist.CLIENT)
+	public static class ClientForgeEvents
+	{
+		@SubscribeEvent
+		public static void stellarViewReload(StellarViewReloadEvent event)
+		{
+			event.setCanceled(true);
 		}
 	}
 	

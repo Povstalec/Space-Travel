@@ -11,7 +11,7 @@ import org.joml.Quaternionf;
 import org.joml.Vector3d;
 import org.joml.Vector3f;
 
-public class SpaceCoords implements INBTSerializable<CompoundTag>
+public class SpacePos implements INBTSerializable<CompoundTag>
 {
 	public static final String X = "x";
 	public static final String Y = "y";
@@ -22,46 +22,46 @@ public class SpaceCoords implements INBTSerializable<CompoundTag>
 	
 	public static final double LIGHT_SPEED = 299_792.458;
 	
-	public static final SpaceCoords NULL_COORDS = new SpaceCoords();
+	public static final SpacePos NULL_COORDS = new SpacePos();
     
-    public static final Codec<SpaceCoords> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-    		SpaceDistance.CODEC.fieldOf(X).forGetter(SpaceCoords::x),
-    		SpaceDistance.CODEC.fieldOf(Y).forGetter(SpaceCoords::y),
-    		SpaceDistance.CODEC.fieldOf(Z).forGetter(SpaceCoords::z)
-			).apply(instance, SpaceCoords::new));
+    public static final Codec<SpacePos> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+    		SpaceDist.CODEC.fieldOf(X).forGetter(SpacePos::x),
+    		SpaceDist.CODEC.fieldOf(Y).forGetter(SpacePos::y),
+    		SpaceDist.CODEC.fieldOf(Z).forGetter(SpacePos::z)
+			).apply(instance, SpacePos::new));
 	
-	private SpaceDistance x;
-	private SpaceDistance y;
-	private SpaceDistance z;
+	private SpaceDist x;
+	private SpaceDist y;
+	private SpaceDist z;
 	
-	public SpaceCoords(SpaceDistance x, SpaceDistance y, SpaceDistance z)
+	public SpacePos(SpaceDist x, SpaceDist y, SpaceDist z)
 	{
 		this.x = x;
 		this.y = y;
 		this.z = z;
 	}
 	
-	public SpaceCoords(long lyX, long lyY, long lyZ, double kmX, double kmY, double kmZ)
+	public SpacePos(long lyX, long lyY, long lyZ, double kmX, double kmY, double kmZ)
 	{
-		this(new SpaceDistance(lyX, kmX), new SpaceDistance(lyY, kmY), new SpaceDistance(lyZ, kmZ));
+		this(new SpaceDist(lyX, kmX), new SpaceDist(lyY, kmY), new SpaceDist(lyZ, kmZ));
 	}
 	
-	public SpaceCoords(long x, long y, long z)
+	public SpacePos(long x, long y, long z)
 	{
 		this(x, y, z, 0, 0, 0);
 	}
 	
-	public SpaceCoords(double x, double y, double z)
+	public SpacePos(double x, double y, double z)
 	{
 		this(0, 0, 0, x, y, z);
 	}
 	
-	public SpaceCoords(Vector3f vector)
+	public SpacePos(Vector3f vector)
 	{
 		this(0, 0, 0, vector.x, vector.y, vector.z);
 	}
 	
-	public SpaceCoords()
+	public SpacePos()
 	{
 		this(0, 0, 0, 0, 0, 0);
 	}
@@ -74,7 +74,7 @@ public class SpaceCoords implements INBTSerializable<CompoundTag>
 	 * @param other The other coordinates that are compared to these coordinates
 	 * @return Returns squared distance between two coordinate values (mainly for use in checks, since square root operation is costly)
 	 */
-	public double distanceSquared(SpaceCoords other)
+	public double distanceSquared(SpacePos other)
 	{
 		double xDistance = this.x.sub(other.x).toKm();
 		double yDistance = this.y.sub(other.y).toKm();
@@ -87,7 +87,7 @@ public class SpaceCoords implements INBTSerializable<CompoundTag>
 	 * @param other The other coordinates that are compared to these coordinates
 	 * @return Returns distance between two coordinate values
 	 */
-	public double distance(SpaceCoords other)
+	public double distance(SpacePos other)
 	{
 		return Math.sqrt(distanceSquared(other));
 	}
@@ -116,7 +116,7 @@ public class SpaceCoords implements INBTSerializable<CompoundTag>
 	 * @param r The radius of the sphere onto which the sky position is projected
 	 * @return Returns the sky position at which the coordinates of this would appear on the sky when viewed from the viewCenter
 	 */
-	public SphericalCoords skyPosition(SpaceCoords viewCenter, float radius)
+	public SphericalCoords skyPosition(SpacePos viewCenter, float radius)
 	{
 		return new SphericalCoords(new Vector3d(this.x.sub(viewCenter.x).toKm(), this.y.sub(viewCenter.y).toKm(), this.z.sub(viewCenter.z).toKm()), radius);
 	}
@@ -125,53 +125,53 @@ public class SpaceCoords implements INBTSerializable<CompoundTag>
 	 * @param viewCenter The coordinates this object is viewed from
 	 * @return Returns the sky position at which the coordinates of this would appear on the sky when viewed from the viewCenter
 	 */
-	public SphericalCoords skyPosition(SpaceCoords viewCenter)
+	public SphericalCoords skyPosition(SpacePos viewCenter)
 	{
 		return new SphericalCoords(new Vector3d(this.x.sub(viewCenter.x).toKm(), this.y.sub(viewCenter.y).toKm(), this.z.sub(viewCenter.z).toKm()));
 	}
 	
-	public SpaceCoords add(SpaceCoords other)
+	public SpacePos add(SpacePos other)
 	{
-		return new SpaceCoords(this.x.add(other.x), this.y.add(other.y), this.z.add(other.z));
+		return new SpacePos(this.x.add(other.x), this.y.add(other.y), this.z.add(other.z));
 	}
 	
-	public SpaceCoords add(Vector3f vector)
+	public SpacePos add(Vector3f vector)
 	{
-		return new SpaceCoords(this.x.add(vector.x), this.y.add(vector.y), this.z.add(vector.z));
+		return new SpacePos(this.x.add(vector.x), this.y.add(vector.y), this.z.add(vector.z));
 	}
 	
-	public SpaceCoords sub(SpaceCoords other)
+	public SpacePos sub(SpacePos other)
 	{
-		return new SpaceCoords(this.x.sub(other.x), this.y.sub(other.y), this.z.sub(other.z));
+		return new SpacePos(this.x.sub(other.x), this.y.sub(other.y), this.z.sub(other.z));
 	}
 	
-	public SpaceCoords sub(Vector3f vector)
+	public SpacePos sub(Vector3f vector)
 	{
-		return new SpaceCoords(this.x.sub(vector.x), this.y.sub(vector.y), this.z.sub(vector.z));
+		return new SpacePos(this.x.sub(vector.x), this.y.sub(vector.y), this.z.sub(vector.z));
 	}
 	
 	//============================================================================================
 	//************************************Getters and Setters*************************************
 	//============================================================================================
 	
-	public SpaceDistance x()
+	public SpaceDist x()
 	{
 		return x;
 	}
 	
-	public SpaceDistance y()
+	public SpaceDist y()
 	{
 		return y;
 	}
 	
-	public SpaceDistance z()
+	public SpaceDist z()
 	{
 		return z;
 	}
 	
-	public SpaceCoords copy()
+	public SpacePos copy()
 	{
-		return new SpaceCoords(x.copy(), y.copy(), z.copy());
+		return new SpacePos(x.copy(), y.copy(), z.copy());
 	}
 	
 	@Override
@@ -210,14 +210,14 @@ public class SpaceCoords implements INBTSerializable<CompoundTag>
 		z.writeToBuffer(buffer);
 	}
 	
-	public static SpaceCoords readFromBuffer(FriendlyByteBuf buffer)
+	public static SpacePos readFromBuffer(FriendlyByteBuf buffer)
 	{
-		return new SpaceCoords(SpaceDistance.readFromBuffer(buffer), SpaceDistance.readFromBuffer(buffer), SpaceDistance.readFromBuffer(buffer));
+		return new SpacePos(SpaceDist.readFromBuffer(buffer), SpaceDist.readFromBuffer(buffer), SpaceDist.readFromBuffer(buffer));
 	}
 	
 	
 	
-	public static class SpaceDistance implements INBTSerializable<CompoundTag>
+	public static class SpaceDist implements INBTSerializable<CompoundTag>
 	{
 		public static final String LY = "ly";
 		public static final String KM = "km";
@@ -225,14 +225,14 @@ public class SpaceCoords implements INBTSerializable<CompoundTag>
 		private long ly; // Light Years
 		private double km; // Kilometers
 		
-		public static final Codec<SpaceDistance> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+		public static final Codec<SpaceDist> CODEC = RecordCodecBuilder.create(instance -> instance.group(
 	    		// Coordinates in Light Years
-				Codec.LONG.optionalFieldOf(LY, 0L).forGetter(SpaceDistance::ly),
+				Codec.LONG.optionalFieldOf(LY, 0L).forGetter(SpaceDist::ly),
 				// Coordinates in Kilometers
-				Codec.DOUBLE.optionalFieldOf(KM, 0D).forGetter(SpaceDistance::km)
-				).apply(instance, SpaceDistance::new));
+				Codec.DOUBLE.optionalFieldOf(KM, 0D).forGetter(SpaceDist::km)
+				).apply(instance, SpaceDist::new));
 		
-		public SpaceDistance(long lightYears, double kilometers)
+		public SpaceDist(long lightYears, double kilometers)
 		{
 			this.ly = lightYears;
 			this.km = kilometers;
@@ -240,12 +240,12 @@ public class SpaceCoords implements INBTSerializable<CompoundTag>
 			handleKmOverflow();
 		}
 		
-		public SpaceDistance(long lightYears)
+		public SpaceDist(long lightYears)
 		{
 			this(lightYears, 0);
 		}
 		
-		public SpaceDistance(double kilometers)
+		public SpaceDist(double kilometers)
 		{
 			this(0, kilometers);
 		}
@@ -296,37 +296,37 @@ public class SpaceCoords implements INBTSerializable<CompoundTag>
 			return ly + km / LY_TO_KM;
 		}
 		
-		public SpaceDistance add(SpaceDistance other)
+		public SpaceDist add(SpaceDist other)
 		{
-			return new SpaceDistance(this.ly + other.ly, this.km + other.km);
+			return new SpaceDist(this.ly + other.ly, this.km + other.km);
 		}
 		
-		public SpaceDistance add(double value)
+		public SpaceDist add(double value)
 		{
-			return new SpaceDistance(this.ly, this.km + value);
+			return new SpaceDist(this.ly, this.km + value);
 		}
 		
-		public SpaceDistance sub(SpaceDistance other)
+		public SpaceDist sub(SpaceDist other)
 		{
-			return new SpaceDistance(this.ly - other.ly, this.km - other.km);
+			return new SpaceDist(this.ly - other.ly, this.km - other.km);
 		}
 		
-		public SpaceDistance sub(double value)
+		public SpaceDist sub(double value)
 		{
-			return new SpaceDistance(this.ly, this.km - value);
+			return new SpaceDist(this.ly, this.km - value);
 		}
 		
-		public SpaceDistance mul(double value, boolean roundDown)
+		public SpaceDist mul(double value, boolean roundDown)
 		{
 			double result = this.ly * value;
 			long ly = (long) result;
 			
-			return new SpaceDistance((long) ly, roundDown ? 0 : result - ly);
+			return new SpaceDist((long) ly, roundDown ? 0 : result - ly);
 		}
 		
-		public SpaceDistance copy()
+		public SpaceDist copy()
 		{
-			return new SpaceDistance(ly, km);
+			return new SpaceDist(ly, km);
 		}
 		
 		@Override
@@ -362,9 +362,9 @@ public class SpaceCoords implements INBTSerializable<CompoundTag>
 			buffer.writeDouble(km);
 		}
 		
-		public static SpaceDistance readFromBuffer(FriendlyByteBuf buffer)
+		public static SpaceDist readFromBuffer(FriendlyByteBuf buffer)
 		{
-			return new SpaceDistance(buffer.readLong(), buffer.readDouble());
+			return new SpaceDist(buffer.readLong(), buffer.readDouble());
 		}
 	}
 }

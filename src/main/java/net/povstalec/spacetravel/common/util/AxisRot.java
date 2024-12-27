@@ -10,11 +10,12 @@ import org.joml.Math;
 import org.joml.Quaterniond;
 import org.joml.Quaternionf;
 
-public class AxisRotation implements INBTSerializable<CompoundTag>
+public class AxisRot implements INBTSerializable<CompoundTag>
 {
 	public static final String X_AXIS = "x_axis";
 	public static final String Y_AXIS = "y_axis";
 	public static final String Z_AXIS = "z_axis";
+	
 	private boolean inDegrees;
 	
 	private double xAxis;
@@ -24,14 +25,14 @@ public class AxisRotation implements INBTSerializable<CompoundTag>
 	private Quaterniond quaterniond;
 	private Quaternionf quaternionf;
 	
-	public static final Codec<AxisRotation> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+	public static final Codec<AxisRot> CODEC = RecordCodecBuilder.create(instance -> instance.group(
 			Codec.BOOL.optionalFieldOf("in_degrees", true).forGetter(axisRotation -> axisRotation.inDegrees),
-			Codec.DOUBLE.fieldOf(X_AXIS).forGetter(AxisRotation::xAxis),
-			Codec.DOUBLE.fieldOf(Y_AXIS).forGetter(AxisRotation::yAxis),
-			Codec.DOUBLE.fieldOf(Z_AXIS).forGetter(AxisRotation::zAxis)
-	).apply(instance, AxisRotation::new));
+			Codec.DOUBLE.fieldOf(X_AXIS).forGetter(AxisRot::xAxis),
+			Codec.DOUBLE.fieldOf(Y_AXIS).forGetter(AxisRot::yAxis),
+			Codec.DOUBLE.fieldOf(Z_AXIS).forGetter(AxisRot::zAxis)
+	).apply(instance, AxisRot::new));
 	
-	public AxisRotation(boolean inDegrees, double xAxis, double yAxis, double zAxis)
+	public AxisRot(boolean inDegrees, double xAxis, double yAxis, double zAxis)
 	{
 		this.inDegrees = inDegrees;
 		
@@ -83,12 +84,12 @@ public class AxisRotation implements INBTSerializable<CompoundTag>
 	 * @param yAxis Rotation around the Y-axis (in degrees)
 	 * @param zAxis Rotation around the Z-axis (in degrees)
 	 */
-	public AxisRotation(double xAxis, double yAxis, double zAxis)
+	public AxisRot(double xAxis, double yAxis, double zAxis)
 	{
 		this(true, xAxis, yAxis, zAxis);
 	}
 	
-	public AxisRotation()
+	public AxisRot()
 	{
 		this(false, 0, 0, 0);
 	}
@@ -127,24 +128,24 @@ public class AxisRotation implements INBTSerializable<CompoundTag>
 		return quaterniond;
 	}
 	
-	public AxisRotation add(AxisRotation other)
+	public AxisRot add(AxisRot other)
 	{
-		return new AxisRotation(false, this.xAxis + other.xAxis, this.yAxis + other.yAxis, this.zAxis + other.zAxis);
+		return new AxisRot(false, this.xAxis + other.xAxis, this.yAxis + other.yAxis, this.zAxis + other.zAxis);
 	}
 	
-	public AxisRotation add(double xRot, double yRot, double zRot)
+	public AxisRot add(double xRot, double yRot, double zRot)
 	{
-		return new AxisRotation(false, this.xAxis + xRot, this.yAxis + yRot, this.zAxis + zRot);
+		return new AxisRot(false, this.xAxis + xRot, this.yAxis + yRot, this.zAxis + zRot);
 	}
 	
-	public AxisRotation sub(AxisRotation other)
+	public AxisRot sub(AxisRot other)
 	{
-		return new AxisRotation(false, this.xAxis - other.xAxis, this.yAxis - other.yAxis, this.zAxis - other.zAxis);
+		return new AxisRot(false, this.xAxis - other.xAxis, this.yAxis - other.yAxis, this.zAxis - other.zAxis);
 	}
 	
-	public AxisRotation copy()
+	public AxisRot copy()
 	{
-		return new AxisRotation(false, xAxis, yAxis, zAxis);
+		return new AxisRot(false, xAxis, yAxis, zAxis);
 	}
 	
 	@Override
@@ -187,8 +188,8 @@ public class AxisRotation implements INBTSerializable<CompoundTag>
 		buffer.writeDouble(zAxis);
 	}
 	
-	public static AxisRotation readFromBuffer(FriendlyByteBuf buffer)
+	public static AxisRot readFromBuffer(FriendlyByteBuf buffer)
 	{
-		return new AxisRotation(buffer.readDouble(), buffer.readDouble(), buffer.readDouble());
+		return new AxisRot(buffer.readDouble(), buffer.readDouble(), buffer.readDouble());
 	}
 }

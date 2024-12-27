@@ -10,7 +10,7 @@ import net.povstalec.spacetravel.client.RenderCenter;
 import net.povstalec.spacetravel.client.render.space_objects.*;
 import net.povstalec.spacetravel.common.space.SpaceRegion.Position;
 import net.povstalec.spacetravel.common.space.objects.*;
-import net.povstalec.spacetravel.common.util.AxisRotation;
+import net.povstalec.spacetravel.common.util.AxisRot;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
@@ -75,10 +75,10 @@ public final class ClientSpaceRegion
 		for(SpaceObjectRenderer<?> renderer : children)
 		{
 			if(renderer != masterParent) // Makes sure the master parent (usually galaxy) is rendered last, that way stars from other galaxies don't get rendered over planets
-				renderer.render(viewCenter, level, partialTicks, stack, camera, projectionMatrix, isFoggy, setupFog, bufferbuilder, NULL_VECTOR, new AxisRotation());
+				renderer.render(viewCenter, level, partialTicks, stack, camera, projectionMatrix, isFoggy, setupFog, bufferbuilder, NULL_VECTOR, new AxisRot());
 		}
 		
-		masterParent.render(viewCenter, level, partialTicks, stack, camera, projectionMatrix, isFoggy, setupFog, bufferbuilder, NULL_VECTOR, new AxisRotation());
+		masterParent.render(viewCenter, level, partialTicks, stack, camera, projectionMatrix, isFoggy, setupFog, bufferbuilder, NULL_VECTOR, new AxisRot());
 	}
 	
 	public void setBestLensing()

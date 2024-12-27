@@ -1,27 +1,16 @@
 package net.povstalec.spacetravel.common.space;
 
 import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
 import java.util.Random;
 
-import com.mojang.datafixers.util.Either;
-import com.mojang.serialization.Codec;
-import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.RandomSource;
 import net.minecraftforge.common.util.INBTSerializable;
 import net.povstalec.spacetravel.SpaceTravel;
 import net.povstalec.spacetravel.common.config.SpaceRegionCommonConfig;
 import net.povstalec.spacetravel.common.space.objects.SpaceObject;
 import net.povstalec.spacetravel.common.space.objects.StarField;
-import net.povstalec.spacetravel.common.util.AxisRotation;
-import net.povstalec.spacetravel.common.util.SpaceCoords;
-import net.povstalec.spacetravel.common.util.StarInfo;
-import net.povstalec.spacetravel.common.util.TextureLayer;
+import net.povstalec.spacetravel.common.util.AxisRot;
+import net.povstalec.spacetravel.common.util.SpacePos;
 
 public final class SpaceRegion implements INBTSerializable<CompoundTag>
 {
@@ -117,7 +106,7 @@ public final class SpaceRegion implements INBTSerializable<CompoundTag>
 			double yRot = random.nextDouble(0, 360);
 			double zRot = random.nextDouble(0, 360);
 			
-			StarField starField = universe.randomStarFieldTemplate(random).generateStarField(random, usedSeed, new SpaceCoords(x, y, z), new AxisRotation(true, xRot, yRot, zRot));
+			StarField starField = universe.randomStarFieldTemplate(random).generateStarField(random, usedSeed, new SpacePos(x, y, z), new AxisRot(true, xRot, yRot, zRot));
 			spaceRegion.addChild(starField);
 		}
 		
@@ -190,7 +179,7 @@ public final class SpaceRegion implements INBTSerializable<CompoundTag>
 			this.z = z;
 		}
 		
-		public Position(SpaceCoords coords)
+		public Position(SpacePos coords)
 		{
 			this(	(coords.x().ly() - LY_PER_REGION_HALF) / LY_PER_REGION,
 					(coords.y().ly() - LY_PER_REGION_HALF) / LY_PER_REGION,

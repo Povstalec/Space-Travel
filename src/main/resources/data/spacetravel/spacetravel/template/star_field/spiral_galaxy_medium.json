@@ -15,7 +15,7 @@
 			{ "rgb": {"red": 255, "green": 255, "blue": 223}, "min_size": 0.10, "max_size": 0.25, "min_brightness": 180, "max_brightness": 210, "weight": 7 },
 			{ "rgb": {"red": 255, "green": 239, "blue": 223}, "min_size": 0.10, "max_size": 0.25, "min_brightness": 120, "max_brightness": 200, "weight": 12 },
 			{ "rgb": {"red": 255, "green": 223, "blue": 223}, "min_size": 0.10, "max_size": 0.15, "min_brightness": 100, "max_brightness": 150, "weight": 74 }
-			]
+		]
 	},
 	"clump_stars_in_center": true,
 	

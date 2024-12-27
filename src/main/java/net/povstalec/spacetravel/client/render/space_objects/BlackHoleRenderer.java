@@ -1,16 +1,12 @@
 package net.povstalec.spacetravel.client.render.space_objects;
 
-import com.mojang.blaze3d.platform.GlStateManager;
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import net.minecraft.client.Camera;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.resources.ResourceLocation;
 import net.povstalec.spacetravel.client.RenderCenter;
 import net.povstalec.spacetravel.client.render.SpaceRenderer;
 import net.povstalec.spacetravel.common.space.objects.BlackHole;
 import net.povstalec.spacetravel.common.space.objects.SpaceObject;
-import net.povstalec.spacetravel.common.space.objects.Star;
 import net.povstalec.spacetravel.common.util.*;
 import org.joml.*;
 
@@ -48,7 +44,7 @@ public class BlackHoleRenderer extends TexturedObjectRenderer<BlackHole>
 	@Override
 	protected void renderTextureLayer(TextureLayer textureLayer, RenderCenter viewCenter, ClientLevel level, Camera camera, BufferBuilder bufferbuilder, Matrix4f lastMatrix, SphericalCoords sphericalCoords, long ticks, double distance, float partialTicks)
 	{
-		double lyDistance = distance / SpaceCoords.LY_TO_KM;
+		double lyDistance = distance / SpacePos.LY_TO_KM;
 		
 		Color.FloatRGBA starRGBA = spaceObject.starRGBA(lyDistance);
 		
@@ -91,7 +87,7 @@ public class BlackHoleRenderer extends TexturedObjectRenderer<BlackHole>
 	@Override
 	public void render(RenderCenter viewCenter, ClientLevel level, float partialTicks, PoseStack stack, Camera camera,
 					   Matrix4f projectionMatrix, boolean isFoggy, Runnable setupFog, BufferBuilder bufferbuilder,
-					   Vector3f parentVector, AxisRotation parentRotation)
+					   Vector3f parentVector, AxisRot parentRotation)
 	{
 		long ticks = level.getDayTime();
 		
@@ -102,7 +98,7 @@ public class BlackHoleRenderer extends TexturedObjectRenderer<BlackHole>
 		boolean isViewCenter = viewCenter.objectEquals(spaceObject);
 		
 		// Add parent vector to current coords
-		SpaceCoords coords = spaceObject.getSpaceCoords().add(positionVector);
+		SpacePos coords = spaceObject.getSpaceCoords().add(positionVector);
 		
 		// Subtract coords of this from View Center coords to get relative coords
 		sphericalCoords = coords.skyPosition(viewCenter.getCoords());

@@ -242,15 +242,15 @@ public class StellarCoordinates
 		
 		public final RightAscension rightAscension;
 		public final Declination declination;
-		public final SpaceCoords.SpaceDistance distance;
+		public final SpacePos.SpaceDist distance;
 		
 		public static final Codec<Equatorial> CODEC = RecordCodecBuilder.create(instance -> instance.group(
 				RightAscension.CODEC.fieldOf(RIGHT_ASCENSION).forGetter(equatorial -> equatorial.rightAscension),
 				Declination.CODEC.fieldOf(DECLINATION).forGetter(equatorial -> equatorial.declination),
-				SpaceCoords.SpaceDistance.CODEC.fieldOf(DISTNACE).forGetter(equatorial -> equatorial.distance)
+				SpacePos.SpaceDist.CODEC.fieldOf(DISTNACE).forGetter(equatorial -> equatorial.distance)
 				).apply(instance, Equatorial::new));
 		
-		public Equatorial(RightAscension rightAscension, Declination declination, SpaceCoords.SpaceDistance distance)
+		public Equatorial(RightAscension rightAscension, Declination declination, SpacePos.SpaceDist distance)
 		{
 			this.rightAscension = rightAscension;
 			this.declination = declination;
@@ -262,7 +262,7 @@ public class StellarCoordinates
 			return toGalactic(rightAscension.radians, declination.radians, distance);
 		}
 		
-		public static Galactic toGalactic(double rightAscension, double declination, SpaceCoords.SpaceDistance distance)
+		public static Galactic toGalactic(double rightAscension, double declination, SpacePos.SpaceDist distance)
 		{
 			double sinB = Math.sin(DECLINATION_NGP) * Math.sin(declination) + Math.cos(DECLINATION_NGP) * Math.cos(declination) * Math.cos(rightAscension - RIGHT_ASCENSION_NGP);
 			
@@ -286,22 +286,22 @@ public class StellarCoordinates
 	{
 		public final double galacticLongtitude;
 		public final double galacticLatitude;
-		public final SpaceCoords.SpaceDistance distance;
+		public final SpacePos.SpaceDist distance;
 		
-		public Galactic(double galacticLongtitude, double galacticLatitude, SpaceCoords.SpaceDistance distance)
+		public Galactic(double galacticLongtitude, double galacticLatitude, SpacePos.SpaceDist distance)
 		{
 			this.galacticLongtitude = galacticLongtitude;
 			this.galacticLatitude = galacticLatitude;
 			this.distance = distance;
 		}
 		
-		public SpaceCoords toSpaceCoords()
+		public SpacePos toSpaceCoords()
 		{
 			double xProj = Math.sin(galacticLongtitude) * Math.cos(galacticLatitude);
 			double yProj = Math.sin(galacticLatitude);
 			double zProj = Math.cos(galacticLongtitude) * Math.cos(galacticLatitude);
 			
-			return new SpaceCoords(distance.mul(xProj, true), distance.mul(yProj, true), distance.mul(zProj, true));
+			return new SpacePos(distance.mul(xProj, true), distance.mul(yProj, true), distance.mul(zProj, true));
 		}
 		
 		@Override

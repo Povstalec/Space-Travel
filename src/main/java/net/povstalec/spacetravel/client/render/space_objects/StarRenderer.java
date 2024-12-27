@@ -1,15 +1,13 @@
 package net.povstalec.spacetravel.client.render.space_objects;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import net.minecraft.client.Camera;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.client.renderer.GameRenderer;
 import net.povstalec.spacetravel.client.RenderCenter;
 import net.povstalec.spacetravel.common.space.objects.SpaceObject;
 import net.povstalec.spacetravel.common.space.objects.Star;
 import net.povstalec.spacetravel.common.util.Color;
-import net.povstalec.spacetravel.common.util.SpaceCoords;
+import net.povstalec.spacetravel.common.util.SpacePos;
 import net.povstalec.spacetravel.common.util.SphericalCoords;
 import net.povstalec.spacetravel.common.util.TextureLayer;
 import org.joml.Matrix4f;
@@ -28,7 +26,7 @@ public class StarRenderer extends TexturedObjectRenderer<Star>
 	@Override
 	protected void renderTextureLayer(TextureLayer textureLayer, RenderCenter viewCenter, ClientLevel level, Camera camera, BufferBuilder bufferbuilder, Matrix4f lastMatrix, SphericalCoords sphericalCoords, long ticks, double distance, float partialTicks)
 	{
-		double lyDistance = distance / SpaceCoords.LY_TO_KM;
+		double lyDistance = distance / SpacePos.LY_TO_KM;
 		
 		Color.FloatRGBA starRGBA = spaceObject.supernovaRGBA(ticks, lyDistance);
 		
