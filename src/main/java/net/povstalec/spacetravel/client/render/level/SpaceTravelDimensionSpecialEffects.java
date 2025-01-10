@@ -34,7 +34,7 @@ public class SpaceTravelDimensionSpecialEffects extends DimensionSpecialEffects
 	@Override
 	public Vec3 getBrightnessDependentFogColor(Vec3 biomeFogColor, float daylight)
 	{
-		return biomeFogColor.multiply((double)(daylight * 0.94F + 0.06F), (double)(daylight * 0.94F + 0.06F), (double)(daylight * 0.91F + 0.09F));
+		return new Vec3(0, 0, 0);
 	}
 
 	@Override
@@ -54,6 +54,8 @@ public class SpaceTravelDimensionSpecialEffects extends DimensionSpecialEffects
     {
         return false;
     }
+	
+	
 	
 	public static void register(RegisterDimensionSpecialEffectsEvent event)
 	{

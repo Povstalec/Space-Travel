@@ -41,7 +41,7 @@ public class CommandInit
 		
 		dispatcher.register(Commands.literal(SpaceTravel.MODID)
 				.then(Commands.literal("spaceship")
-						.then(Commands.literal("velocity")
+						.then(Commands.literal("speed")
 								.then(Commands.literal("get").executes(CommandInit::getSpaceshipSpeed))
 								.then(Commands.literal("set")
 										.then(Commands.argument("x_axis", IntegerArgumentType.integer())

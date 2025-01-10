@@ -25,7 +25,6 @@ public class ForgeEvents
 	@SubscribeEvent
 	public static void onServerStarting(ServerStartingEvent event)
 	{
-		SpaceTravel.LOGGER.info("--------------------HELLO from server starting--------------------");
 		MinecraftServer server = event.getServer();
 		
 		Multiverse.get(server).setupUniverse();

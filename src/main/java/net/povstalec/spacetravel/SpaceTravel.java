@@ -99,7 +99,7 @@ public class SpaceTravel
 		@SubscribeEvent
 		public static void stellarViewReload(StellarViewReloadEvent event)
 		{
-			//event.setCanceled(true);
+			event.setCanceled(true);
 		}
 	}
 	
