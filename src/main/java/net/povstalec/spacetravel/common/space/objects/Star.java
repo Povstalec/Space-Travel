@@ -15,7 +15,7 @@ import java.util.Optional;
 
 public class Star extends StarLike
 {
-	public static final ResourceLocation STAR_LOCATION = new ResourceLocation(SpaceTravel.MODID, "star");
+	public static final ResourceLocation STAR_LOCATION = new ResourceLocation(SpaceTravel.MODID, "celestials/star");
 	public static final ResourceKey<Registry<Star>> REGISTRY_KEY = ResourceKey.createRegistryKey(STAR_LOCATION);
 	
 	@Nullable

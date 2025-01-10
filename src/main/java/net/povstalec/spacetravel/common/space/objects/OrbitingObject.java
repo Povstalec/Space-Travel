@@ -24,7 +24,7 @@ public class OrbitingObject extends TexturedObject
 {
 	public static final Vector3f INITIAL_ORBIT_VECTOR = new Vector3f(0, 0, -1);
 
-	public static final ResourceLocation ORBITING_OBJECT_LOCATION = new ResourceLocation(SpaceTravel.MODID, "orbiting_object");
+	public static final ResourceLocation ORBITING_OBJECT_LOCATION = new ResourceLocation(SpaceTravel.MODID, "celestials/orbiting_object");
 	
 	@Nullable
 	private OrbitInfo orbitInfo;

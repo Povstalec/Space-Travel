@@ -18,7 +18,7 @@ public class BlackHole extends StarLike
 	public static final String LENSING_INTENSITY = "lensing_intensity";
 	public static final String MAX_LENSING_DISTANCE = "max_lensing_distance";
 	
-	public static final ResourceLocation BLACK_HOLE_LOCATION = new ResourceLocation(SpaceTravel.MODID, "black_hole");
+	public static final ResourceLocation BLACK_HOLE_LOCATION = new ResourceLocation(SpaceTravel.MODID, "celestials/black_hole");
 	public static final ResourceKey<Registry<BlackHole>> REGISTRY_KEY = ResourceKey.createRegistryKey(BLACK_HOLE_LOCATION);
 	
 	protected float lensingIntensity;

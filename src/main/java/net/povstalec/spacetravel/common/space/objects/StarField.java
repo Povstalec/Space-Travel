@@ -18,7 +18,7 @@ import java.util.Optional;
 
 public class StarField extends SpaceObject
 {
-	public static final ResourceLocation STAR_FIELD_LOCATION = new ResourceLocation(SpaceTravel.MODID, "star_field");
+	public static final ResourceLocation STAR_FIELD_LOCATION = new ResourceLocation(SpaceTravel.MODID, "celestials/star_field");
 	public static final ResourceKey<Registry<StarField>> REGISTRY_KEY = ResourceKey.createRegistryKey(STAR_FIELD_LOCATION);
 	
 	public static final ResourceLocation DEFAULT_DUST_CLOUD_TEXTURE = new ResourceLocation(SpaceTravel.MODID,"textures/environment/dust_cloud.png");

@@ -18,10 +18,10 @@ public class ClientAccess
 {
 	public static final String OBJECT_TYPE = "object_type";
 	
-	public static final ResourceLocation STAR_FIELD_LOCATION = new ResourceLocation(SpaceTravel.MODID, "star_field");
-	public static final ResourceLocation STAR_LOCATION = new ResourceLocation(SpaceTravel.MODID, "star");
-	public static final ResourceLocation BLACK_HOLE_LOCATION = new ResourceLocation(SpaceTravel.MODID, "black_hole");
-	public static final ResourceLocation ORBITING_OBJECT_LOCATION = new ResourceLocation(SpaceTravel.MODID, "orbiting_object");
+	public static final ResourceLocation STAR_FIELD_LOCATION = new ResourceLocation(SpaceTravel.MODID, "celestials/star_field");
+	public static final ResourceLocation STAR_LOCATION = new ResourceLocation(SpaceTravel.MODID, "celestials/star");
+	public static final ResourceLocation BLACK_HOLE_LOCATION = new ResourceLocation(SpaceTravel.MODID, "celestials/black_hole");
+	public static final ResourceLocation ORBITING_OBJECT_LOCATION = new ResourceLocation(SpaceTravel.MODID, "celestials/orbiting_object");
 	
 	protected static Minecraft minecraft = Minecraft.getInstance();
     
