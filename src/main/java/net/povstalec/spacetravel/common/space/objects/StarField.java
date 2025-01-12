@@ -10,6 +10,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.common.util.INBTSerializable;
 import net.povstalec.spacetravel.SpaceTravel;
 import net.povstalec.spacetravel.common.util.*;
+import net.povstalec.stellarview.common.util.SpaceCoords;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -18,6 +19,59 @@ import java.util.Optional;
 
 public class StarField extends SpaceObject
 {
+	public enum LevelOfDetail
+	{
+		LOD1((short) 225, 10000000L), // Very far away, most stars can't be seen
+		LOD2((short) 190, 5000000L), // Middle point, some stars can be seen
+		LOD3((short) 0, 0); // Very close, even the dimmest stars are seen
+		
+		short minBrightness;
+		long minDistanceSquared;
+		
+		LevelOfDetail(short minBrightness, long minDistance)
+		{
+			this.minBrightness = minBrightness;
+			this.minDistanceSquared = minDistance * minDistance;
+		}
+		
+		public static LevelOfDetail fromBrightness(short brightness) // Majority of stars should be dim, so we're starting with LOD3
+		{
+			if(brightness < LOD2.minBrightness)
+				return LOD3;
+			
+			if(brightness < LOD1.minBrightness)
+				return LOD2;
+			
+			return LOD1;
+		}
+		
+		public static LevelOfDetail fromDistance(long distance) // Majority of galaxies should be far away, so we're starting with LOD1
+		{
+			long distanceSquared = distance * distance;
+			
+			if(distanceSquared >= LOD1.minDistanceSquared)
+				return LOD1;
+			
+			if(distanceSquared >= LOD2.minDistanceSquared)
+				return LOD2;
+			
+			return LOD3;
+		}
+		
+		public static LevelOfDetail fromDistance(SpaceCoords difference) // Majority of galaxies should be far away, so we're starting with LOD1
+		{
+			long distanceSquared = difference.lyDistanceSquared();
+			
+			if(distanceSquared >= LOD1.minDistanceSquared)
+				return LOD1;
+			
+			if(distanceSquared >= LOD2.minDistanceSquared)
+				return LOD2;
+			
+			return LOD3;
+		}
+	}
+	
 	public static final ResourceLocation STAR_FIELD_LOCATION = new ResourceLocation(SpaceTravel.MODID, "celestials/star_field");
 	public static final ResourceKey<Registry<StarField>> REGISTRY_KEY = ResourceKey.createRegistryKey(STAR_FIELD_LOCATION);
 	

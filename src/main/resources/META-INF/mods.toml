@@ -27,6 +27,6 @@ description='''Space Travel'''
 [[dependencies.spacetravel]]
 modId="stellarview"
 mandatory=true
-versionRange="[0.3.3,0.4.0)"
+versionRange="[0.3.4,0.4.0)"
 ordering="NONE"
 side="CLIENT"

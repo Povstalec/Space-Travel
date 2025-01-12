@@ -1,24 +1,9 @@
 {
-	"coords": { "right_ascension": {"hours": 0, "minutes": 52, "seconds": 44.8}, "declination": {"degrees": -72, "minutes": 49, "seconds": 43}, "distance": {"ly": 203700} },
-	"axis_rotation": { "x_axis": 197, "y_axis": 71.6, "z_axis": 33.8 },
+	"weight": 1,
+
+	"dust_clouds": { "min":  60, "max": 80 },
 	
-	"seed": 66837,
-	"diameter_ly": 6950,
-	"stars": 500,
-	"dust_clouds": 12,
-	
-	"x_stretch": 1.0,
-	"y_stretch": 1.0,
-	"z_stretch": 1.0,
-	
-	"dust_cloud_info":
-	{
-		"dust_cloud_types":
-		[
-			{ "rgb": {"red": 107, "green": 107, "blue": 107}, "min_size": 2.0, "max_size": 7.0, "min_brightness": 255, "max_brightness": 255, "weight": 1 }
-		]
-	},
-	
+	"stars": { "min":  200, "max": 500 },
 	"star_info":
 	{
 		"star_types":
@@ -31,5 +16,25 @@
 			{ "rgb": {"red": 255, "green": 239, "blue": 223}, "min_size": 0.10, "max_size": 0.25, "min_brightness": 120, "max_brightness": 200, "max_visible_distance": 4500000, "weight": 12 },
 			{ "rgb": {"red": 255, "green": 223, "blue": 223}, "min_size": 0.10, "max_size": 0.15, "min_brightness": 100, "max_brightness": 150, "max_visible_distance": 4000000, "weight": 74 }
 		]
-	}
+	},
+	"clump_stars_in_center": true,
+	
+	"diameter": { "min": 12000, "max": 58000 },
+	"x_stretch": { "min": 0.25, "max": 1.0 },
+	"y_stretch": { "min": 0.25, "max": 1.0 },
+	"z_stretch": { "min": 0.25, "max": 1.0 },
+	
+	"number_of_arms": { "min": 2, "max": 4 },
+	"spiral_arms":
+	[
+		{
+			"weight": 1,
+			"dust_clouds": { "min": 30, "max": 50 },
+			"stars": { "min": 150, "max": 600 },
+			"clump_stars_in_center": true,
+			"arm_rotation_offset": { "min": 0, "max": 0 },
+			"arm_length": { "min": 1.5, "max": 2.5 },
+			"arm_thickness": { "min": 1.75, "max": 3.75 }
+		}
+	]
 }

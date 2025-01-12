@@ -111,6 +111,7 @@ public abstract class StarLike extends OrbitingObject
 		public static final String MAX_SIZE = "max_size";
 		public static final String MIN_BRIGHTNESS = "min_brightness";
 		public static final String MAX_BRIGHTNESS = "max_brightness";
+		public static final String MAX_VISIBLE_DISTANCE = "max_visible_distance";
 		public static final String WEIGHT = "weight";
 		
 		private Color.IntRGB rgb;
@@ -120,6 +121,8 @@ public abstract class StarLike extends OrbitingObject
 
 		private short minBrightness;
 		private short maxBrightness;
+		
+		public long maxVisibleDistance;
 		
 		public int weight;
 		
@@ -132,12 +135,14 @@ public abstract class StarLike extends OrbitingObject
 				Codec.SHORT.fieldOf("min_brightness").forGetter(starType -> starType.minBrightness),
 				Codec.SHORT.fieldOf("max_brightness").forGetter(starType -> starType.maxBrightness),
 				
+				Codec.LONG.optionalFieldOf("max_visible_distance", 6000000L).forGetter(StarLike.StarType::getMaxVisibleDistance),
+				
 				Codec.intRange(1, Integer.MAX_VALUE).fieldOf("weight").forGetter(StarType::getWeight)
 				).apply(instance, StarType::new));
 		
 		public StarType() {}
 		
-		public StarType(Color.IntRGB rgb, float minSize, float maxSize, short minBrightness, short maxBrightness, int weight)
+		public StarType(Color.IntRGB rgb, float minSize, float maxSize, short minBrightness, short maxBrightness, long maxVisibleDistance, int weight)
 		{
 			this.rgb = rgb;
 			
@@ -146,6 +151,8 @@ public abstract class StarLike extends OrbitingObject
 
 			this.minBrightness = minBrightness;
 			this.maxBrightness = maxBrightness;
+			
+			this.maxVisibleDistance = maxVisibleDistance;
 
 			this.weight = weight;
 		}
@@ -176,6 +183,11 @@ public abstract class StarLike extends OrbitingObject
 			return (short) random.nextInt(minBrightness, maxBrightness + 1);
 		}
 		
+		public long getMaxVisibleDistance()
+		{
+			return maxVisibleDistance;
+		}
+		
 		//============================================================================================
 		//*************************************Saving and Loading*************************************
 		//============================================================================================
@@ -193,6 +205,8 @@ public abstract class StarLike extends OrbitingObject
 			tag.putShort(MIN_BRIGHTNESS, minBrightness);
 			tag.putShort(MAX_BRIGHTNESS, maxBrightness);
 			
+			tag.putLong(MAX_VISIBLE_DISTANCE, maxVisibleDistance);
+			
 			tag.putInt(WEIGHT, weight);
 			
 			return tag;
@@ -209,6 +223,8 @@ public abstract class StarLike extends OrbitingObject
 			
 			minBrightness = tag.getShort(MIN_BRIGHTNESS);
 			maxBrightness = tag.getShort(MAX_BRIGHTNESS);
+			
+			maxVisibleDistance = tag.getLong(MAX_VISIBLE_DISTANCE);
 			
 			weight = tag.getInt(WEIGHT);
 		}
