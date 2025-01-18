@@ -1,14 +1,14 @@
 package net.povstalec.spacetravel.common.space.generation;
 
+import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.povstalec.spacetravel.SpaceTravel;
-import net.povstalec.spacetravel.common.space.objects.SpaceObject;
-import net.povstalec.spacetravel.common.space.objects.StarField;
-import net.povstalec.spacetravel.common.util.*;
+import net.povstalec.stellarview.api.common.space_objects.resourcepack.StarField;
+import net.povstalec.stellarview.common.util.*;
 
 import java.util.*;
 
@@ -27,6 +27,12 @@ public class StarFieldTemplate
 			new SpaceTravelParameters.IntRange(12000, 120000), new SpaceTravelParameters.DoubleRange(0.25, 1.0),
 			new SpaceTravelParameters.DoubleRange(0.25, 1.0), new SpaceTravelParameters.DoubleRange(0.25, 1.0),
 			new SpaceTravelParameters.IntRange(2, 4), Arrays.asList(DEFAULT_SPIRAL_ARM));
+	
+	public static final DustCloudInfo.DustCloudType WHITE_DUST_CLOUD = new DustCloudInfo.DustCloudType(new Color.IntRGB(107, 107, 107), 2.0F, 7.0F, (short) 255, (short) 255, 1);
+	public static final DustCloudInfo.DustCloudType YELLOW_DUST_CLOUD = new DustCloudInfo.DustCloudType(new Color.IntRGB(107, 107, 40), 2.0F, 7.0F, (short) 255, (short) 255, 1);
+	public static final DustCloudInfo.DustCloudType BLUE_DUST_CLOUD = new DustCloudInfo.DustCloudType(new Color.IntRGB(40, 60, 107), 2.0F, 7.0F, (short) 255, (short) 255, 1);
+	public static final DustCloudInfo.DustCloudType RED_DUST_CLOUD = new DustCloudInfo.DustCloudType(new Color.IntRGB(107, 20, 20), 2.0F, 7.0F, (short) 255, (short) 255, 1);
+	public static final DustCloudInfo.DustCloudType GREEN_DUST_CLOUD = new DustCloudInfo.DustCloudType(new Color.IntRGB(60, 120, 120), 2.0F, 7.0F, (short) 255, (short) 255, 1);
 	
 	protected int weight; // TODO Is weight necessary?
 	protected Optional<ArrayList<ResourceLocation>> universes;
@@ -106,7 +112,7 @@ public class StarFieldTemplate
 	}
 	
 	//TODO Should this also decide Space Coords and Axis Rotation instead of them being completely random?
-	public StarField generateStarField(Random random, long seed, SpacePos spacePos, AxisRot axisRot)
+	public StarField generateStarField(Random random, long seed, SpaceCoords spaceCoords, AxisRotation axisRotation)
 	{
 		int dustClouds = dustCloudsRange.nextInt(random);
 		
@@ -125,9 +131,34 @@ public class StarFieldTemplate
 			arms.add(randomArmTemplate(random).generateSpiralArm(random, degrees * i));
 		}
 		
-		return new StarField(Optional.empty(), spacePos, axisRot, SpaceObject.FadeOutHandler.DEFAULT_STAR_FIELD_HANDLER,
-				dustClouds, DustCloudInfo.randomDustCloudInfo(random), dustCloudTexture,
+		return new StarField(Optional.empty(), Either.left(spaceCoords), axisRotation,
+				dustClouds, randomDustCloudInfo(random), dustCloudTexture,
 				starInfo, seed, diameter, stars, clumpStarsInCenter, xStretch, yStretch, zStretch, arms);
+	}
+	
+	public static DustCloudInfo randomDustCloudInfo(Random random)
+	{
+		DustCloudInfo dustCloudInfo;
+		switch(random.nextInt(0, 5))
+		{
+			case 1:
+				dustCloudInfo = new DustCloudInfo(Arrays.asList(WHITE_DUST_CLOUD, YELLOW_DUST_CLOUD));
+				break;
+			case 2:
+				dustCloudInfo = new DustCloudInfo(Arrays.asList(RED_DUST_CLOUD, BLUE_DUST_CLOUD));
+				break;
+			case 3:
+				dustCloudInfo = new DustCloudInfo(Arrays.asList(BLUE_DUST_CLOUD, GREEN_DUST_CLOUD));
+				break;
+			case 4:
+				dustCloudInfo = new DustCloudInfo(Arrays.asList(RED_DUST_CLOUD, YELLOW_DUST_CLOUD));
+				break;
+			default:
+				dustCloudInfo = new DustCloudInfo(Arrays.asList(WHITE_DUST_CLOUD, BLUE_DUST_CLOUD));
+			
+		}
+		
+		return dustCloudInfo;
 	}
 	
 	protected SpiralArmTemplate randomArmTemplate(Random random)

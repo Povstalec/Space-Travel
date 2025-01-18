@@ -5,7 +5,8 @@ import java.util.function.Supplier;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.network.NetworkEvent;
 import net.povstalec.spacetravel.client.ClientAccess;
-import net.povstalec.spacetravel.common.space.SpaceRegion;
+import net.povstalec.spacetravel.common.space.STSpaceRegion;
+import net.povstalec.stellarview.api.common.SpaceRegion;
 
 public class ClientBoundSpaceRegionUnloadPacket
 {
@@ -20,7 +21,7 @@ public class ClientBoundSpaceRegionUnloadPacket
 		this.z = z;
     }
 	
-	public ClientBoundSpaceRegionUnloadPacket(SpaceRegion.Position spaceRegionPos)
+	public ClientBoundSpaceRegionUnloadPacket(SpaceRegion.RegionPos spaceRegionPos)
     {
 		this(spaceRegionPos.x(), spaceRegionPos.y(), spaceRegionPos.z());
     }

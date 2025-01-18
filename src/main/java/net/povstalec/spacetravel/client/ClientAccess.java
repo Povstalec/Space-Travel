@@ -10,19 +10,17 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
 import net.povstalec.spacetravel.SpaceTravel;
 import net.povstalec.spacetravel.client.render.level.SpaceShipSpecialEffects;
-import net.povstalec.stellarview.client.render.ClientSpaceRegion;
+import net.povstalec.spacetravel.common.init.SpaceObjectRegistry;
+import net.povstalec.spacetravel.common.space.STSpaceRegion;
+import net.povstalec.stellarview.api.common.SpaceRegion;
+import net.povstalec.stellarview.api.common.space_objects.SpaceObject;
+import net.povstalec.stellarview.client.SpaceObjectRenderers;
+import net.povstalec.stellarview.client.render.SpaceRegionRenderer;
 import net.povstalec.stellarview.client.render.SpaceRenderer;
-import net.povstalec.stellarview.client.resourcepack.objects.*;
+import net.povstalec.stellarview.client.render.space_objects.SpaceObjectRenderer;
 
 public class ClientAccess
 {
-	public static final String OBJECT_TYPE = "object_type";
-	
-	public static final ResourceLocation STAR_FIELD_LOCATION = new ResourceLocation(SpaceTravel.MODID, "celestials/star_field");
-	public static final ResourceLocation STAR_LOCATION = new ResourceLocation(SpaceTravel.MODID, "celestials/star");
-	public static final ResourceLocation BLACK_HOLE_LOCATION = new ResourceLocation(SpaceTravel.MODID, "celestials/black_hole");
-	public static final ResourceLocation ORBITING_OBJECT_LOCATION = new ResourceLocation(SpaceTravel.MODID, "celestials/orbiting_object");
-	
 	protected static Minecraft minecraft = Minecraft.getInstance();
     
     public static void updateDimensions(Set<ResourceKey<Level>> levelKeys, boolean add)
@@ -77,7 +75,7 @@ public class ClientAccess
     
     public static void loadSpaceRegion(long x, long y, long z, CompoundTag childrenTag)
     {
-    	ClientSpaceRegion spaceRegion = new ClientSpaceRegion(x, y, z);
+    	SpaceRegionRenderer spaceRegion = new SpaceRegionRenderer(new SpaceRegion(x, y, z));
 		
 		setupClientSpaceRegion(spaceRegion, childrenTag);
 		
@@ -86,66 +84,81 @@ public class ClientAccess
     
     public static void unloadSpaceRegion(long x, long y, long z)
     {
-    	ClientSpaceRegion.RegionPos spaceRegionPos = new ClientSpaceRegion.RegionPos(x, y, z);
+    	SpaceRegion.RegionPos spaceRegionPos = new SpaceRegion.RegionPos(x, y, z);
 		SpaceRenderer.removeSpaceRegion(spaceRegionPos);
     }
 	
-	public static void setupClientSpaceRegion(ClientSpaceRegion spaceRegion, CompoundTag childrenTag)
+	private static void deserializeObjectsRecursive(SpaceObjectRenderer parent, CompoundTag tag)
 	{
-		for(String childId : childrenTag.getAllKeys())
+		String objectTypeString = tag.getString(SpaceObjectRegistry.OBJECT_TYPE);
+		
+		if(objectTypeString != null && ResourceLocation.isValidResourceLocation(objectTypeString))
 		{
-			CompoundTag childTag = childrenTag.getCompound(childId);
-			String objectTypeString = childTag.getString(OBJECT_TYPE);
+			ResourceLocation objectType = new ResourceLocation(objectTypeString);
+			SpaceObject spaceObject = deserialize(objectType, tag);
 			
-			if(objectTypeString != null && ResourceLocation.isValidResourceLocation(objectTypeString))
+			if(spaceObject != null)
 			{
-				SpaceObject spaceObject = null;
-				ResourceLocation objectType = new ResourceLocation(objectTypeString);
-				// Deserializes object based on its type specified in the object_type
-				if(objectType.equals(ORBITING_OBJECT_LOCATION))
-					spaceObject = deserializeOrbitingObject(childTag);
-				else if(objectType.equals(STAR_LOCATION))
-					spaceObject = deserializeStar(childTag);
-				else if(objectType.equals(BLACK_HOLE_LOCATION))
-					spaceObject = deserializeBlackHole(childTag);
-				else if(objectType.equals(STAR_FIELD_LOCATION))
-					spaceObject = deserializeStarField(childTag);
-				
-				if(spaceObject != null)
-					spaceRegion.addChild(spaceObject);
+				SpaceObjectRenderer renderer = SpaceObjectRenderers.constructObjectRenderer(spaceObject);
+				if(renderer != null)
+				{
+					parent.addChild(renderer);
+					
+					if(tag.contains(STSpaceRegion.CHILDREN))
+					{
+						CompoundTag childrenTag = tag.getCompound(STSpaceRegion.CHILDREN);
+						for(String childId : childrenTag.getAllKeys())
+						{
+							deserializeObjectsRecursive(renderer, childrenTag.getCompound(childId));
+						}
+					}
+				}
 			}
 		}
 	}
 	
-	private static StarField deserializeStarField(CompoundTag childTag)
+	public static void setupClientSpaceRegion(SpaceRegionRenderer spaceRegion, CompoundTag tag)
 	{
-		StarField starField = new StarField();
-		starField.fromTag(childTag);
-		
-		return starField;
+		for(String regionChildId : tag.getAllKeys())
+		{
+			CompoundTag childTag = tag.getCompound(regionChildId);
+			String objectTypeString = childTag.getString(SpaceObjectRegistry.OBJECT_TYPE);
+			
+			if(objectTypeString != null && ResourceLocation.isValidResourceLocation(objectTypeString))
+			{
+				ResourceLocation objectType = new ResourceLocation(objectTypeString);
+				SpaceObject spaceObject = deserialize(objectType, childTag);
+				if(spaceObject != null)
+				{
+					SpaceObjectRenderer renderer = SpaceObjectRenderers.constructObjectRenderer(spaceObject);
+					if(renderer != null)
+					{
+						spaceRegion.addChild(renderer);
+						
+						if(tag.contains(STSpaceRegion.CHILDREN))
+						{
+							CompoundTag childrenTag = tag.getCompound(STSpaceRegion.CHILDREN);
+							for(String childId : childrenTag.getAllKeys())
+							{
+								deserializeObjectsRecursive(renderer, childrenTag.getCompound(childId));
+							}
+						}
+					}
+				}
+			}
+		}
 	}
 	
-	private static Star deserializeStar(CompoundTag childTag)
+	private static SpaceObject deserialize(ResourceLocation typeLocation, CompoundTag tag)
 	{
-		Star star = new Star();
-		star.fromTag(childTag);
+		SpaceObject spaceObject = SpaceObjectRegistry.constructObject(typeLocation);
+		if(spaceObject != null)
+		{
+			spaceObject.deserializeNBT(tag);
+			
+			return spaceObject;
+		}
 		
-		return star;
-	}
-	
-	private static BlackHole deserializeBlackHole(CompoundTag childTag)
-	{
-		BlackHole blackHole = new BlackHole();
-		blackHole.fromTag(childTag);
-		
-		return blackHole;
-	}
-	
-	private static OrbitingObject deserializeOrbitingObject(CompoundTag childTag)
-	{
-		OrbitingObject orbitingObject = new OrbitingObject();
-		orbitingObject.fromTag(childTag);
-		
-		return orbitingObject;
+		return null;
 	}
 }

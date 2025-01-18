@@ -19,17 +19,16 @@ import net.povstalec.spacetravel.common.init.PacketHandlerInit;
 import net.povstalec.spacetravel.common.packets.ClientBoundSpaceRegionLoadPacket;
 import net.povstalec.spacetravel.common.packets.ClientBoundSpaceRegionUnloadPacket;
 import net.povstalec.spacetravel.common.packets.ClientBoundSpaceshipUpdatePacket;
-import net.povstalec.spacetravel.common.space.objects.OrbitingObject;
-import net.povstalec.spacetravel.common.util.AxisRot;
-import net.povstalec.spacetravel.common.util.SpacePos;
-import net.povstalec.spacetravel.common.util.TextureLayer;
+import net.povstalec.stellarview.api.common.SpaceRegion;
+import net.povstalec.stellarview.api.common.space_objects.ViewObject;
+import net.povstalec.stellarview.common.util.AxisRotation;
+import net.povstalec.stellarview.common.util.SpaceCoords;
+import net.povstalec.stellarview.common.util.TextureLayer;
 
-public class Spaceship extends OrbitingObject
+public class Spaceship extends ViewObject
 {
-	public static final ResourceLocation SPACESHIP_LOCATION = new ResourceLocation(SpaceTravel.MODID, "spaceship");
-	
-	private final HashMap<SpaceRegion.Position, SpaceRegion> loadedSpaceRegions = new HashMap<SpaceRegion.Position, SpaceRegion>();
-	private SpaceRegion.Position spaceRegionPos;
+	private final HashMap<SpaceRegion.RegionPos, SpaceRegion> loadedSpaceRegions = new HashMap<SpaceRegion.RegionPos, SpaceRegion>();
+	private SpaceRegion.RegionPos spaceRegionPos;
 	
 	private int xAxisSpeed = 0;
 	private int yAxisSpeed = 0;
@@ -41,9 +40,9 @@ public class Spaceship extends OrbitingObject
 	
 	public Spaceship()
 	{
-		super(SPACESHIP_LOCATION, Optional.empty(), Either.left(new SpacePos()), new AxisRot(), FadeOutHandler.DEFAULT_PLANET_HANDLER, new ArrayList<TextureLayer>(), Optional.empty());
+		super(Optional.empty(), Either.left(new SpaceCoords()), new AxisRotation(), Optional.empty(), new ArrayList<TextureLayer>(), FadeOutHandler.DEFAULT_PLANET_HANDLER);
 		
-		spaceRegionPos = new SpaceRegion.Position(this.getSpaceCoords());
+		spaceRegionPos = new SpaceRegion.RegionPos(this.getSpaceCoords());
 	}
 
 	public int getxAxisSpeed() { return xAxisSpeed; }
@@ -60,7 +59,7 @@ public class Spaceship extends OrbitingObject
 		this.zAxisSpeed = zAxisSpeed;
 	}
 	
-	public SpacePos getSpaceCoords()
+	public SpaceCoords getSpaceCoords()
 	{
 		return this.coords;
 	}
@@ -74,26 +73,26 @@ public class Spaceship extends OrbitingObject
 	
 	public void travel(ServerLevel level)
 	{
-		this.coords = this.coords.add(new SpacePos(xAxisSpeed, yAxisSpeed, zAxisSpeed));
+		this.coords = this.coords.add(new SpaceCoords(xAxisSpeed, yAxisSpeed, zAxisSpeed));
 
-		this.axisRot = this.axisRot.add(xAxisRotation, yAxisRotation, zAxisRotation);
+		this.axisRotation = this.axisRotation.add(xAxisRotation, yAxisRotation, zAxisRotation);
 		
-		SpaceRegion.Position spaceRegionPos = new SpaceRegion.Position(this.getSpaceCoords());
+		SpaceRegion.RegionPos spaceRegionPos = new SpaceRegion.RegionPos(this.getSpaceCoords());
 		if(!this.spaceRegionPos.equals(spaceRegionPos))
 		{
 			this.spaceRegionPos = spaceRegionPos;
 			
 			// Space Region loading and unloading
-			Map<SpaceRegion.Position, SpaceRegion> newSpaceRegions = newSpaceRegions(level.getServer(), spaceRegionPos);
+			Map<SpaceRegion.RegionPos, STSpaceRegion> newSpaceRegions = newSpaceRegions(level.getServer(), spaceRegionPos);
 			
-			for(SpaceRegion.Position regionPos : regionsToLoad(newSpaceRegions))
+			for(SpaceRegion.RegionPos regionPos : regionsToLoad(newSpaceRegions))
 			{
-				SpaceRegion spaceRegion = newSpaceRegions.get(regionPos);
+				STSpaceRegion spaceRegion = newSpaceRegions.get(regionPos);
 				loadedSpaceRegions.put(regionPos, spaceRegion);
 				PacketHandlerInit.sendPacketToDimension(level.dimension(), new ClientBoundSpaceRegionLoadPacket(spaceRegion));
 			}
 			
-			for(SpaceRegion.Position regionPos : regionsToUnload(newSpaceRegions))
+			for(SpaceRegion.RegionPos regionPos : regionsToUnload(newSpaceRegions))
 			{
 				loadedSpaceRegions.remove(regionPos);
 				PacketHandlerInit.sendPacketToDimension(level.dimension(), new ClientBoundSpaceRegionUnloadPacket(regionPos));
@@ -102,21 +101,21 @@ public class Spaceship extends OrbitingObject
 	}
 	
 	@Nullable
-	private Map<SpaceRegion.Position, SpaceRegion> newSpaceRegions(MinecraftServer server, SpaceRegion.Position spaceRegionPos)
+	private Map<SpaceRegion.RegionPos, STSpaceRegion> newSpaceRegions(MinecraftServer server, SpaceRegion.RegionPos spaceRegionPos)
 	{
 		Optional<Universe> universe = Multiverse.get(server).getUniverse(Multiverse.PRIME_UNIVERSE);
 		
 		if(universe.isPresent())
-			return universe.get().getRegionsAt(spaceRegionPos, SpaceRegion.SPACE_REGION_LOAD_DISTANCE, true);
+			return universe.get().getRegionsAt(spaceRegionPos, STSpaceRegion.SPACE_REGION_LOAD_DISTANCE, true);
 		
 		return null;
 	}
 	
-	private List<SpaceRegion.Position> regionsToUnload(Map<SpaceRegion.Position, SpaceRegion> newSpaceRegions)
+	private List<SpaceRegion.RegionPos> regionsToUnload(Map<SpaceRegion.RegionPos, STSpaceRegion> newSpaceRegions)
 	{
-		ArrayList<SpaceRegion.Position> unloadedRegions = new ArrayList<SpaceRegion.Position>();
+		ArrayList<SpaceRegion.RegionPos> unloadedRegions = new ArrayList<SpaceRegion.RegionPos>();
 		
-		for(Map.Entry<SpaceRegion.Position, SpaceRegion> regionEntry : loadedSpaceRegions.entrySet())
+		for(Map.Entry<SpaceRegion.RegionPos, SpaceRegion> regionEntry : loadedSpaceRegions.entrySet())
 		{
 			if(!newSpaceRegions.containsKey(regionEntry.getKey()))
 				unloadedRegions.add(regionEntry.getKey());
@@ -125,11 +124,11 @@ public class Spaceship extends OrbitingObject
 		return unloadedRegions;
 	}
 	
-	private List<SpaceRegion.Position> regionsToLoad(Map<SpaceRegion.Position, SpaceRegion> newSpaceRegions)
+	private List<SpaceRegion.RegionPos> regionsToLoad(Map<SpaceRegion.RegionPos, STSpaceRegion> newSpaceRegions)
 	{
-		ArrayList<SpaceRegion.Position> loadedRegions = new ArrayList<SpaceRegion.Position>();
+		ArrayList<SpaceRegion.RegionPos> loadedRegions = new ArrayList<SpaceRegion.RegionPos>();
 		
-		for(Map.Entry<SpaceRegion.Position, SpaceRegion> regionEntry : newSpaceRegions.entrySet())
+		for(Map.Entry<SpaceRegion.RegionPos, STSpaceRegion> regionEntry : newSpaceRegions.entrySet())
 		{
 			if(!loadedSpaceRegions.containsKey(regionEntry.getKey()))
 				loadedRegions.add(regionEntry.getKey());

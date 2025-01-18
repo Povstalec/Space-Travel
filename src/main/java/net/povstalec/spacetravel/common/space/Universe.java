@@ -9,7 +9,8 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.common.util.INBTSerializable;
 import net.povstalec.spacetravel.SpaceTravel;
 import net.povstalec.spacetravel.common.space.generation.StarFieldTemplate;
-import net.povstalec.spacetravel.common.space.objects.SpaceObject;
+import net.povstalec.stellarview.api.common.SpaceRegion;
+import net.povstalec.stellarview.api.common.space_objects.SpaceObject;
 
 import javax.annotation.Nullable;
 import java.util.*;
@@ -26,7 +27,7 @@ public class Universe implements INBTSerializable<CompoundTag>
 	private final ArrayList<StarFieldTemplate> starFieldTemplates = new ArrayList<StarFieldTemplate>();
 	private int totalStarFieldTemplateWeight = 0;
 	
-	private final HashMap<SpaceRegion.Position, SpaceRegion> spaceRegions;
+	private final HashMap<SpaceRegion.RegionPos, STSpaceRegion> spaceRegions;
 	private final HashMap<ResourceLocation, SpaceObject> spaceObjects; // Map of space objects that need to be added to this Universe
 	
 	@Nullable
@@ -41,7 +42,7 @@ public class Universe implements INBTSerializable<CompoundTag>
 	
 	public Universe()
 	{
-		spaceRegions = new HashMap<SpaceRegion.Position, SpaceRegion>();
+		spaceRegions = new HashMap<SpaceRegion.RegionPos, STSpaceRegion>();
 		spaceObjects = new HashMap<ResourceLocation, SpaceObject>();
 	}
 	
@@ -123,9 +124,9 @@ public class Universe implements INBTSerializable<CompoundTag>
 	 * @param z
 	 * @return Returns an existing space region located at xyz coordinates or a new space region if it doesn't exist yet
 	 */
-	public SpaceRegion getRegionAt(long x, long y, long z, boolean generate)
+	public STSpaceRegion getRegionAt(long x, long y, long z, boolean generate)
 	{
-		SpaceRegion.Position pos = new SpaceRegion.Position(x, y, z);
+		SpaceRegion.RegionPos pos = new SpaceRegion.RegionPos(x, y, z);
 		
 		return getRegionAt(pos, generate);
 	}
@@ -135,12 +136,12 @@ public class Universe implements INBTSerializable<CompoundTag>
 	 * @param pos Position of the Space Region
 	 * @return Returns an existing space region located at xyz coordinates or a new space region if it doesn't exist yet
 	 */
-	public SpaceRegion getRegionAt(SpaceRegion.Position pos, boolean generate)
+	public STSpaceRegion getRegionAt(SpaceRegion.RegionPos pos, boolean generate)
 	{
 		if(!generate)
-			return spaceRegions.computeIfAbsent(pos, position -> new SpaceRegion(pos));
+			return spaceRegions.computeIfAbsent(pos, position -> new STSpaceRegion(pos));
 		else
-			return spaceRegions.computeIfAbsent(pos, position -> SpaceRegion.generateRegion(this, position, getSeed())); // TODO Handle seeds
+			return spaceRegions.computeIfAbsent(pos, position -> STSpaceRegion.generateRegion(this, position, getSeed())); // TODO Handle seeds
 	}
 	
 	/**
@@ -150,7 +151,7 @@ public class Universe implements INBTSerializable<CompoundTag>
 	 * @param generate Whether or not new regions should attempt generating space objects
 	 * @return Returns a map of space region position + space region of regions in some range around coords
 	 */
-	public Map<SpaceRegion.Position, SpaceRegion> getRegionsAt(SpaceRegion.Position regionPos, int radius, boolean generate)
+	public Map<SpaceRegion.RegionPos, STSpaceRegion> getRegionsAt(SpaceRegion.RegionPos regionPos, int radius, boolean generate)
 	{
 		return getRegionsAt(regionPos.x(), regionPos.y(), regionPos.z(), radius, generate);
 	}
@@ -164,9 +165,9 @@ public class Universe implements INBTSerializable<CompoundTag>
 	 * @param generate Whether or not new regions should attempt generating space objects
 	 * @return Returns a map of space region position + space region of regions in some range around coords
 	 */
-	public Map<SpaceRegion.Position, SpaceRegion> getRegionsAt(long xCenter, long yCenter, long zCenter, int radius, boolean generate)
+	public Map<SpaceRegion.RegionPos, STSpaceRegion> getRegionsAt(long xCenter, long yCenter, long zCenter, int radius, boolean generate)
 	{
-		HashMap<SpaceRegion.Position, SpaceRegion> spaceRegions = new HashMap<SpaceRegion.Position, SpaceRegion>();
+		HashMap<SpaceRegion.RegionPos, STSpaceRegion> spaceRegions = new HashMap<SpaceRegion.RegionPos, STSpaceRegion>();
 		
 		for(long x = -radius + xCenter; x <= radius + xCenter; x++)
 		{
@@ -174,7 +175,7 @@ public class Universe implements INBTSerializable<CompoundTag>
 			{
 				for(long z = -radius + zCenter; z <= radius + zCenter; z++)
 				{
-					SpaceRegion spaceRegion = getRegionAt(x, y, z, generate);
+					STSpaceRegion spaceRegion = getRegionAt(x, y, z, generate);
 					spaceRegions.put(spaceRegion.getRegionPos(), spaceRegion);
 				}
 			}
@@ -189,7 +190,7 @@ public class Universe implements INBTSerializable<CompoundTag>
 	 */
 	public void addToRegion(SpaceObject spaceObject)
 	{
-		SpaceRegion.Position pos = new SpaceRegion.Position(spaceObject.getSpaceCoords());
+		SpaceRegion.RegionPos pos = new SpaceRegion.RegionPos(spaceObject.getCoords());
 		
 		getRegionAt(pos, false).addChild(spaceObject);
 	}
@@ -246,7 +247,7 @@ public class Universe implements INBTSerializable<CompoundTag>
 		
 		CompoundTag spaceRegionsTag = new CompoundTag();
 		
-		for(Map.Entry<SpaceRegion.Position, SpaceRegion> spaceRegionEntry : spaceRegions.entrySet())
+		for(Map.Entry<SpaceRegion.RegionPos, STSpaceRegion> spaceRegionEntry : spaceRegions.entrySet())
 		{
 			if(spaceRegionEntry.getValue().shouldSave())
 				spaceRegionsTag.put(spaceRegionEntry.getKey().toString(), spaceRegionEntry.getValue().serializeNBT());
@@ -264,7 +265,7 @@ public class Universe implements INBTSerializable<CompoundTag>
 		CompoundTag spaceRegionsTag =  tag.getCompound(SPACE_REGIONS);
 		for(String keyString : spaceRegionsTag.getAllKeys())
 		{
-			SpaceRegion spaceRegion = new SpaceRegion();
+			STSpaceRegion spaceRegion = new STSpaceRegion();
 			spaceRegion.deserializeNBT(spaceRegionsTag.getCompound(keyString));
 			// Take Space Region's deserialized pos and put it in the map
 			spaceRegions.put(spaceRegion.getRegionPos(), spaceRegion);

@@ -9,21 +9,14 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.DimensionSpecialEffects;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
-import net.povstalec.spacetravel.client.render.ClientSpaceship;
+import net.povstalec.spacetravel.client.render.SpaceshipRenderer;
+import net.povstalec.spacetravel.common.space.Spaceship;
 import net.povstalec.stellarview.client.render.level.util.StellarViewFogEffects;
-import net.povstalec.stellarview.client.resourcepack.Skybox;
 import net.povstalec.stellarview.client.resourcepack.ViewCenter;
 import net.povstalec.stellarview.client.resourcepack.effects.MeteorEffect;
-import net.povstalec.stellarview.client.resourcepack.objects.OrbitingObject;
-import net.povstalec.stellarview.client.resourcepack.objects.SpaceObject;
-import net.povstalec.stellarview.common.config.GeneralConfig;
 import net.povstalec.stellarview.common.util.AxisRotation;
-import net.povstalec.stellarview.common.util.SpaceCoords;
 import org.joml.Matrix4f;
 
-import java.util.List;
 import java.util.Optional;
 
 public class SpaceShipSpecialEffects extends SpaceTravelDimensionSpecialEffects
@@ -35,7 +28,7 @@ public class SpaceShipSpecialEffects extends SpaceTravelDimensionSpecialEffects
 		super(Float.NaN, false, DimensionSpecialEffects.SkyType.NONE, false, false);
 		
 		spaceshipViewCenter = new SpaceshipViewCenter();
-		spaceshipViewCenter.setViewCenterObject(new ClientSpaceship());
+		spaceshipViewCenter.setViewObjectRenderer(new SpaceshipRenderer(new Spaceship()));
 	}
 	
 	@Override
@@ -51,28 +44,30 @@ public class SpaceShipSpecialEffects extends SpaceTravelDimensionSpecialEffects
 	
 	public static class SpaceshipViewCenter extends ViewCenter
 	{
-		
 		public SpaceshipViewCenter()
 		{
-			super(Optional.empty(), Optional.empty(), new AxisRotation(), 0, 1, 0, 0,
+			super(Optional.empty(), Optional.empty(), new AxisRotation(), 0, DayBlending.DAY_BLENDING, ViewCenter.DayBlending.SUN_DAY_BLENDING,
 					new MeteorEffect.ShootingStar(), new MeteorEffect.MeteorShower(), false, false, true, 0);
 		}
 		
 		@Override
 		protected boolean renderSkyObjectsFrom(ClientLevel level, Camera camera, float partialTicks, PoseStack stack, Matrix4f projectionMatrix, Runnable setupFog, BufferBuilder bufferbuilder)
 		{
-			if(viewCenterObject == null)
+			if(viewObject == null)
 				return false;
 			
-			coords = viewCenterObject.getCoords();
+			coords = viewObject.spaceCoords();
+			this.ticks = level.getGameTime();
+			this.starBrightness = 1;//StarLike.getStarBrightness(this, level, camera, partialTicks);
+			this.dustCloudBrightness = 1;//GeneralConfig.dust_clouds.get() ? StarField.dustCloudBrightness(this, level, camera, partialTicks) : 0.0F;
 			
 			stack.pushPose();
 			
-			stack.mulPose(Axis.YP.rotation((float) viewCenterObject.getAxisRotation().yAxis()));
-			stack.mulPose(Axis.ZP.rotation((float) viewCenterObject.getAxisRotation().zAxis()));
-			stack.mulPose(Axis.XP.rotation((float) viewCenterObject.getAxisRotation().xAxis()));
+			stack.mulPose(Axis.YP.rotation((float) viewObject.axisRotation().yAxis()));
+			stack.mulPose(Axis.ZP.rotation((float) viewObject.axisRotation().zAxis()));
+			stack.mulPose(Axis.XP.rotation((float) viewObject.axisRotation().xAxis()));
 			
-			viewCenterObject.renderFrom(this, level, partialTicks, stack, camera, projectionMatrix, StellarViewFogEffects.isFoggy(minecraft, camera), setupFog, bufferbuilder);
+			viewObject.renderFrom(this, level, partialTicks, stack, camera, projectionMatrix, StellarViewFogEffects.isFoggy(minecraft, camera), setupFog, bufferbuilder);
 			
 			stack.popPose();
 			
@@ -82,8 +77,8 @@ public class SpaceShipSpecialEffects extends SpaceTravelDimensionSpecialEffects
 		
 		public void deserializeNBT(CompoundTag tag)
 		{
-			if(viewCenterObject instanceof ClientSpaceship spaceship)
-				spaceship.deserializeNBT(tag);
+			if(viewObject instanceof SpaceshipRenderer spaceship)
+				spaceship.renderedObject().deserializeNBT(tag);
 		}
 	}
 }

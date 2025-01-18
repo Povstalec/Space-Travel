@@ -6,13 +6,13 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.network.NetworkEvent;
 import net.povstalec.spacetravel.client.ClientAccess;
-import net.povstalec.spacetravel.common.space.objects.SpaceObject;
+import net.povstalec.stellarview.api.common.space_objects.ViewObject;
 
 public class ClientBoundRenderCenterUpdatePacket
 {
 	public final CompoundTag tag;
 
-    public ClientBoundRenderCenterUpdatePacket(SpaceObject renderCenter)
+    public ClientBoundRenderCenterUpdatePacket(ViewObject renderCenter)
     {
         this.tag = renderCenter.serializeNBT();
     }

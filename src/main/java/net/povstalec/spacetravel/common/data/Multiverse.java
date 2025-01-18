@@ -14,13 +14,14 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.level.storage.DimensionDataStorage;
 import net.povstalec.spacetravel.SpaceTravel;
-import net.povstalec.spacetravel.common.space.SpaceRegion;
+import net.povstalec.spacetravel.common.init.SpaceObjectRegistry;
 import net.povstalec.spacetravel.common.space.Universe;
 import net.povstalec.spacetravel.common.space.generation.StarFieldTemplate;
-import net.povstalec.spacetravel.common.space.objects.BlackHole;
-import net.povstalec.spacetravel.common.space.objects.SpaceObject;
-import net.povstalec.spacetravel.common.space.objects.Star;
-import net.povstalec.spacetravel.common.space.objects.StarField;
+import net.povstalec.stellarview.api.common.space_objects.SpaceObject;
+import net.povstalec.stellarview.api.common.space_objects.resourcepack.BlackHole;
+import net.povstalec.stellarview.api.common.space_objects.resourcepack.Nebula;
+import net.povstalec.stellarview.api.common.space_objects.resourcepack.Star;
+import net.povstalec.stellarview.api.common.space_objects.resourcepack.StarField;
 
 public class Multiverse extends SavedData
 {
@@ -56,6 +57,7 @@ public class Multiverse extends SavedData
 		registerStarFields(server);
 		registerStars(server);
 		registerBlackHoles(server);
+		registerNebulae(server);
 		
 		prepareUniverses();
 		
@@ -135,7 +137,7 @@ public class Multiverse extends SavedData
 	public void registerStarFields(MinecraftServer server)
 	{
 		final RegistryAccess registries = server.registryAccess();
-		final Registry<StarField> starFieldRegistry = registries.registryOrThrow(StarField.REGISTRY_KEY);
+		final Registry<StarField> starFieldRegistry = registries.registryOrThrow(SpaceObjectRegistry.STAR_FIELD_REGISTRY_KEY);
 		
 		Set<Map.Entry<ResourceKey<StarField>, StarField>> starFieldSet = starFieldRegistry.entrySet();
 		starFieldSet.forEach((starFieldEntry) ->
@@ -153,7 +155,7 @@ public class Multiverse extends SavedData
 	public void registerStars(MinecraftServer server)
 	{
 		final RegistryAccess registries = server.registryAccess();
-		final Registry<Star> starRegistry = registries.registryOrThrow(Star.REGISTRY_KEY);
+		final Registry<Star> starRegistry = registries.registryOrThrow(SpaceObjectRegistry.STAR_REGISTRY_KEY);
 		
 		Set<Map.Entry<ResourceKey<Star>, Star>> starSet = starRegistry.entrySet();
 		starSet.forEach((starEntry) ->
@@ -171,7 +173,7 @@ public class Multiverse extends SavedData
 	public void registerBlackHoles(MinecraftServer server)
 	{
 		final RegistryAccess registries = server.registryAccess();
-		final Registry<BlackHole> starRegistry = registries.registryOrThrow(BlackHole.REGISTRY_KEY);
+		final Registry<BlackHole> starRegistry = registries.registryOrThrow(SpaceObjectRegistry.BLACK_HOLE_REGISTRY_KEY);
 		
 		Set<Map.Entry<ResourceKey<BlackHole>, BlackHole>> blackHoleSet = starRegistry.entrySet();
 		blackHoleSet.forEach((blackHoleEntry) ->
@@ -182,6 +184,24 @@ public class Multiverse extends SavedData
 			blackHole.setResourceLocation(location);
 			
 			addObjectToAllUniverses(location, blackHole);
+		});
+		SpaceTravel.LOGGER.info("Black Holes registered");
+	}
+	
+	public void registerNebulae(MinecraftServer server)
+	{
+		final RegistryAccess registries = server.registryAccess();
+		final Registry<Nebula> starRegistry = registries.registryOrThrow(SpaceObjectRegistry.NEBULA_REGISTRY_KEY);
+		
+		Set<Map.Entry<ResourceKey<Nebula>, Nebula>> nebulaSet = starRegistry.entrySet();
+		nebulaSet.forEach((nebulaEntry) ->
+		{
+			Nebula nebula = nebulaEntry.getValue();
+			ResourceLocation location = nebulaEntry.getKey().location().withPath("nebula/" + nebulaEntry.getKey().location().getPath());
+			
+			nebula.setResourceLocation(location);
+			
+			addObjectToAllUniverses(location, nebula);
 		});
 		SpaceTravel.LOGGER.info("Black Holes registered");
 	}

@@ -3,15 +3,17 @@ package net.povstalec.spacetravel;
 import java.util.Map;
 import java.util.Optional;
 
+import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.registries.DataPackRegistryEvent;
 import net.povstalec.spacetravel.common.config.SpaceTravelConfig;
+import net.povstalec.spacetravel.common.init.SpaceObjectRegistry;
+import net.povstalec.spacetravel.common.space.STSpaceRegion;
 import net.povstalec.spacetravel.common.space.generation.StarFieldTemplate;
-import net.povstalec.spacetravel.common.space.objects.BlackHole;
-import net.povstalec.spacetravel.common.space.objects.Star;
-import net.povstalec.spacetravel.common.space.objects.StarField;
-import net.povstalec.stellarview.client.events.StellarViewReloadEvent;
+import net.povstalec.stellarview.api.client.events.StellarViewReloadEvent;
+import net.povstalec.stellarview.api.common.SpaceRegion;
+import net.povstalec.stellarview.api.common.space_objects.resourcepack.*;
 import org.slf4j.Logger;
 
 import com.mojang.logging.LogUtils;
@@ -37,7 +39,6 @@ import net.povstalec.spacetravel.common.init.WorldGenInit;
 import net.povstalec.spacetravel.common.packets.ClientBoundRenderCenterUpdatePacket;
 import net.povstalec.spacetravel.common.packets.ClientBoundSpaceRegionClearPacket;
 import net.povstalec.spacetravel.common.packets.ClientBoundSpaceRegionLoadPacket;
-import net.povstalec.spacetravel.common.space.SpaceRegion;
 import net.povstalec.spacetravel.common.space.Spaceship;
 import net.povstalec.spacetravel.common.space.Universe;
 
@@ -58,9 +59,12 @@ public class SpaceTravel
 			
 			event.dataPackRegistry(StarFieldTemplate.REGISTRY_KEY, StarFieldTemplate.CODEC, StarFieldTemplate.CODEC);
 			
-			event.dataPackRegistry(StarField.REGISTRY_KEY, StarField.CODEC, StarField.CODEC);
-			event.dataPackRegistry(Star.REGISTRY_KEY, Star.CODEC, Star.CODEC);
-			event.dataPackRegistry(BlackHole.REGISTRY_KEY, BlackHole.CODEC, BlackHole.CODEC);
+			event.dataPackRegistry(SpaceObjectRegistry.PLANET_REGISTRY_KEY, Planet.CODEC, Planet.CODEC);
+			event.dataPackRegistry(SpaceObjectRegistry.MOON_REGISTRY_KEY, Moon.CODEC, Moon.CODEC);
+			event.dataPackRegistry(SpaceObjectRegistry.STAR_REGISTRY_KEY, Star.CODEC, Star.CODEC);
+			event.dataPackRegistry(SpaceObjectRegistry.BLACK_HOLE_REGISTRY_KEY, BlackHole.CODEC, BlackHole.CODEC);
+			event.dataPackRegistry(SpaceObjectRegistry.NEBULA_REGISTRY_KEY, Nebula.CODEC, Nebula.CODEC);
+			event.dataPackRegistry(SpaceObjectRegistry.STAR_FIELD_REGISTRY_KEY, StarField.CODEC, StarField.CODEC);
 		});
 		
 		modEventBus.addListener(this::commonSetup);
@@ -79,6 +83,13 @@ public class SpaceTravel
 		event.enqueueWork(() -> 
     	{
             PacketHandlerInit.register();
+			
+			SpaceObjectRegistry.register(new ResourceLocation(SpaceTravel.MODID, "planet"), Planet.class, Planet::new);
+			SpaceObjectRegistry.register(new ResourceLocation(SpaceTravel.MODID, "moon"), Moon.class, Moon::new);
+			SpaceObjectRegistry.register(new ResourceLocation(SpaceTravel.MODID, "star"), Star.class, Star::new);
+			SpaceObjectRegistry.register(new ResourceLocation(SpaceTravel.MODID, "black_hole"), BlackHole.class, BlackHole::new);
+			SpaceObjectRegistry.register(new ResourceLocation(SpaceTravel.MODID, "nebula"), Nebula.class, Nebula::new);
+			SpaceObjectRegistry.register(new ResourceLocation(SpaceTravel.MODID, "star_field"), StarField.class, StarField::new);
     	});
 	}
 	
@@ -117,7 +128,7 @@ public class SpaceTravel
 				{
 					PacketHandlerInit.sendToPlayer(player, new ClientBoundRenderCenterUpdatePacket(new Spaceship())); //TODO Get coords from somewhere
 					PacketHandlerInit.sendToPlayer(player, new ClientBoundSpaceRegionClearPacket());
-					for(Map.Entry<SpaceRegion.Position, SpaceRegion> spaceRegionEntry : universe.get().getRegionsAt(new SpaceRegion.Position(cap.spaceship.getSpaceCoords()), SpaceRegion.SPACE_REGION_LOAD_DISTANCE, true).entrySet())
+					for(Map.Entry<SpaceRegion.RegionPos, STSpaceRegion> spaceRegionEntry : universe.get().getRegionsAt(new SpaceRegion.RegionPos(cap.spaceship.getSpaceCoords()), STSpaceRegion.SPACE_REGION_LOAD_DISTANCE, true).entrySet())
 					{
 						PacketHandlerInit.sendToPlayer(player, new ClientBoundSpaceRegionLoadPacket(spaceRegionEntry.getValue()));
 					}

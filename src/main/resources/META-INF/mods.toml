@@ -3,7 +3,7 @@ loaderVersion="[47,)"
 license="MIT"
 [[mods]]
 modId="spacetravel"
-version="0.0.1"
+version="0.2.0"
 displayName="Space Travel"
 credits=""
 authors="Povstalec"
@@ -27,6 +27,6 @@ description='''Space Travel'''
 [[dependencies.spacetravel]]
 modId="stellarview"
 mandatory=true
-versionRange="[0.3.4,0.4.0)"
+versionRange="[0.4.0,0.5.0)"
 ordering="NONE"
-side="CLIENT"
+side="BOTH"

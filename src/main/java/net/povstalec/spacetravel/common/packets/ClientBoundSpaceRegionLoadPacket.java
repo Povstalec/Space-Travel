@@ -6,7 +6,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.network.NetworkEvent;
 import net.povstalec.spacetravel.client.ClientAccess;
-import net.povstalec.spacetravel.common.space.SpaceRegion;
+import net.povstalec.spacetravel.common.space.STSpaceRegion;
 
 public class ClientBoundSpaceRegionLoadPacket
 {
@@ -23,7 +23,7 @@ public class ClientBoundSpaceRegionLoadPacket
         this.childrenTag = childrenTag;
     }
 	
-	public ClientBoundSpaceRegionLoadPacket(SpaceRegion spaceRegion)
+	public ClientBoundSpaceRegionLoadPacket(STSpaceRegion spaceRegion)
     {
 		this(spaceRegion.getRegionPos().x(), spaceRegion.getRegionPos().y(), spaceRegion.getRegionPos().z(), spaceRegion.getChildrenTag());
     }

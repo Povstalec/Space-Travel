@@ -2,7 +2,6 @@ package net.povstalec.spacetravel.common.space.generation;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.povstalec.spacetravel.common.space.objects.StarField;
 
 import java.util.Random;
 
