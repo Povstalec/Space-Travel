@@ -4,7 +4,7 @@
 	"texture_layers":
 	[
 		{
-			"texture": "spacetravel:textures/environment/star/sn_1987a.png",
+			"texture": "stellarview:textures/environment/star/sn_1987a.png",
 			"rgba": {"red": 255, "green": 255, "blue": 255, "alpha": 255},
 			"blend": true,
 			"size": 4488626469,

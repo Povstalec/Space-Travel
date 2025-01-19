@@ -58,8 +58,8 @@ public class SpaceShipSpecialEffects extends SpaceTravelDimensionSpecialEffects
 			
 			coords = viewObject.spaceCoords();
 			this.ticks = level.getGameTime();
-			this.starBrightness = 1;//StarLike.getStarBrightness(this, level, camera, partialTicks);
-			this.dustCloudBrightness = 1;//GeneralConfig.dust_clouds.get() ? StarField.dustCloudBrightness(this, level, camera, partialTicks) : 0.0F;
+			this.starBrightness = 1F;//StarLike.getStarBrightness(this, level, camera, partialTicks);
+			this.dustCloudBrightness = 0.5F;//GeneralConfig.dust_clouds.get() ? StarField.dustCloudBrightness(this, level, camera, partialTicks) : 0.0F;
 			
 			stack.pushPose();
 			

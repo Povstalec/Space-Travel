@@ -7,7 +7,7 @@
 	"texture_layers":
 	[
 		{
-			"texture": "spacetravel:textures/environment/star/pa_99_n2.png",
+			"texture": "stellarview:textures/environment/star/pa_99_n2.png",
 			"rgba": {"red": 255, "green": 255, "blue": 255, "alpha": 255},
 			"blend": true,
 			"size": 4000000000,
