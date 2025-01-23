@@ -11,6 +11,8 @@ import net.povstalec.spacetravel.common.config.SpaceTravelConfig;
 import net.povstalec.spacetravel.common.init.SpaceObjectRegistry;
 import net.povstalec.spacetravel.common.space.STSpaceRegion;
 import net.povstalec.spacetravel.common.space.generation.StarFieldTemplate;
+import net.povstalec.stellarview.api.client.events.SpaceRendererReloadEvent;
+import net.povstalec.stellarview.api.client.events.StellarViewEffectsReloadEvent;
 import net.povstalec.stellarview.api.client.events.StellarViewReloadEvent;
 import net.povstalec.stellarview.api.common.SpaceRegion;
 import net.povstalec.stellarview.api.common.space_objects.resourcepack.*;
@@ -108,7 +110,7 @@ public class SpaceTravel
 	public static class ClientForgeEvents
 	{
 		@SubscribeEvent
-		public static void stellarViewReload(StellarViewReloadEvent event)
+		public static void stellarViewSpaceRendererReload(SpaceRendererReloadEvent event)
 		{
 			event.setCanceled(true);
 		}

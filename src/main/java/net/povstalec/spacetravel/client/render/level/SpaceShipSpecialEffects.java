@@ -47,7 +47,7 @@ public class SpaceShipSpecialEffects extends SpaceTravelDimensionSpecialEffects
 		public SpaceshipViewCenter()
 		{
 			super(Optional.empty(), Optional.empty(), new AxisRotation(), 0, DayBlending.DAY_BLENDING, ViewCenter.DayBlending.SUN_DAY_BLENDING,
-					new MeteorEffect.ShootingStar(), new MeteorEffect.MeteorShower(), false, false, true, 0);
+					Optional.empty(), Optional.empty(), false, false, true, true, 0);
 		}
 		
 		@Override

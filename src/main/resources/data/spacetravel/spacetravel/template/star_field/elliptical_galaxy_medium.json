@@ -1,12 +1,12 @@
 {
-	"weight": 1,
+	"weight": 20,
 
-	"dust_clouds": { "min":  250, "max": 500 },
+	"dust_clouds": { "min":  150, "max": 300 },
 	
-	"stars": { "min":  10000, "max": 20000 },
+	"stars": { "min":  4000, "max": 8000 },
 	"clump_stars_in_center": true,
 	
-	"diameter": { "min": 200000, "max": 1000000 },
+	"diameter": { "min": 58000, "max": 120000 },
 	"x_stretch": { "min": 0.25, "max": 1.0 },
 	"y_stretch": { "min": 0.25, "max": 1.0 },
 	"z_stretch": { "min": 0.25, "max": 1.0 },

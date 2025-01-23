@@ -14,10 +14,13 @@ import net.povstalec.spacetravel.common.init.SpaceObjectRegistry;
 import net.povstalec.spacetravel.common.space.STSpaceRegion;
 import net.povstalec.stellarview.api.common.SpaceRegion;
 import net.povstalec.stellarview.api.common.space_objects.SpaceObject;
+import net.povstalec.stellarview.api.common.space_objects.resourcepack.StarField;
 import net.povstalec.stellarview.client.SpaceObjectRenderers;
 import net.povstalec.stellarview.client.render.SpaceRegionRenderer;
 import net.povstalec.stellarview.client.render.SpaceRenderer;
+import net.povstalec.stellarview.client.render.StellarViewEffects;
 import net.povstalec.stellarview.client.render.space_objects.SpaceObjectRenderer;
+import net.povstalec.stellarview.client.render.space_objects.resourcepack.StarFieldRenderer;
 
 public class ClientAccess
 {
@@ -102,6 +105,7 @@ public class ClientAccess
 				SpaceObjectRenderer renderer = SpaceObjectRenderers.constructObjectRenderer(spaceObject);
 				if(renderer != null)
 				{
+					renderer.setupSpaceObject(null);
 					parent.addChild(renderer);
 					
 					if(tag.contains(STSpaceRegion.CHILDREN))
@@ -133,6 +137,7 @@ public class ClientAccess
 					SpaceObjectRenderer renderer = SpaceObjectRenderers.constructObjectRenderer(spaceObject);
 					if(renderer != null)
 					{
+						renderer.setupSpaceObject(null);
 						spaceRegion.addChild(renderer);
 						
 						if(tag.contains(STSpaceRegion.CHILDREN))
