@@ -16,7 +16,8 @@ import net.minecraft.world.level.storage.DimensionDataStorage;
 import net.povstalec.spacetravel.SpaceTravel;
 import net.povstalec.spacetravel.common.init.SpaceObjectRegistry;
 import net.povstalec.spacetravel.common.space.Universe;
-import net.povstalec.spacetravel.common.space.generation.StarFieldTemplate;
+import net.povstalec.spacetravel.common.space.generation.SpaceObjectParameterRegistry;
+import net.povstalec.spacetravel.common.space.generation.templates.StarFieldParameters;
 import net.povstalec.stellarview.api.common.space_objects.SpaceObject;
 import net.povstalec.stellarview.api.common.space_objects.resourcepack.BlackHole;
 import net.povstalec.stellarview.api.common.space_objects.resourcepack.Nebula;
@@ -50,9 +51,11 @@ public class Multiverse extends SavedData
 	
 	public void setupUniverse()
 	{
+		//TODO Universe setup event
+		
 		registerUniverses(server);
 		
-		registerStarFieldTemplates(server);
+		registerStarFieldParameters(server);
 		
 		registerStarFields(server);
 		registerStars(server);
@@ -99,27 +102,20 @@ public class Multiverse extends SavedData
 		}
 	}
 	
-	public void registerStarFieldTemplates(MinecraftServer server)
+	public void registerStarFieldParameters(MinecraftServer server)
 	{
 		final RegistryAccess registries = server.registryAccess();
-		final Registry<StarFieldTemplate> templateRegistry = registries.registryOrThrow(StarFieldTemplate.REGISTRY_KEY);
+		final Registry<StarFieldParameters> templateRegistry = registries.registryOrThrow(StarFieldParameters.REGISTRY_KEY);
 		
-		Set<Map.Entry<ResourceKey<StarFieldTemplate>, StarFieldTemplate>> templateSet = templateRegistry.entrySet();
+		Set<Map.Entry<ResourceKey<StarFieldParameters>, StarFieldParameters>> templateSet = templateRegistry.entrySet();
 		templateSet.forEach((templateEntry) ->
 		{
-			StarFieldTemplate template = templateEntry.getValue();
+			ResourceLocation location = templateEntry.getKey().location();
+			StarFieldParameters template = templateEntry.getValue();
 			
-			addStarFieldTemplateToAllUniverses(template);
+			SpaceObjectParameterRegistry.register(new ResourceLocation(location.getNamespace(), "star_field/"+ location.getPath()), template);
 		});
 		SpaceTravel.LOGGER.info("Star Field Templates registered");
-	}
-	
-	private void addStarFieldTemplateToAllUniverses(StarFieldTemplate template)
-	{
-		for(Map.Entry<ResourceLocation, Universe> universeEntry : universes.entrySet())
-		{
-			universeEntry.getValue().addStarFieldTemplate(template);
-		}
 	}
 
 	//============================================================================================

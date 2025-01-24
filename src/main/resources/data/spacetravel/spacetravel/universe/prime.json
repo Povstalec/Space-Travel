@@ -2,5 +2,13 @@
 	"saved_regions":
 	[
 		{ "x": -5, "y": -5, "z": -5, "x_end": 5, "y_end": 5, "z_end": 5 }
+	],
+	
+	"children_parameters":
+	[
+		{ "parameters": "spacetravel:star_field/spiral_galaxy_small", "weight": 1 },
+		{ "parameters": "spacetravel:star_field/spiral_galaxy_medium", "weight": 10 },
+		{ "parameters": "spacetravel:star_field/elliptical_galaxy_medium", "weight": 20 },
+		{ "parameters": "spacetravel:star_field/elliptical_galaxy_large", "weight": 1 }
 	]
 }

@@ -1,4 +1,4 @@
-package net.povstalec.spacetravel.common.space.generation;
+package net.povstalec.spacetravel.common.space.generation.templates;
 
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
@@ -7,36 +7,32 @@ import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.povstalec.spacetravel.SpaceTravel;
-import net.povstalec.spacetravel.common.space.MassObject;
-import net.povstalec.spacetravel.common.space.space_objects.STStar;
-import net.povstalec.stellarview.StellarView;
-import net.povstalec.stellarview.api.common.space_objects.StarLike;
-import net.povstalec.stellarview.api.common.space_objects.TexturedObject;
+import net.povstalec.spacetravel.common.space.generation.*;
+import net.povstalec.stellarview.api.common.space_objects.SpaceObject;
 import net.povstalec.stellarview.api.common.space_objects.resourcepack.StarField;
 import net.povstalec.stellarview.common.util.*;
 
 import java.util.*;
 
-public class StarFieldTemplate
+public class StarFieldParameters extends SpaceObjectParameters<StarField>
 {
 	public static final ResourceLocation MAIN_SEQUENCE_DISTRIBUTION = new ResourceLocation(SpaceTravel.MODID, "main_sequence_distribution");
 	public static final ResourceLocation WHITE_DUST_CLOUDS = new ResourceLocation(SpaceTravel.MODID, "white_dust_clouds");
 	
-	public static final ResourceLocation STAR_FIELD_TEMPLATE_LOCATION = new ResourceLocation(SpaceTravel.MODID, "template/star_field");
-	public static final ResourceKey<Registry<StarFieldTemplate>> REGISTRY_KEY = ResourceKey.createRegistryKey(STAR_FIELD_TEMPLATE_LOCATION);
+	public static final ResourceLocation STAR_FIELD_PARAMETERS_LOCATION = new ResourceLocation(SpaceTravel.MODID, "parameters/star_field");
+	public static final ResourceKey<Registry<StarFieldParameters>> REGISTRY_KEY = ResourceKey.createRegistryKey(STAR_FIELD_PARAMETERS_LOCATION);
 	
 	public static final SpiralArmTemplate DEFAULT_SPIRAL_ARM = new SpiralArmTemplate(1, new SpaceTravelParameters.IntRange(80, 100), new ArrayList<WeightedDustCloudInfo>(),
 			new SpaceTravelParameters.IntRange(600, 1000), true, new SpaceTravelParameters.DoubleRange(0, 0),
 			new SpaceTravelParameters.DoubleRange(1.5, 2.0), new SpaceTravelParameters.DoubleRange(2.0, 2.5));
 	
-	public static final StarFieldTemplate DEFAULT_STAR_FIELD_TEMPLATE = new StarFieldTemplate(
-			1, StarField.DEFAULT_DUST_CLOUD_TEXTURE, new SpaceTravelParameters.IntRange(80, 100), new ArrayList<WeightedDustCloudInfo>(),
+	public static final StarFieldParameters DEFAULT_STAR_FIELD_PARAMETERS = new StarFieldParameters(
+			StarField.DEFAULT_DUST_CLOUD_TEXTURE, new SpaceTravelParameters.IntRange(80, 100), new ArrayList<WeightedDustCloudInfo>(),
 			StarField.DEFAULT_STAR_TEXTURE, new SpaceTravelParameters.IntRange(600, 1000), new ArrayList<WeightedStarInfo>(), true,
 			new SpaceTravelParameters.IntRange(12000, 120000), new SpaceTravelParameters.DoubleRange(0.25, 1.0),
 			new SpaceTravelParameters.DoubleRange(0.25, 1.0), new SpaceTravelParameters.DoubleRange(0.25, 1.0),
-			new SpaceTravelParameters.IntRange(2, 4), Arrays.asList(DEFAULT_SPIRAL_ARM));
+			new SpaceTravelParameters.IntRange(2, 4), Arrays.asList(DEFAULT_SPIRAL_ARM), new ArrayList<ParameterLocation>());
 	
-	protected int weight; // TODO Is weight necessary?
 	protected Optional<ArrayList<ResourceLocation>> universes;
 	
 	protected ResourceLocation dustCloudTexture;
@@ -61,33 +57,33 @@ public class StarFieldTemplate
 	protected ArrayList<SpiralArmTemplate> spiralArmTemplates;
 	protected int totalArmWeight;
 	
-	public static final Codec<StarFieldTemplate> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-			Codec.intRange(1, Integer.MAX_VALUE).fieldOf("weight").forGetter(template -> template.weight),
+	public static final Codec<StarFieldParameters> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+			ResourceLocation.CODEC.optionalFieldOf("dust_cloud_texture", StarField.DEFAULT_DUST_CLOUD_TEXTURE).forGetter(parameters -> parameters.dustCloudTexture),
+			SpaceTravelParameters.IntRange.DUST_CLOUD_RANGE_CODEC.fieldOf("dust_clouds").forGetter(parameters -> parameters.dustCloudsRange),
+			WeightedDustCloudInfo.CODEC.listOf().optionalFieldOf("dust_cloud_info", new ArrayList<WeightedDustCloudInfo>()).forGetter(parameters -> parameters.dustCloudInfo),
 			
-			ResourceLocation.CODEC.optionalFieldOf("dust_cloud_texture", StarField.DEFAULT_DUST_CLOUD_TEXTURE).forGetter(template -> template.dustCloudTexture),
-			SpaceTravelParameters.DUST_CLOUD_RANGE_CODEC.fieldOf("dust_clouds").forGetter(template -> template.dustCloudsRange),
-			WeightedDustCloudInfo.CODEC.listOf().optionalFieldOf("dust_cloud_info", new ArrayList<WeightedDustCloudInfo>()).forGetter(template -> template.dustCloudInfo),
+			ResourceLocation.CODEC.optionalFieldOf("star_texture", StarField.DEFAULT_STAR_TEXTURE).forGetter(parameters -> parameters.starTexture),
+			SpaceTravelParameters.IntRange.STAR_RANGE_CODEC.fieldOf("stars").forGetter(template -> template.starsRange),
+			WeightedStarInfo.CODEC.listOf().optionalFieldOf("star_info", new ArrayList<WeightedStarInfo>()).forGetter(parameters -> parameters.starInfo),
+			Codec.BOOL.optionalFieldOf("clump_stars_in_center", true).forGetter(parameters -> parameters.clumpStarsInCenter),
 			
-			ResourceLocation.CODEC.optionalFieldOf("star_texture", StarField.DEFAULT_STAR_TEXTURE).forGetter(template -> template.starTexture),
-			SpaceTravelParameters.STAR_RANGE_CODEC.fieldOf("stars").forGetter(template -> template.starsRange),
-			WeightedStarInfo.CODEC.listOf().optionalFieldOf("star_info", new ArrayList<WeightedStarInfo>()).forGetter(template -> template.starInfo),
-			Codec.BOOL.optionalFieldOf("clump_stars_in_center", true).forGetter(template -> template.clumpStarsInCenter),
+			SpaceTravelParameters.IntRange.DIAMETER_RANGE_CODEC.fieldOf("diameter").forGetter(parameters -> parameters.diameterRange),
+			SpaceTravelParameters.DoubleRange.FULL_RANGE_CODEC.fieldOf("x_stretch").forGetter(parameters -> parameters.xStretchRange),
+			SpaceTravelParameters.DoubleRange.FULL_RANGE_CODEC.fieldOf("y_stretch").forGetter(parameters -> parameters.yStretchRange),
+			SpaceTravelParameters.DoubleRange.FULL_RANGE_CODEC.fieldOf("z_stretch").forGetter(parameters -> parameters.zStretchRange),
 			
-			SpaceTravelParameters.DIAMETER_RANGE_CODEC.fieldOf("diameter").forGetter(template -> template.diameterRange),
-			SpaceTravelParameters.DOUBLE_RANGE_CODEC.fieldOf("x_stretch").forGetter(template -> template.xStretchRange),
-			SpaceTravelParameters.DOUBLE_RANGE_CODEC.fieldOf("y_stretch").forGetter(template -> template.yStretchRange),
-			SpaceTravelParameters.DOUBLE_RANGE_CODEC.fieldOf("z_stretch").forGetter(template -> template.zStretchRange),
+			SpaceTravelParameters.IntRange.ARM_NUMBER_RANGE_CODEC.optionalFieldOf("number_of_arms", new SpaceTravelParameters.IntRange(0, 0)).forGetter(parameters -> parameters.numberOfArmsRange),
+			SpiralArmTemplate.CODEC.listOf().optionalFieldOf("spiral_arms", new ArrayList<>()).forGetter(parameters -> parameters.spiralArmTemplates),
 			
-			SpaceTravelParameters.ARM_NUMBER_RANGE_CODEC.optionalFieldOf("number_of_arms", new SpaceTravelParameters.IntRange(0, 0)).forGetter(template -> template.numberOfArmsRange),
-			SpiralArmTemplate.CODEC.listOf().optionalFieldOf("spiral_arms", new ArrayList<>()).forGetter(template -> template.spiralArmTemplates)
-	).apply(instance, StarFieldTemplate::new));
+			ParameterLocation.CODEC.listOf().optionalFieldOf(CHILDREN, new ArrayList<>()).forGetter(parameters -> parameters.childrenParameters)
+	).apply(instance, StarFieldParameters::new));
 	
-	public StarFieldTemplate(int weight, ResourceLocation dustCloudTexture, SpaceTravelParameters.IntRange dustCloudsRange, List<WeightedDustCloudInfo> dustCloudInfo,
-							 ResourceLocation starTexture, SpaceTravelParameters.IntRange starsRange, List<WeightedStarInfo> starInfo, boolean clumpStarsInCenter,
-							 SpaceTravelParameters.IntRange diameterRange, SpaceTravelParameters.DoubleRange xStretchRange, SpaceTravelParameters.DoubleRange yStretchRange, SpaceTravelParameters.DoubleRange zStretchRange,
-							 SpaceTravelParameters.IntRange numberOfArmsRange, List<SpiralArmTemplate> spiralArmTemplates)
+	public StarFieldParameters(ResourceLocation dustCloudTexture, SpaceTravelParameters.IntRange dustCloudsRange, List<WeightedDustCloudInfo> dustCloudInfo,
+							   ResourceLocation starTexture, SpaceTravelParameters.IntRange starsRange, List<WeightedStarInfo> starInfo, boolean clumpStarsInCenter,
+							   SpaceTravelParameters.IntRange diameterRange, SpaceTravelParameters.DoubleRange xStretchRange, SpaceTravelParameters.DoubleRange yStretchRange, SpaceTravelParameters.DoubleRange zStretchRange,
+							   SpaceTravelParameters.IntRange numberOfArmsRange, List<SpiralArmTemplate> spiralArmTemplates, List<ParameterLocation> childrenParameters)
 	{
-		this.weight = weight;
+		super(childrenParameters);
 		
 		this.dustCloudTexture = dustCloudTexture;
 		this.dustCloudsRange = dustCloudsRange;
@@ -122,11 +118,6 @@ public class StarFieldTemplate
 		{
 			totalArmWeight += armTemplate.weight;
 		}
-	}
-	
-	public int getWeight()
-	{
-		return weight;
 	}
 	
 	public ResourceLocation randomDustCloudInfo(Random random)
@@ -183,7 +174,7 @@ public class StarFieldTemplate
 		return spiralArmTemplates.get(i);
 	}
 	
-	public StarField generateStarField(Random random, long seed, SpaceCoords spaceCoords, AxisRotation axisRotation)
+	public StarField generate(Random random, long seed, SpaceCoords spaceCoords, AxisRotation axisRotation)
 	{
 		int dustClouds = dustCloudsRange.nextInt(random);
 		
@@ -206,19 +197,28 @@ public class StarFieldTemplate
 				dustClouds, Optional.ofNullable(randomDustCloudInfo(random)), dustCloudTexture,
 				Optional.ofNullable(randomStarInfo(random)), starTexture, seed, diameter, stars, clumpStarsInCenter, xStretch, yStretch, zStretch, arms);
 		
-		//System.out.println("- " + starField.getCoords() + " " + starField.getSeed());
 		Random starFieldRandom = new Random(starField.getSeed());
-		for(int i = 0; i < 10; i++)
+		for(ParameterLocation parameterLocation : childrenParameters)
 		{
-			long randomX = starFieldRandom.nextLong(0, diameter) - (diameter / 2);
-			long randomY = starFieldRandom.nextLong(0, diameter) - (diameter / 2);
-			long randomZ = starFieldRandom.nextLong(0, diameter) - (diameter / 2);
-			
-			TextureLayer textureLayer = new TextureLayer(new ResourceLocation("textures/environment/sun.png"), new Color.FloatRGBA(1F, 1F, 1F, 1F), true,
-					4488626469D, 1, true, -32D, UV.Quad.DEFAULT_QUAD_UV);
-			starField.addChild(new STStar(Optional.empty(), Either.left(new SpaceCoords(randomX, randomY, randomZ)), new AxisRotation(), Optional.empty(),
-					Arrays.asList(textureLayer), TexturedObject.FadeOutHandler.DEFAULT_STAR_HANDLER, StarLike.MIN_SIZE, StarLike.MAX_ALPHA, StarLike.MIN_ALPHA, Optional.empty(),
-					Optional.of(MassObject.Mass.randomSolarMass(starFieldRandom, 0.1D, 20D))));
+			int count = parameterLocation.count().nextInt(starFieldRandom);
+			for(int i = 0; i < count; i++)
+			{
+				//TODO Offset
+				
+				long randomX = starFieldRandom.nextLong(0, diameter) - (diameter / 2);
+				long randomY = starFieldRandom.nextLong(0, diameter) - (diameter / 2);
+				long randomZ = starFieldRandom.nextLong(0, diameter) - (diameter / 2);
+				
+				//randomChildTemplate(starFieldRandom)
+				SpaceObjectParameters parameters = SpaceObjectParameterRegistry.get(parameterLocation.location());
+				if(parameters != null)
+				{
+					SpaceObject child = parameters.generate(starFieldRandom, seed, new SpaceCoords(randomX, randomY, randomZ), new AxisRotation());
+					
+					if(child != null)
+						starField.addChild(child);
+				}
+			}
 		}
 		
 		return starField;
@@ -245,15 +245,15 @@ public class StarFieldTemplate
 		public static final Codec<SpiralArmTemplate> CODEC = RecordCodecBuilder.create(instance -> instance.group(
 				Codec.intRange(1, Integer.MAX_VALUE).fieldOf("weight").forGetter(template -> template.weight),
 				
-				SpaceTravelParameters.DUST_CLOUD_RANGE_CODEC.fieldOf("dust_clouds").forGetter(template -> template.dustCloudsRange),
+				SpaceTravelParameters.IntRange.DUST_CLOUD_RANGE_CODEC.fieldOf("dust_clouds").forGetter(template -> template.dustCloudsRange),
 				WeightedDustCloudInfo.CODEC.listOf().optionalFieldOf("dust_cloud_info", new ArrayList<WeightedDustCloudInfo>()).forGetter(template -> template.dustCloudInfo),
 				
-				SpaceTravelParameters.STAR_RANGE_CODEC.fieldOf("stars").forGetter(template -> template.starsRange),
+				SpaceTravelParameters.IntRange.STAR_RANGE_CODEC.fieldOf("stars").forGetter(template -> template.starsRange),
 				Codec.BOOL.optionalFieldOf("clump_stars_in_center", true).forGetter(template -> template.clumpStarsInCenter),
 				
-				SpaceTravelParameters.ANGLE_RANGE_CODEC.fieldOf("arm_rotation_offset").forGetter(template -> template.armRotationOffsetRange),
-				SpaceTravelParameters.DOUBLE_POSITIVE_RANGE_CODEC.fieldOf("arm_length").forGetter(template -> template.armLengthRange),
-				SpaceTravelParameters.DOUBLE_POSITIVE_RANGE_CODEC.fieldOf("arm_thickness").forGetter(template -> template.armThicknessRange)
+				SpaceTravelParameters.DoubleRange.ANGLE_RANGE_CODEC.fieldOf("arm_rotation_offset").forGetter(template -> template.armRotationOffsetRange),
+				SpaceTravelParameters.DoubleRange.POSITIVE_RANGE_CODEC.fieldOf("arm_length").forGetter(template -> template.armLengthRange),
+				SpaceTravelParameters.DoubleRange.POSITIVE_RANGE_CODEC.fieldOf("arm_thickness").forGetter(template -> template.armThicknessRange)
 		).apply(instance, SpiralArmTemplate::new));
 		
 		public SpiralArmTemplate(int weight, SpaceTravelParameters.IntRange dustCloudsRange, List<WeightedDustCloudInfo> dustCloudInfo, SpaceTravelParameters.IntRange starsRange, boolean clumpStarsInCenter,

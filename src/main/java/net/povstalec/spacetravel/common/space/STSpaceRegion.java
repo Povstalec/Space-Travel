@@ -6,6 +6,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.povstalec.spacetravel.common.config.SpaceRegionCommonConfig;
 import net.povstalec.spacetravel.common.init.SpaceObjectRegistry;
+import net.povstalec.spacetravel.common.space.generation.templates.SpaceObjectParameters;
 import net.povstalec.stellarview.api.common.SpaceRegion;
 import net.povstalec.stellarview.api.common.space_objects.SpaceObject;
 import net.povstalec.stellarview.api.common.space_objects.resourcepack.StarField;
@@ -58,25 +59,29 @@ public final class STSpaceRegion extends SpaceRegion
 		
 		//TODO Random generation
 		Random random = new Random(usedSeed);
-		
 		int chance = random.nextInt(0, 101);
 		
 		if(chance > 90)
 		{
-			long randomX = random.nextLong(0, STSpaceRegion.LY_PER_REGION) - STSpaceRegion.LY_PER_REGION_HALF;
-			long randomY = random.nextLong(0, STSpaceRegion.LY_PER_REGION) - STSpaceRegion.LY_PER_REGION_HALF;
-			long randomZ = random.nextLong(0, STSpaceRegion.LY_PER_REGION) - STSpaceRegion.LY_PER_REGION_HALF;
-			
-			long x = randomX + pos.lyX();
-			long y = randomY + pos.lyY();
-			long z = randomZ + pos.lyZ();
-			
-			double xRot = random.nextDouble(0, 360);
-			double yRot = random.nextDouble(0, 360);
-			double zRot = random.nextDouble(0, 360);
-			
-			StarField starField = universe.randomStarFieldTemplate(random).generateStarField(random, usedSeed, new SpaceCoords(x, y, z), new AxisRotation(true, xRot, yRot, zRot));
-			spaceRegion.addChild(starField);
+			SpaceObjectParameters parameters = universe.randomSpaceObjectParameters(random);
+			if(parameters != null)
+			{
+				long randomX = random.nextLong(0, STSpaceRegion.LY_PER_REGION) - STSpaceRegion.LY_PER_REGION_HALF;
+				long randomY = random.nextLong(0, STSpaceRegion.LY_PER_REGION) - STSpaceRegion.LY_PER_REGION_HALF;
+				long randomZ = random.nextLong(0, STSpaceRegion.LY_PER_REGION) - STSpaceRegion.LY_PER_REGION_HALF;
+				
+				long x = randomX + pos.lyX();
+				long y = randomY + pos.lyY();
+				long z = randomZ + pos.lyZ();
+				
+				double xRot = random.nextDouble(0, 360);
+				double yRot = random.nextDouble(0, 360);
+				double zRot = random.nextDouble(0, 360);
+				
+				SpaceObject spaceObject = parameters.generate(random, usedSeed, new SpaceCoords(x, y, z), new AxisRotation(true, xRot, yRot, zRot));
+				if(spaceObject != null)
+					spaceRegion.addChild(spaceObject);
+			}
 		}
 		
 		return spaceRegion;

@@ -8,7 +8,10 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.common.util.INBTSerializable;
 import net.povstalec.spacetravel.SpaceTravel;
-import net.povstalec.spacetravel.common.space.generation.StarFieldTemplate;
+import net.povstalec.spacetravel.common.space.generation.ParameterLocation;
+import net.povstalec.spacetravel.common.space.generation.SpaceObjectParameterRegistry;
+import net.povstalec.spacetravel.common.space.generation.templates.SpaceObjectParameters;
+import net.povstalec.spacetravel.common.space.generation.templates.StarFieldParameters;
 import net.povstalec.stellarview.api.common.SpaceRegion;
 import net.povstalec.stellarview.api.common.space_objects.SpaceObject;
 
@@ -23,9 +26,8 @@ public class Universe implements INBTSerializable<CompoundTag>
 	public static final String SPACE_REGIONS = "space_regions";
 	public static final String SEED = "seed";
 	
-	//TODO Change it to list
-	private final ArrayList<StarFieldTemplate> starFieldTemplates = new ArrayList<StarFieldTemplate>();
-	private int totalStarFieldTemplateWeight = 0;
+	private ArrayList<ParameterLocation> childrenParameters;
+	private int childrenWeight = 0;
 	
 	private final HashMap<SpaceRegion.RegionPos, STSpaceRegion> spaceRegions;
 	private final HashMap<ResourceLocation, SpaceObject> spaceObjects; // Map of space objects that need to be added to this Universe
@@ -37,18 +39,28 @@ public class Universe implements INBTSerializable<CompoundTag>
 	
 	public static final Codec<Universe> CODEC = RecordCodecBuilder.create(instance -> instance.group(
 			Codec.LONG.optionalFieldOf(SEED).forGetter(universe -> Optional.ofNullable(universe.seed)),
-			Area.CODEC.listOf().optionalFieldOf("saved_regions", new ArrayList<Area>()).forGetter(universe -> new ArrayList<Area>())
+			Area.CODEC.listOf().optionalFieldOf("saved_regions", new ArrayList<Area>()).forGetter(universe -> new ArrayList<Area>()),
+			
+			ParameterLocation.CODEC.listOf().optionalFieldOf("children_parameters", new ArrayList<>()).forGetter(parameters -> parameters.childrenParameters)
 	).apply(instance, Universe::new));
 	
 	public Universe()
 	{
-		spaceRegions = new HashMap<SpaceRegion.RegionPos, STSpaceRegion>();
-		spaceObjects = new HashMap<ResourceLocation, SpaceObject>();
+		this.spaceRegions = new HashMap<SpaceRegion.RegionPos, STSpaceRegion>();
+		this.spaceObjects = new HashMap<ResourceLocation, SpaceObject>();
+		this.childrenParameters = new ArrayList<ParameterLocation>();
 	}
 	
-	public Universe(Optional<Long> seed, List<Area> forceSavedRegions)
+	public Universe(Optional<Long> seed, List<Area> forceSavedRegions, List<ParameterLocation> childrenParameters)
 	{
-		this();
+		this.spaceRegions = new HashMap<SpaceRegion.RegionPos, STSpaceRegion>();
+		this.spaceObjects = new HashMap<ResourceLocation, SpaceObject>();
+		
+		this.childrenParameters = new ArrayList<ParameterLocation>(childrenParameters);
+		for(ParameterLocation childTemplate : childrenParameters)
+		{
+			childrenWeight += childTemplate.weight();
+		}
 		
 		if(seed.isPresent())
 			this.seed = seed.get();
@@ -93,28 +105,23 @@ public class Universe implements INBTSerializable<CompoundTag>
 		return location;
 	}
 	
-	public void addStarFieldTemplate(StarFieldTemplate template)
+	@Nullable
+	public SpaceObjectParameters randomSpaceObjectParameters(Random random)
 	{
-		starFieldTemplates.add(template);
-		totalStarFieldTemplateWeight += template.getWeight();
-	}
-	
-	public StarFieldTemplate randomStarFieldTemplate(Random random)
-	{
-		if(starFieldTemplates.isEmpty())
-			return StarFieldTemplate.DEFAULT_STAR_FIELD_TEMPLATE;
+		if(childrenParameters.isEmpty())
+			return null;
 		
 		int i = 0;
 		
-		for(int weight = random.nextInt(0, totalStarFieldTemplateWeight); i < starFieldTemplates.size() - 1; i++)
+		for(int weight = random.nextInt(0, childrenWeight); i < childrenParameters.size() - 1; i++)
 		{
-			weight -= starFieldTemplates.get(i).getWeight();
+			weight -= childrenParameters.get(i).weight();
 			
 			if(weight <= 0)
 				break;
 		}
 		
-		return starFieldTemplates.get(i);
+		return SpaceObjectParameterRegistry.get(childrenParameters.get(i).location());
 	}
 	
 	/**

@@ -1,12 +1,10 @@
 {
-	"weight": 1,
-
-	"dust_clouds": { "min":  60, "max": 80 },
+	"dust_clouds": { "min":  80, "max": 120 },
 	
-	"stars": { "min":  200, "max": 500 },
+	"stars": { "min":  1000, "max": 2000 },
 	"clump_stars_in_center": true,
 	
-	"diameter": { "min": 12000, "max": 58000 },
+	"diameter": { "min": 58000, "max": 120000 },
 	"x_stretch": { "min": 0.25, "max": 1.0 },
 	"y_stretch": { "min": 0.25, "max": 1.0 },
 	"z_stretch": { "min": 0.25, "max": 1.0 },
@@ -16,8 +14,8 @@
 	[
 		{
 			"weight": 1,
-			"dust_clouds": { "min": 30, "max": 50 },
-			"stars": { "min": 150, "max": 600 },
+			"dust_clouds": { "min": 80, "max": 160 },
+			"stars": { "min": 1500, "max": 4000 },
 			"clump_stars_in_center": true,
 			"arm_rotation_offset": { "min": 0, "max": 0 },
 			"arm_length": { "min": 1.5, "max": 2.5 },
