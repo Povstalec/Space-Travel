@@ -39,6 +39,8 @@ import net.povstalec.spacetravel.common.worldgen.SpaceChunkGenerator;
 
 public class DimensionUtil
 {
+    public static final ResourceLocation DIMENSION_LOCATION = new ResourceLocation("minecraft", "dimension");
+    
 	/**
 	 * Class for helping with dimension generation
 	 * CREDIT GOES TO: Joseph Bettendorff a.k.a. "Commoble" (https://github.com/Commoble/infiniverse)
@@ -202,4 +204,11 @@ public class DimensionUtil
 
         return stem;
     }*/
+    
+    public static ResourceKey<Level> stringToDimension(String dimensionString)
+    {
+        ResourceLocation dimension = ResourceLocation.tryParse(dimensionString);
+        
+        return dimension != null ? ResourceKey.create(ResourceKey.createRegistryKey(DIMENSION_LOCATION), dimension) : null;
+    }
 }

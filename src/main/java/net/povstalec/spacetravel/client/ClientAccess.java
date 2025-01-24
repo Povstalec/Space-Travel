@@ -106,7 +106,7 @@ public class ClientAccess
 				if(renderer != null)
 				{
 					renderer.setupSpaceObject(null);
-					parent.addChild(renderer);
+					parent.addChildRaw(renderer);
 					
 					if(tag.contains(STSpaceRegion.CHILDREN))
 					{
@@ -140,9 +140,9 @@ public class ClientAccess
 						renderer.setupSpaceObject(null);
 						spaceRegion.addChild(renderer);
 						
-						if(tag.contains(STSpaceRegion.CHILDREN))
+						if(childTag.contains(STSpaceRegion.CHILDREN))
 						{
-							CompoundTag childrenTag = tag.getCompound(STSpaceRegion.CHILDREN);
+							CompoundTag childrenTag = childTag.getCompound(STSpaceRegion.CHILDREN);
 							for(String childId : childrenTag.getAllKeys())
 							{
 								deserializeObjectsRecursive(renderer, childrenTag.getCompound(childId));

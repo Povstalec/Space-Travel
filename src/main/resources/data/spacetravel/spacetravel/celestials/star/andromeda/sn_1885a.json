@@ -1,4 +1,6 @@
 {
+	"mass": { "solar_masses": 28.16 },
+	
 	"coords": { "right_ascension": {"hours": 0, "minutes": 42, "seconds": 44.3}, "declination": {"degrees": 41, "minutes": 16, "seconds": 9}, "distance": {"ly": 2500000} },
 	"axis_rotation": { "x_axis": 0, "y_axis": 0, "z_axis": 0 },
 	"texture_layers":

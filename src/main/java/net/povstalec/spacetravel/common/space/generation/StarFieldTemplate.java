@@ -7,6 +7,11 @@ import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.povstalec.spacetravel.SpaceTravel;
+import net.povstalec.spacetravel.common.space.MassObject;
+import net.povstalec.spacetravel.common.space.space_objects.STStar;
+import net.povstalec.stellarview.StellarView;
+import net.povstalec.stellarview.api.common.space_objects.StarLike;
+import net.povstalec.stellarview.api.common.space_objects.TexturedObject;
 import net.povstalec.stellarview.api.common.space_objects.resourcepack.StarField;
 import net.povstalec.stellarview.common.util.*;
 
@@ -197,9 +202,26 @@ public class StarFieldTemplate
 			arms.add(randomArmTemplate(random).generateSpiralArm(random, degrees * i));
 		}
 		
-		return new StarField(Optional.empty(), Either.left(spaceCoords), axisRotation,
+		StarField starField = new StarField(Optional.empty(), Either.left(spaceCoords), axisRotation,
 				dustClouds, Optional.ofNullable(randomDustCloudInfo(random)), dustCloudTexture,
 				Optional.ofNullable(randomStarInfo(random)), starTexture, seed, diameter, stars, clumpStarsInCenter, xStretch, yStretch, zStretch, arms);
+		
+		//System.out.println("- " + starField.getCoords() + " " + starField.getSeed());
+		Random starFieldRandom = new Random(starField.getSeed());
+		for(int i = 0; i < 10; i++)
+		{
+			long randomX = starFieldRandom.nextLong(0, diameter) - (diameter / 2);
+			long randomY = starFieldRandom.nextLong(0, diameter) - (diameter / 2);
+			long randomZ = starFieldRandom.nextLong(0, diameter) - (diameter / 2);
+			
+			TextureLayer textureLayer = new TextureLayer(new ResourceLocation("textures/environment/sun.png"), new Color.FloatRGBA(1F, 1F, 1F, 1F), true,
+					4488626469D, 1, true, -32D, UV.Quad.DEFAULT_QUAD_UV);
+			starField.addChild(new STStar(Optional.empty(), Either.left(new SpaceCoords(randomX, randomY, randomZ)), new AxisRotation(), Optional.empty(),
+					Arrays.asList(textureLayer), TexturedObject.FadeOutHandler.DEFAULT_STAR_HANDLER, StarLike.MIN_SIZE, StarLike.MAX_ALPHA, StarLike.MIN_ALPHA, Optional.empty(),
+					Optional.of(MassObject.Mass.randomSolarMass(starFieldRandom, 0.1D, 20D))));
+		}
+		
+		return starField;
 	}
 	
 	
