@@ -1,8 +1,9 @@
-package net.povstalec.spacetravel.common.space.generation.templates;
+package net.povstalec.spacetravel.common.space.generation.parameters;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.povstalec.spacetravel.common.space.generation.ParameterLocation;
+import net.povstalec.spacetravel.common.space.generation.ParameterLocations;
 import net.povstalec.spacetravel.common.space.generation.SpaceTravelParameters;
 import net.povstalec.stellarview.api.common.space_objects.OrbitingObject;
 import net.povstalec.stellarview.common.util.AxisRotation;
@@ -20,9 +21,9 @@ public abstract class OrbitingObjectParameters<T extends OrbitingObject> extends
 	@Nullable
 	protected OrbitParameters orbitParameters;
 	
-	public OrbitingObjectParameters(Optional<OrbitParameters> orbitParameters, List<ParameterLocation> childrenParameters)
+	public OrbitingObjectParameters(Optional<OrbitParameters> orbitParameters, Optional<List<ParameterLocations>> instantChildrenParameters, Optional<List<ParameterLocations>> childrenParameters)
 	{
-		super(childrenParameters);
+		super(instantChildrenParameters, childrenParameters);
 		this.orbitParameters = orbitParameters.orElse(null);
 	}
 	

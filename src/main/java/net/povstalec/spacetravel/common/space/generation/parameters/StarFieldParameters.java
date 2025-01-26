@@ -1,4 +1,4 @@
-package net.povstalec.spacetravel.common.space.generation.templates;
+package net.povstalec.spacetravel.common.space.generation.parameters;
 
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
@@ -8,10 +8,10 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.povstalec.spacetravel.SpaceTravel;
 import net.povstalec.spacetravel.common.space.generation.*;
-import net.povstalec.stellarview.api.common.space_objects.SpaceObject;
 import net.povstalec.stellarview.api.common.space_objects.resourcepack.StarField;
 import net.povstalec.stellarview.common.util.*;
 
+import javax.annotation.Nullable;
 import java.util.*;
 
 public class StarFieldParameters extends SpaceObjectParameters<StarField>
@@ -22,16 +22,9 @@ public class StarFieldParameters extends SpaceObjectParameters<StarField>
 	public static final ResourceLocation STAR_FIELD_PARAMETERS_LOCATION = new ResourceLocation(SpaceTravel.MODID, "parameters/star_field");
 	public static final ResourceKey<Registry<StarFieldParameters>> REGISTRY_KEY = ResourceKey.createRegistryKey(STAR_FIELD_PARAMETERS_LOCATION);
 	
-	public static final SpiralArmTemplate DEFAULT_SPIRAL_ARM = new SpiralArmTemplate(1, new SpaceTravelParameters.IntRange(80, 100), new ArrayList<WeightedDustCloudInfo>(),
+	public static final SpiralArmParameters DEFAULT_SPIRAL_ARM = new SpiralArmParameters(1, new SpaceTravelParameters.IntRange(80, 100), new ArrayList<WeightedDustCloudInfo>(),
 			new SpaceTravelParameters.IntRange(600, 1000), true, new SpaceTravelParameters.DoubleRange(0, 0),
 			new SpaceTravelParameters.DoubleRange(1.5, 2.0), new SpaceTravelParameters.DoubleRange(2.0, 2.5));
-	
-	public static final StarFieldParameters DEFAULT_STAR_FIELD_PARAMETERS = new StarFieldParameters(
-			StarField.DEFAULT_DUST_CLOUD_TEXTURE, new SpaceTravelParameters.IntRange(80, 100), new ArrayList<WeightedDustCloudInfo>(),
-			StarField.DEFAULT_STAR_TEXTURE, new SpaceTravelParameters.IntRange(600, 1000), new ArrayList<WeightedStarInfo>(), true,
-			new SpaceTravelParameters.IntRange(12000, 120000), new SpaceTravelParameters.DoubleRange(0.25, 1.0),
-			new SpaceTravelParameters.DoubleRange(0.25, 1.0), new SpaceTravelParameters.DoubleRange(0.25, 1.0),
-			new SpaceTravelParameters.IntRange(2, 4), Arrays.asList(DEFAULT_SPIRAL_ARM), new ArrayList<ParameterLocation>());
 	
 	protected Optional<ArrayList<ResourceLocation>> universes;
 	
@@ -54,7 +47,7 @@ public class StarFieldParameters extends SpaceObjectParameters<StarField>
 	protected SpaceTravelParameters.DoubleRange zStretchRange;
 	
 	protected SpaceTravelParameters.IntRange numberOfArmsRange;
-	protected ArrayList<SpiralArmTemplate> spiralArmTemplates;
+	protected ArrayList<SpiralArmParameters> spiralArmParameters;
 	protected int totalArmWeight;
 	
 	public static final Codec<StarFieldParameters> CODEC = RecordCodecBuilder.create(instance -> instance.group(
@@ -73,17 +66,19 @@ public class StarFieldParameters extends SpaceObjectParameters<StarField>
 			SpaceTravelParameters.DoubleRange.FULL_RANGE_CODEC.fieldOf("z_stretch").forGetter(parameters -> parameters.zStretchRange),
 			
 			SpaceTravelParameters.IntRange.ARM_NUMBER_RANGE_CODEC.optionalFieldOf("number_of_arms", new SpaceTravelParameters.IntRange(0, 0)).forGetter(parameters -> parameters.numberOfArmsRange),
-			SpiralArmTemplate.CODEC.listOf().optionalFieldOf("spiral_arms", new ArrayList<>()).forGetter(parameters -> parameters.spiralArmTemplates),
+			SpiralArmParameters.CODEC.listOf().optionalFieldOf("spiral_arms", new ArrayList<>()).forGetter(parameters -> parameters.spiralArmParameters),
 			
-			ParameterLocation.CODEC.listOf().optionalFieldOf(CHILDREN, new ArrayList<>()).forGetter(parameters -> parameters.childrenParameters)
+			ParameterLocations.CODEC.listOf().optionalFieldOf(INSTANT_CHILDREN).forGetter(parameters -> Optional.ofNullable(parameters.instantChildrenParameters)),
+			ParameterLocations.CODEC.listOf().optionalFieldOf(CHILDREN).forGetter(parameters -> Optional.ofNullable(parameters.childrenParameters))
 	).apply(instance, StarFieldParameters::new));
 	
 	public StarFieldParameters(ResourceLocation dustCloudTexture, SpaceTravelParameters.IntRange dustCloudsRange, List<WeightedDustCloudInfo> dustCloudInfo,
 							   ResourceLocation starTexture, SpaceTravelParameters.IntRange starsRange, List<WeightedStarInfo> starInfo, boolean clumpStarsInCenter,
 							   SpaceTravelParameters.IntRange diameterRange, SpaceTravelParameters.DoubleRange xStretchRange, SpaceTravelParameters.DoubleRange yStretchRange, SpaceTravelParameters.DoubleRange zStretchRange,
-							   SpaceTravelParameters.IntRange numberOfArmsRange, List<SpiralArmTemplate> spiralArmTemplates, List<ParameterLocation> childrenParameters)
+							   SpaceTravelParameters.IntRange numberOfArmsRange, List<SpiralArmParameters> spiralArmParameters,
+							   Optional<List<ParameterLocations>> instantChildrenParameters, Optional<List<ParameterLocations>> childrenParameters)
 	{
-		super(childrenParameters);
+		super(instantChildrenParameters, childrenParameters);
 		
 		this.dustCloudTexture = dustCloudTexture;
 		this.dustCloudsRange = dustCloudsRange;
@@ -112,9 +107,9 @@ public class StarFieldParameters extends SpaceObjectParameters<StarField>
 		
 		this.numberOfArmsRange = numberOfArmsRange;
 		
-		this.spiralArmTemplates = new ArrayList<>(spiralArmTemplates);
+		this.spiralArmParameters = new ArrayList<>(spiralArmParameters);
 		this.totalArmWeight = 0;
-		for(SpiralArmTemplate armTemplate : spiralArmTemplates)
+		for(SpiralArmParameters armTemplate : spiralArmParameters)
 		{
 			totalArmWeight += armTemplate.weight;
 		}
@@ -156,22 +151,23 @@ public class StarFieldParameters extends SpaceObjectParameters<StarField>
 		return starInfo.get(i).starInfo();
 	}
 	
-	protected SpiralArmTemplate randomArmTemplate(Random random)
+	@Nullable
+	protected SpiralArmParameters randomArmParameters(Random random)
 	{
-		if(spiralArmTemplates.isEmpty())
-			return DEFAULT_SPIRAL_ARM;
+		if(spiralArmParameters.isEmpty())
+			return null;
 		
 		int i = 0;
 		
-		for(int weight = random.nextInt(0, totalArmWeight); i < spiralArmTemplates.size() - 1; i++)
+		for(int weight = random.nextInt(0, totalArmWeight); i < spiralArmParameters.size() - 1; i++)
 		{
-			weight -= spiralArmTemplates.get(i).weight;
+			weight -= spiralArmParameters.get(i).weight;
 			
 			if(weight <= 0)
 				break;
 		}
 		
-		return spiralArmTemplates.get(i);
+		return spiralArmParameters.get(i);
 	}
 	
 	public StarField generate(Random random, long seed, SpaceCoords spaceCoords, AxisRotation axisRotation)
@@ -190,43 +186,23 @@ public class StarFieldParameters extends SpaceObjectParameters<StarField>
 		ArrayList<StarField.SpiralArm> arms = new ArrayList<StarField.SpiralArm>();
 		for(int i = 0; i < numberOfArms; i++)
 		{
-			arms.add(randomArmTemplate(random).generateSpiralArm(random, degrees * i));
+			SpiralArmParameters parameters = randomArmParameters(random);
+			if(parameters != null)
+				arms.add(parameters.generateSpiralArm(random, degrees * i));
 		}
 		
 		StarField starField = new StarField(Optional.empty(), Either.left(spaceCoords), axisRotation,
 				dustClouds, Optional.ofNullable(randomDustCloudInfo(random)), dustCloudTexture,
 				Optional.ofNullable(randomStarInfo(random)), starTexture, seed, diameter, stars, clumpStarsInCenter, xStretch, yStretch, zStretch, arms);
 		
-		Random starFieldRandom = new Random(starField.getSeed());
-		for(ParameterLocation parameterLocation : childrenParameters)
-		{
-			int count = parameterLocation.count().nextInt(starFieldRandom);
-			for(int i = 0; i < count; i++)
-			{
-				//TODO Offset
-				
-				long randomX = starFieldRandom.nextLong(0, diameter) - (diameter / 2);
-				long randomY = starFieldRandom.nextLong(0, diameter) - (diameter / 2);
-				long randomZ = starFieldRandom.nextLong(0, diameter) - (diameter / 2);
-				
-				//randomChildTemplate(starFieldRandom)
-				SpaceObjectParameters parameters = SpaceObjectParameterRegistry.get(parameterLocation.location());
-				if(parameters != null)
-				{
-					SpaceObject child = parameters.generate(starFieldRandom, seed, new SpaceCoords(randomX, randomY, randomZ), new AxisRotation());
-					
-					if(child != null)
-						starField.addChild(child);
-				}
-			}
-		}
+		generateChildrenWithParent(starField, starField.getSeed());
 		
 		return starField;
 	}
 	
 	
 	
-	public static class SpiralArmTemplate
+	public static class SpiralArmParameters
 	{
 		protected int weight;
 		
@@ -242,7 +218,7 @@ public class StarFieldParameters extends SpaceObjectParameters<StarField>
 		protected SpaceTravelParameters.DoubleRange armLengthRange;
 		protected SpaceTravelParameters.DoubleRange armThicknessRange;
 		
-		public static final Codec<SpiralArmTemplate> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+		public static final Codec<SpiralArmParameters> CODEC = RecordCodecBuilder.create(instance -> instance.group(
 				Codec.intRange(1, Integer.MAX_VALUE).fieldOf("weight").forGetter(template -> template.weight),
 				
 				SpaceTravelParameters.IntRange.DUST_CLOUD_RANGE_CODEC.fieldOf("dust_clouds").forGetter(template -> template.dustCloudsRange),
@@ -254,10 +230,10 @@ public class StarFieldParameters extends SpaceObjectParameters<StarField>
 				SpaceTravelParameters.DoubleRange.ANGLE_RANGE_CODEC.fieldOf("arm_rotation_offset").forGetter(template -> template.armRotationOffsetRange),
 				SpaceTravelParameters.DoubleRange.POSITIVE_RANGE_CODEC.fieldOf("arm_length").forGetter(template -> template.armLengthRange),
 				SpaceTravelParameters.DoubleRange.POSITIVE_RANGE_CODEC.fieldOf("arm_thickness").forGetter(template -> template.armThicknessRange)
-		).apply(instance, SpiralArmTemplate::new));
+		).apply(instance, SpiralArmParameters::new));
 		
-		public SpiralArmTemplate(int weight, SpaceTravelParameters.IntRange dustCloudsRange, List<WeightedDustCloudInfo> dustCloudInfo, SpaceTravelParameters.IntRange starsRange, boolean clumpStarsInCenter,
-								 SpaceTravelParameters.DoubleRange armRotationOffsetRange, SpaceTravelParameters.DoubleRange armLengthRange, SpaceTravelParameters.DoubleRange armThicknessRange)
+		public SpiralArmParameters(int weight, SpaceTravelParameters.IntRange dustCloudsRange, List<WeightedDustCloudInfo> dustCloudInfo, SpaceTravelParameters.IntRange starsRange, boolean clumpStarsInCenter,
+								   SpaceTravelParameters.DoubleRange armRotationOffsetRange, SpaceTravelParameters.DoubleRange armLengthRange, SpaceTravelParameters.DoubleRange armThicknessRange)
 		{
 			this.weight = weight;
 			

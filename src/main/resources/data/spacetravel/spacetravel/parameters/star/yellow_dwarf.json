@@ -1,0 +1,19 @@
+{
+	"texture_layers":
+	[
+		{
+			"texture": "minecraft:textures/environment/sun.png",
+			"rgba": {"red": 255, "green": 255, "blue": 255, "alpha": 255},
+			"blend": true,
+			"size": 4488626469,
+			"min_size": 0.3,
+			"clamp_at_min_size": true,
+			"rotation": 0,
+			"uv": { "flip_uv": false }
+		}
+	],
+	
+	"min_star_size": { "min": 0.07, "max": 0.08 },
+	"max_star_alpha": { "min": 0.9, "max": 1 },
+	"min_star_alpha": { "min": 0.08, "max": 0.1 }
+}

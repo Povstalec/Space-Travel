@@ -6,10 +6,9 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.povstalec.spacetravel.common.config.SpaceRegionCommonConfig;
 import net.povstalec.spacetravel.common.init.SpaceObjectRegistry;
-import net.povstalec.spacetravel.common.space.generation.templates.SpaceObjectParameters;
+import net.povstalec.spacetravel.common.space.generation.parameters.SpaceObjectParameters;
 import net.povstalec.stellarview.api.common.SpaceRegion;
 import net.povstalec.stellarview.api.common.space_objects.SpaceObject;
-import net.povstalec.stellarview.api.common.space_objects.resourcepack.StarField;
 import net.povstalec.stellarview.common.util.AxisRotation;
 import net.povstalec.stellarview.common.util.SpaceCoords;
 
@@ -51,10 +50,29 @@ public final class STSpaceRegion extends SpaceRegion
 	
 	
 	
+	public static SpaceCoords randomRegionCoords(Random random, RegionPos pos)
+	{
+		long randomX = random.nextLong(0, STSpaceRegion.LY_PER_REGION) - STSpaceRegion.LY_PER_REGION_HALF;
+		long randomY = random.nextLong(0, STSpaceRegion.LY_PER_REGION) - STSpaceRegion.LY_PER_REGION_HALF;
+		long randomZ = random.nextLong(0, STSpaceRegion.LY_PER_REGION) - STSpaceRegion.LY_PER_REGION_HALF;
+		
+		return new SpaceCoords(randomX + pos.lyX(), randomY + pos.lyY(), randomZ + pos.lyZ());
+	}
+	
+	public static AxisRotation randomAxisRotation(Random random)
+	{
+		double xRot = random.nextDouble(0, 360);
+		double yRot = random.nextDouble(0, 360);
+		double zRot = random.nextDouble(0, 360);
+		
+		return new AxisRotation(xRot, yRot, zRot);
+	}
+	
+	
+	
 	public static STSpaceRegion generateRegion(Universe universe, RegionPos pos, long seed)
 	{
 		long usedSeed = seed + pos.hashCode();
-		
 		STSpaceRegion spaceRegion = new STSpaceRegion(pos);
 		
 		//TODO Random generation
@@ -66,19 +84,7 @@ public final class STSpaceRegion extends SpaceRegion
 			SpaceObjectParameters parameters = universe.randomSpaceObjectParameters(random);
 			if(parameters != null)
 			{
-				long randomX = random.nextLong(0, STSpaceRegion.LY_PER_REGION) - STSpaceRegion.LY_PER_REGION_HALF;
-				long randomY = random.nextLong(0, STSpaceRegion.LY_PER_REGION) - STSpaceRegion.LY_PER_REGION_HALF;
-				long randomZ = random.nextLong(0, STSpaceRegion.LY_PER_REGION) - STSpaceRegion.LY_PER_REGION_HALF;
-				
-				long x = randomX + pos.lyX();
-				long y = randomY + pos.lyY();
-				long z = randomZ + pos.lyZ();
-				
-				double xRot = random.nextDouble(0, 360);
-				double yRot = random.nextDouble(0, 360);
-				double zRot = random.nextDouble(0, 360);
-				
-				SpaceObject spaceObject = parameters.generate(random, usedSeed, new SpaceCoords(x, y, z), new AxisRotation(true, xRot, yRot, zRot));
+				SpaceObject spaceObject = parameters.generate(random, usedSeed, randomRegionCoords(random, pos), randomAxisRotation(random));
 				if(spaceObject != null)
 					spaceRegion.addChild(spaceObject);
 			}

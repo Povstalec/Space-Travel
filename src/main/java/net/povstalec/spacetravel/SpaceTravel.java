@@ -11,7 +11,8 @@ import net.minecraftforge.registries.DataPackRegistryEvent;
 import net.povstalec.spacetravel.common.config.SpaceTravelConfig;
 import net.povstalec.spacetravel.common.init.SpaceObjectRegistry;
 import net.povstalec.spacetravel.common.space.STSpaceRegion;
-import net.povstalec.spacetravel.common.space.generation.templates.StarFieldParameters;
+import net.povstalec.spacetravel.common.space.generation.parameters.StarFieldParameters;
+import net.povstalec.spacetravel.common.space.generation.parameters.StarParameters;
 import net.povstalec.spacetravel.common.space.space_objects.STPlanet;
 import net.povstalec.spacetravel.common.space.space_objects.STStar;
 import net.povstalec.stellarview.api.client.events.SpaceRendererReloadEvent;
@@ -63,6 +64,7 @@ public class SpaceTravel
 			event.dataPackRegistry(Universe.REGISTRY_KEY, Universe.CODEC, Universe.CODEC);
 			
 			event.dataPackRegistry(StarFieldParameters.REGISTRY_KEY, StarFieldParameters.CODEC, StarFieldParameters.CODEC);
+			event.dataPackRegistry(StarParameters.REGISTRY_KEY, StarParameters.CODEC, StarParameters.CODEC);
 			
 			event.dataPackRegistry(SpaceObjectRegistry.PLANET_REGISTRY_KEY, STPlanet.CODEC, STPlanet.CODEC);
 			event.dataPackRegistry(SpaceObjectRegistry.MOON_REGISTRY_KEY, Moon.CODEC, Moon.CODEC);

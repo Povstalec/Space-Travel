@@ -1,8 +1,13 @@
-package net.povstalec.spacetravel.common.space.generation.templates;
+package net.povstalec.spacetravel.common.space.generation.parameters;
 
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.minecraft.core.Registry;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
+import net.povstalec.spacetravel.SpaceTravel;
+import net.povstalec.spacetravel.common.space.generation.ParameterLocations;
 import net.povstalec.spacetravel.common.space.generation.SpaceTravelParameters;
 import net.povstalec.spacetravel.common.space.generation.ParameterLocation;
 import net.povstalec.spacetravel.common.space.space_objects.STStar;
@@ -19,6 +24,9 @@ import java.util.Random;
 
 public class StarParameters extends OrbitingObjectParameters<STStar>
 {
+	public static final ResourceLocation STAR_PARAMETERS_LOCATION = new ResourceLocation(SpaceTravel.MODID, "parameters/star");
+	public static final ResourceKey<Registry<StarParameters>> REGISTRY_KEY = ResourceKey.createRegistryKey(STAR_PARAMETERS_LOCATION);
+	
 	protected ArrayList<TextureLayer> textureLayers;
 	
 	protected SpaceTravelParameters.DoubleRange minSizeRange;
@@ -41,13 +49,16 @@ public class StarParameters extends OrbitingObjectParameters<STStar>
 			//TODO MassObject.Mass.CODEC.optionalFieldOf(MassObject.MASS).forGetter(star -> Optional.ofNullable(star.mass))
 			
 			OrbitParameters.CODEC.optionalFieldOf(ORBIT_PARAMETERS).forGetter(parameters -> Optional.ofNullable(parameters.orbitParameters)),
-			ParameterLocation.CODEC.listOf().optionalFieldOf(CHILDREN, new ArrayList<>()).forGetter(parameters -> parameters.childrenParameters)
+			
+			ParameterLocations.CODEC.listOf().optionalFieldOf(INSTANT_CHILDREN).forGetter(parameters -> Optional.ofNullable(parameters.instantChildrenParameters)),
+			ParameterLocations.CODEC.listOf().optionalFieldOf(CHILDREN).forGetter(parameters -> Optional.ofNullable(parameters.childrenParameters))
 	).apply(instance, StarParameters::new));
 	
-	public StarParameters(List<TextureLayer> textureLayers, SpaceTravelParameters.DoubleRange minSizeRange, SpaceTravelParameters.DoubleRange maxAlphaRange, SpaceTravelParameters.DoubleRange minAlphaRange,
-						  Optional<OrbitParameters> orbitParameters, List<ParameterLocation> childrenParameters)
+	public StarParameters(List<TextureLayer> textureLayers, SpaceTravelParameters.DoubleRange minSizeRange,SpaceTravelParameters.DoubleRange maxAlphaRange, SpaceTravelParameters.DoubleRange minAlphaRange,
+						  Optional<OrbitParameters> orbitParameters,
+						  Optional<List<ParameterLocations>> instantChildrenParameters, Optional<List<ParameterLocations>> childrenParameters)
 	{
-		super(orbitParameters, childrenParameters);
+		super(orbitParameters, instantChildrenParameters, childrenParameters);
 		
 		this.textureLayers = new ArrayList<>(textureLayers);
 		

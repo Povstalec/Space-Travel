@@ -1,7 +1,7 @@
 package net.povstalec.spacetravel.common.space.generation;
 
 import net.minecraft.resources.ResourceLocation;
-import net.povstalec.spacetravel.common.space.generation.templates.SpaceObjectParameters;
+import net.povstalec.spacetravel.common.space.generation.parameters.SpaceObjectParameters;
 import net.povstalec.stellarview.api.common.space_objects.SpaceObject;
 
 import javax.annotation.Nullable;
@@ -27,4 +27,6 @@ public class SpaceObjectParameterRegistry
 		
 		return SPACE_OBJECT_TEMPLATES.get(resourceLocation);
 	}
+	
+	
 }

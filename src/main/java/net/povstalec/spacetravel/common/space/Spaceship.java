@@ -59,6 +59,14 @@ public class Spaceship extends ViewObject
 		this.zAxisSpeed = zAxisSpeed;
 	}
 	
+	public void setPos(ServerLevel level, long x, long y, long z)
+	{
+		this.coords = new SpaceCoords(x, y, z);
+		spaceRegionPos = new SpaceRegion.RegionPos(this.getSpaceCoords());
+		
+		updateRegions(level);
+	}
+	
 	public SpaceCoords getSpaceCoords()
 	{
 		return this.coords;
@@ -77,6 +85,11 @@ public class Spaceship extends ViewObject
 
 		this.axisRotation = this.axisRotation.add(xAxisRotation, yAxisRotation, zAxisRotation);
 		
+		updateRegions(level);
+	}
+	
+	private void updateRegions(ServerLevel level)
+	{
 		SpaceRegion.RegionPos spaceRegionPos = new SpaceRegion.RegionPos(this.getSpaceCoords());
 		if(!this.spaceRegionPos.equals(spaceRegionPos))
 		{
@@ -126,6 +139,9 @@ public class Spaceship extends ViewObject
 	
 	private List<SpaceRegion.RegionPos> regionsToLoad(Map<SpaceRegion.RegionPos, STSpaceRegion> newSpaceRegions)
 	{
+		if(newSpaceRegions == null)
+			return new ArrayList<>();
+		
 		ArrayList<SpaceRegion.RegionPos> loadedRegions = new ArrayList<SpaceRegion.RegionPos>();
 		
 		for(Map.Entry<SpaceRegion.RegionPos, STSpaceRegion> regionEntry : newSpaceRegions.entrySet())

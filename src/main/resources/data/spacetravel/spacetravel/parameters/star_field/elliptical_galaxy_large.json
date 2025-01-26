@@ -20,5 +20,23 @@
 		{ "dust_cloud_info": "spacetravel:colors/red_yellow_distribution", "weight": 1 },
 		{ "dust_cloud_info": "spacetravel:colors/white_blue_distribution", "weight": 1 },
 		{ "dust_cloud_info": "spacetravel:colors/white_yellow_distribution", "weight": 1 }
+	],
+	
+	"instant_child_parameters":
+	[
+		{
+			"count": { "min": 0, "max": 3 },
+			"parameters":
+			[
+				{ "parameters": "spacetravel:star/blue_giant", "weight": 1, "position": { "min": { "ly": 0 }, "max": { "ly": 100000 } } }
+			]
+		},
+		{
+			"count": { "min": 0, "max": 3 },
+			"parameters":
+			[
+				{ "parameters": "spacetravel:star/yellow_dwarf", "weight": 1, "position": { "min": { "ly": 0 }, "max": { "ly": 400000 } } }
+			]
+		}
 	]
 }

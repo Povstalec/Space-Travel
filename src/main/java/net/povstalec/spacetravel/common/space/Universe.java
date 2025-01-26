@@ -10,8 +10,7 @@ import net.minecraftforge.common.util.INBTSerializable;
 import net.povstalec.spacetravel.SpaceTravel;
 import net.povstalec.spacetravel.common.space.generation.ParameterLocation;
 import net.povstalec.spacetravel.common.space.generation.SpaceObjectParameterRegistry;
-import net.povstalec.spacetravel.common.space.generation.templates.SpaceObjectParameters;
-import net.povstalec.spacetravel.common.space.generation.templates.StarFieldParameters;
+import net.povstalec.spacetravel.common.space.generation.parameters.SpaceObjectParameters;
 import net.povstalec.stellarview.api.common.SpaceRegion;
 import net.povstalec.stellarview.api.common.space_objects.SpaceObject;
 
@@ -57,9 +56,10 @@ public class Universe implements INBTSerializable<CompoundTag>
 		this.spaceObjects = new HashMap<ResourceLocation, SpaceObject>();
 		
 		this.childrenParameters = new ArrayList<ParameterLocation>(childrenParameters);
+		this.childrenWeight = 0;
 		for(ParameterLocation childTemplate : childrenParameters)
 		{
-			childrenWeight += childTemplate.weight();
+			this.childrenWeight += childTemplate.weight();
 		}
 		
 		if(seed.isPresent())

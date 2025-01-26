@@ -17,7 +17,8 @@ import net.povstalec.spacetravel.SpaceTravel;
 import net.povstalec.spacetravel.common.init.SpaceObjectRegistry;
 import net.povstalec.spacetravel.common.space.Universe;
 import net.povstalec.spacetravel.common.space.generation.SpaceObjectParameterRegistry;
-import net.povstalec.spacetravel.common.space.generation.templates.StarFieldParameters;
+import net.povstalec.spacetravel.common.space.generation.parameters.StarFieldParameters;
+import net.povstalec.spacetravel.common.space.generation.parameters.StarParameters;
 import net.povstalec.stellarview.api.common.space_objects.SpaceObject;
 import net.povstalec.stellarview.api.common.space_objects.resourcepack.BlackHole;
 import net.povstalec.stellarview.api.common.space_objects.resourcepack.Nebula;
@@ -56,6 +57,7 @@ public class Multiverse extends SavedData
 		registerUniverses(server);
 		
 		registerStarFieldParameters(server);
+		registerStarParameters(server);
 		
 		registerStarFields(server);
 		registerStars(server);
@@ -107,15 +109,31 @@ public class Multiverse extends SavedData
 		final RegistryAccess registries = server.registryAccess();
 		final Registry<StarFieldParameters> templateRegistry = registries.registryOrThrow(StarFieldParameters.REGISTRY_KEY);
 		
-		Set<Map.Entry<ResourceKey<StarFieldParameters>, StarFieldParameters>> templateSet = templateRegistry.entrySet();
-		templateSet.forEach((templateEntry) ->
+		Set<Map.Entry<ResourceKey<StarFieldParameters>, StarFieldParameters>> parameterSet = templateRegistry.entrySet();
+		parameterSet.forEach((parameterEntry) ->
 		{
-			ResourceLocation location = templateEntry.getKey().location();
-			StarFieldParameters template = templateEntry.getValue();
+			ResourceLocation location = parameterEntry.getKey().location();
+			StarFieldParameters parameters = parameterEntry.getValue();
 			
-			SpaceObjectParameterRegistry.register(new ResourceLocation(location.getNamespace(), "star_field/"+ location.getPath()), template);
+			SpaceObjectParameterRegistry.register(new ResourceLocation(location.getNamespace(), "star_field/"+ location.getPath()), parameters);
 		});
-		SpaceTravel.LOGGER.info("Star Field Templates registered");
+		SpaceTravel.LOGGER.info("Star Field Parameters registered");
+	}
+	
+	public void registerStarParameters(MinecraftServer server)
+	{
+		final RegistryAccess registries = server.registryAccess();
+		final Registry<StarParameters> templateRegistry = registries.registryOrThrow(StarParameters.REGISTRY_KEY);
+		
+		Set<Map.Entry<ResourceKey<StarParameters>, StarParameters>> parameterSet = templateRegistry.entrySet();
+		parameterSet.forEach((parameterEntry) ->
+		{
+			ResourceLocation location = parameterEntry.getKey().location();
+			StarParameters parameters = parameterEntry.getValue();
+			
+			SpaceObjectParameterRegistry.register(new ResourceLocation(location.getNamespace(), "star/"+ location.getPath()), parameters);
+		});
+		SpaceTravel.LOGGER.info("Star Parameters registered");
 	}
 
 	//============================================================================================
