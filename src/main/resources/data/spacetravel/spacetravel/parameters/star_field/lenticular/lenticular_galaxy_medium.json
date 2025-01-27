@@ -6,7 +6,7 @@
 	
 	"diameter": { "min": 58000, "max": 120000 },
 	"x_stretch": { "min": 0.25, "max": 1.0 },
-	"y_stretch": { "min": 0.25, "max": 1.0 },
+	"y_stretch": { "min": 0.1, "max": 0.25 },
 	"z_stretch": { "min": 0.25, "max": 1.0 },
 
 	"star_info":
@@ -32,7 +32,7 @@
 			]
 		},
 		{
-			"count": { "min": 0, "max": 3 },
+			"count": { "min": 1, "max": 3 },
 			"parameters":
 			[
 				{ "parameters": "spacetravel:star/yellow_dwarf", "weight": 1, "position": { "min": { "ly": 0 }, "max": { "ly": 8000 } } }

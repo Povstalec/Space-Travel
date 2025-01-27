@@ -6,6 +6,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.povstalec.spacetravel.SpaceTravel;
 import net.povstalec.spacetravel.common.space.space_objects.STPlanet;
 import net.povstalec.spacetravel.common.space.space_objects.STStar;
+import net.povstalec.spacetravel.common.space.space_objects.STStarField;
 import net.povstalec.stellarview.api.common.space_objects.SpaceObject;
 import net.povstalec.stellarview.api.common.space_objects.resourcepack.*;
 
@@ -28,7 +29,7 @@ public class SpaceObjectRegistry
 	public static final ResourceKey<Registry<STStar>> STAR_REGISTRY_KEY = ResourceKey.createRegistryKey(STAR_LOCATION);
 	public static final ResourceKey<Registry<BlackHole>> BLACK_HOLE_REGISTRY_KEY = ResourceKey.createRegistryKey(BLACK_HOLE_LOCATION);
 	public static final ResourceKey<Registry<Nebula>> NEBULA_REGISTRY_KEY = ResourceKey.createRegistryKey(NEBULA_LOCATION);
-	public static final ResourceKey<Registry<StarField>> STAR_FIELD_REGISTRY_KEY = ResourceKey.createRegistryKey(STAR_FIELD_LOCATION);
+	public static final ResourceKey<Registry<STStarField>> STAR_FIELD_REGISTRY_KEY = ResourceKey.createRegistryKey(STAR_FIELD_LOCATION);
 	
 	private static final HashMap<ResourceLocation, SpaceObjectConstructor> SPACE_OBJECTS = new HashMap<ResourceLocation, SpaceObjectConstructor>();
 	private static final HashMap<Class<? extends SpaceObject>, ResourceLocation> LOCATIONS = new HashMap<Class<? extends SpaceObject>, ResourceLocation>();

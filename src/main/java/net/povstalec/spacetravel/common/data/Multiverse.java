@@ -19,6 +19,8 @@ import net.povstalec.spacetravel.common.space.Universe;
 import net.povstalec.spacetravel.common.space.generation.SpaceObjectParameterRegistry;
 import net.povstalec.spacetravel.common.space.generation.parameters.StarFieldParameters;
 import net.povstalec.spacetravel.common.space.generation.parameters.StarParameters;
+import net.povstalec.spacetravel.common.space.space_objects.STStar;
+import net.povstalec.spacetravel.common.space.space_objects.STStarField;
 import net.povstalec.stellarview.api.common.space_objects.SpaceObject;
 import net.povstalec.stellarview.api.common.space_objects.resourcepack.BlackHole;
 import net.povstalec.stellarview.api.common.space_objects.resourcepack.Nebula;
@@ -151,12 +153,12 @@ public class Multiverse extends SavedData
 	public void registerStarFields(MinecraftServer server)
 	{
 		final RegistryAccess registries = server.registryAccess();
-		final Registry<StarField> starFieldRegistry = registries.registryOrThrow(SpaceObjectRegistry.STAR_FIELD_REGISTRY_KEY);
+		final Registry<STStarField> starFieldRegistry = registries.registryOrThrow(SpaceObjectRegistry.STAR_FIELD_REGISTRY_KEY);
 		
-		Set<Map.Entry<ResourceKey<StarField>, StarField>> starFieldSet = starFieldRegistry.entrySet();
+		Set<Map.Entry<ResourceKey<STStarField>, STStarField>> starFieldSet = starFieldRegistry.entrySet();
 		starFieldSet.forEach((starFieldEntry) ->
 		{
-			StarField starField = starFieldEntry.getValue();
+			STStarField starField = starFieldEntry.getValue();
 			ResourceLocation location = starFieldEntry.getKey().location().withPath("star_field/" + starFieldEntry.getKey().location().getPath());
 			
 			starField.setResourceLocation(location);
@@ -169,12 +171,12 @@ public class Multiverse extends SavedData
 	public void registerStars(MinecraftServer server)
 	{
 		final RegistryAccess registries = server.registryAccess();
-		final Registry<Star> starRegistry = registries.registryOrThrow(SpaceObjectRegistry.STAR_REGISTRY_KEY);
+		final Registry<STStar> starRegistry = registries.registryOrThrow(SpaceObjectRegistry.STAR_REGISTRY_KEY);
 		
-		Set<Map.Entry<ResourceKey<Star>, Star>> starSet = starRegistry.entrySet();
+		Set<Map.Entry<ResourceKey<STStar>, STStar>> starSet = starRegistry.entrySet();
 		starSet.forEach((starEntry) ->
 		{
-			Star star = starEntry.getValue();
+			STStar star = starEntry.getValue();
 			ResourceLocation location = starEntry.getKey().location().withPath("star/" + starEntry.getKey().location().getPath());
 			
 			star.setResourceLocation(location);

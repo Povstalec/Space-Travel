@@ -6,9 +6,12 @@
 	
 	"children_parameters":
 	[
-		{ "parameters": "spacetravel:star_field/spiral_galaxy_small", "weight": 1 },
-		{ "parameters": "spacetravel:star_field/spiral_galaxy_medium", "weight": 10 },
-		{ "parameters": "spacetravel:star_field/elliptical_galaxy_medium", "weight": 20 },
-		{ "parameters": "spacetravel:star_field/elliptical_galaxy_large", "weight": 1 }
+		{ "parameters": "spacetravel:star_field/spiral/spiral_galaxy_small", "weight": 30 },
+		{ "parameters": "spacetravel:star_field/spiral/spiral_galaxy_medium", "weight": 30 },
+		{ "parameters": "spacetravel:star_field/elliptical/elliptical_galaxy_medium", "weight": 10 },
+		{ "parameters": "spacetravel:star_field/elliptical/elliptical_galaxy_large", "weight": 1 },
+		{ "parameters": "spacetravel:star_field/lenticular/lenticular_galaxy_medium", "weight": 4 },
+		{ "parameters": "spacetravel:star_field/irregular/irregular_galaxy_medium", "weight": 24 },
+		{ "parameters": "spacetravel:star_field/irregular/merging_galaxy_medium_a", "weight": 1 }
 	]
 }

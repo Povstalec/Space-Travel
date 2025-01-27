@@ -5,8 +5,10 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
+import net.povstalec.spacetravel.common.space.GenerationObject;
 import net.povstalec.spacetravel.common.space.MassObject;
 import net.povstalec.stellarview.api.common.space_objects.OrbitingObject;
+import net.povstalec.stellarview.api.common.space_objects.SpaceObject;
 import net.povstalec.stellarview.api.common.space_objects.TexturedObject;
 import net.povstalec.stellarview.api.common.space_objects.resourcepack.Star;
 import net.povstalec.stellarview.common.util.*;
@@ -15,8 +17,11 @@ import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Optional;
 
-public class STStar extends Star implements MassObject
+public class STStar extends Star implements MassObject, GenerationObject
 {
+	@Nullable
+	protected ResourceLocation generationParameters;
+	
 	@Nullable
 	protected Mass mass;
 	
@@ -57,6 +62,35 @@ public class STStar extends Star implements MassObject
 	}
 	
 	//============================================================================================
+	//*****************************************Geeration******************************************
+	//============================================================================================
+	
+	@Override
+	@Nullable
+	public ResourceLocation getGenerationParameters()
+	{
+		return generationParameters;
+	}
+	
+	@Override
+	public void setGenerationParameters(ResourceLocation generationParameters)
+	{
+		this.generationParameters = generationParameters;
+	}
+	
+	@Override
+	public long generationSeed()
+	{
+		return this.getCoords().hashCode();
+	}
+	
+	@Override
+	public SpaceObject generationParent()
+	{
+		return this;
+	}
+	
+	//============================================================================================
 	//*************************************Saving and Loading*************************************
 	//============================================================================================
 	
@@ -67,6 +101,9 @@ public class STStar extends Star implements MassObject
 		
 		if(mass != null)
 			tag.put(MASS, mass.serializeNBT());
+		
+		if(generationParameters != null)
+			tag.putString(GENERATION_PARAMETERS, generationParameters.toString());
 		
 		return tag;
 	}
@@ -81,5 +118,8 @@ public class STStar extends Star implements MassObject
 			this.mass = new Mass();
 			this.mass.deserializeNBT(tag.getCompound(MASS));
 		}
+		
+		if(tag.contains(GENERATION_PARAMETERS))
+			this.generationParameters = new ResourceLocation(tag.getString(GENERATION_PARAMETERS));
 	}
 }

@@ -1,0 +1,64 @@
+{
+	"dust_clouds": { "min":  80, "max": 120 },
+	
+	"stars": { "min":  1000, "max": 2000 },
+	"clump_stars_in_center": true,
+	
+	"diameter": { "min": 58000, "max": 120000 },
+	"x_stretch": { "min": 0.25, "max": 1.0 },
+	"y_stretch": { "min": 0.25, "max": 1.0 },
+	"z_stretch": { "min": 0.25, "max": 1.0 },
+	
+	"number_of_arms": { "min": 1, "max": 1 },
+	"spiral_arms":
+	[
+		{
+			"weight": 1,
+			"dust_clouds": { "min": 80, "max": 160 },
+			"stars": { "min": 1500, "max": 4000 },
+			"clump_stars_in_center": true,
+			"arm_rotation_offset": { "min": 0, "max": 0 },
+			"arm_length": { "min": 3.0, "max": 3.5 },
+			"arm_thickness": { "min": 1.75, "max": 3.75 },
+			"dust_cloud_info":
+			[
+				{ "dust_cloud_info": "spacetravel:colors/blue_green_distribution", "weight": 1 },
+				{ "dust_cloud_info": "spacetravel:colors/red_blue_distribution", "weight": 1 },
+				{ "dust_cloud_info": "spacetravel:colors/red_yellow_distribution", "weight": 1 },
+				{ "dust_cloud_info": "spacetravel:colors/white_blue_distribution", "weight": 1 },
+				{ "dust_cloud_info": "spacetravel:colors/white_yellow_distribution", "weight": 1 }
+			]
+		}
+	],
+
+	"star_info":
+	[
+		{ "star_info": "spacetravel:main_sequence_distribution", "weight": 1 }
+	],
+	"dust_cloud_info":
+	[
+		{ "dust_cloud_info": "spacetravel:colors/blue_green_distribution", "weight": 1 },
+		{ "dust_cloud_info": "spacetravel:colors/red_blue_distribution", "weight": 1 },
+		{ "dust_cloud_info": "spacetravel:colors/red_yellow_distribution", "weight": 1 },
+		{ "dust_cloud_info": "spacetravel:colors/white_blue_distribution", "weight": 1 },
+		{ "dust_cloud_info": "spacetravel:colors/white_yellow_distribution", "weight": 1 }
+	],
+	
+	"instant_child_parameters":
+	[
+		{
+			"count": { "min": 0, "max": 3 },
+			"parameters":
+			[
+				{ "parameters": "spacetravel:star/blue_giant", "weight": 1, "position": { "min": { "ly": 0 }, "max": { "ly": 5000 } } }
+			]
+		},
+		{
+			"count": { "min": 1, "max": 3 },
+			"parameters":
+			[
+				{ "parameters": "spacetravel:star/yellow_dwarf", "weight": 1, "position": { "min": { "ly": 0 }, "max": { "ly": 120000 } } }
+			]
+		}
+	]
+}

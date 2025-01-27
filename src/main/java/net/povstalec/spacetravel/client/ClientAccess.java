@@ -8,19 +8,15 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
-import net.povstalec.spacetravel.SpaceTravel;
 import net.povstalec.spacetravel.client.render.level.SpaceShipSpecialEffects;
 import net.povstalec.spacetravel.common.init.SpaceObjectRegistry;
 import net.povstalec.spacetravel.common.space.STSpaceRegion;
 import net.povstalec.stellarview.api.common.SpaceRegion;
 import net.povstalec.stellarview.api.common.space_objects.SpaceObject;
-import net.povstalec.stellarview.api.common.space_objects.resourcepack.StarField;
 import net.povstalec.stellarview.client.SpaceObjectRenderers;
 import net.povstalec.stellarview.client.render.SpaceRegionRenderer;
 import net.povstalec.stellarview.client.render.SpaceRenderer;
-import net.povstalec.stellarview.client.render.StellarViewEffects;
 import net.povstalec.stellarview.client.render.space_objects.SpaceObjectRenderer;
-import net.povstalec.stellarview.client.render.space_objects.resourcepack.StarFieldRenderer;
 
 public class ClientAccess
 {

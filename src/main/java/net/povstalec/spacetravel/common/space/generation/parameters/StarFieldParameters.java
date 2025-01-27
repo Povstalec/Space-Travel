@@ -8,13 +8,14 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.povstalec.spacetravel.SpaceTravel;
 import net.povstalec.spacetravel.common.space.generation.*;
+import net.povstalec.spacetravel.common.space.space_objects.STStarField;
 import net.povstalec.stellarview.api.common.space_objects.resourcepack.StarField;
 import net.povstalec.stellarview.common.util.*;
 
 import javax.annotation.Nullable;
 import java.util.*;
 
-public class StarFieldParameters extends SpaceObjectParameters<StarField>
+public class StarFieldParameters extends SpaceObjectParameters<STStarField>
 {
 	public static final ResourceLocation MAIN_SEQUENCE_DISTRIBUTION = new ResourceLocation(SpaceTravel.MODID, "main_sequence_distribution");
 	public static final ResourceLocation WHITE_DUST_CLOUDS = new ResourceLocation(SpaceTravel.MODID, "white_dust_clouds");
@@ -170,7 +171,7 @@ public class StarFieldParameters extends SpaceObjectParameters<StarField>
 		return spiralArmParameters.get(i);
 	}
 	
-	public StarField generate(Random random, long seed, SpaceCoords spaceCoords, AxisRotation axisRotation)
+	public STStarField generate(Random random, long seed, SpaceCoords spaceCoords, AxisRotation axisRotation)
 	{
 		int dustClouds = dustCloudsRange.nextInt(random);
 		
@@ -191,7 +192,7 @@ public class StarFieldParameters extends SpaceObjectParameters<StarField>
 				arms.add(parameters.generateSpiralArm(random, degrees * i));
 		}
 		
-		StarField starField = new StarField(Optional.empty(), Either.left(spaceCoords), axisRotation,
+		STStarField starField = new STStarField(Optional.empty(), Either.left(spaceCoords), axisRotation,
 				dustClouds, Optional.ofNullable(randomDustCloudInfo(random)), dustCloudTexture,
 				Optional.ofNullable(randomStarInfo(random)), starTexture, seed, diameter, stars, clumpStarsInCenter, xStretch, yStretch, zStretch, arms);
 		

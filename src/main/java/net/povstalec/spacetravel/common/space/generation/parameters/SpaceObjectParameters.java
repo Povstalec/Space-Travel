@@ -1,5 +1,6 @@
 package net.povstalec.spacetravel.common.space.generation.parameters;
 
+import net.povstalec.spacetravel.common.space.STSpaceRegion;
 import net.povstalec.spacetravel.common.space.generation.ParameterLocation;
 import net.povstalec.spacetravel.common.space.generation.ParameterLocations;
 import net.povstalec.spacetravel.common.space.generation.SpaceObjectParameterRegistry;
@@ -49,7 +50,7 @@ public abstract class SpaceObjectParameters<T extends SpaceObject>
 		//TODO Randomize coords and axis rotation
 		SpaceOffsetParameters offset = parameterLocation.spaceCoordOffset();
 		
-		SpaceObject child = parameters.generate(random, seed, offset.randomOffset(random), new AxisRotation());
+		SpaceObject child = parameters.generate(random, seed, offset.randomOffset(random), STSpaceRegion.randomAxisRotation(random));
 		if(child != null)
 			parent.addChild(child);
 	}

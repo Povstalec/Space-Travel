@@ -15,6 +15,7 @@ import net.povstalec.spacetravel.common.space.generation.parameters.StarFieldPar
 import net.povstalec.spacetravel.common.space.generation.parameters.StarParameters;
 import net.povstalec.spacetravel.common.space.space_objects.STPlanet;
 import net.povstalec.spacetravel.common.space.space_objects.STStar;
+import net.povstalec.spacetravel.common.space.space_objects.STStarField;
 import net.povstalec.stellarview.api.client.events.SpaceRendererReloadEvent;
 import net.povstalec.stellarview.api.common.SpaceRegion;
 import net.povstalec.stellarview.api.common.space_objects.resourcepack.*;
@@ -71,7 +72,7 @@ public class SpaceTravel
 			event.dataPackRegistry(SpaceObjectRegistry.STAR_REGISTRY_KEY, STStar.CODEC, STStar.CODEC);
 			event.dataPackRegistry(SpaceObjectRegistry.BLACK_HOLE_REGISTRY_KEY, BlackHole.CODEC, BlackHole.CODEC);
 			event.dataPackRegistry(SpaceObjectRegistry.NEBULA_REGISTRY_KEY, Nebula.CODEC, Nebula.CODEC);
-			event.dataPackRegistry(SpaceObjectRegistry.STAR_FIELD_REGISTRY_KEY, StarField.CODEC, StarField.CODEC);
+			event.dataPackRegistry(SpaceObjectRegistry.STAR_FIELD_REGISTRY_KEY, STStarField.CODEC, STStarField.CODEC);
 		});
 		
 		modEventBus.addListener(this::commonSetup);
@@ -96,7 +97,7 @@ public class SpaceTravel
 			SpaceObjectRegistry.register(new ResourceLocation(SpaceTravel.MODID, "star"), STStar.class, STStar::new);
 			SpaceObjectRegistry.register(new ResourceLocation(SpaceTravel.MODID, "black_hole"), BlackHole.class, BlackHole::new);
 			SpaceObjectRegistry.register(new ResourceLocation(SpaceTravel.MODID, "nebula"), Nebula.class, Nebula::new);
-			SpaceObjectRegistry.register(new ResourceLocation(SpaceTravel.MODID, "star_field"), StarField.class, StarField::new);
+			SpaceObjectRegistry.register(new ResourceLocation(SpaceTravel.MODID, "star_field"), STStarField.class, STStarField::new);
     	});
 	}
 	
@@ -111,6 +112,7 @@ public class SpaceTravel
 			{
 				SpaceObjectRenderers.register(STPlanet.class, PlanetRenderer<STPlanet>::new);
 				SpaceObjectRenderers.register(STStar.class, StarRenderer<STStar>::new);
+				SpaceObjectRenderers.register(STStarField.class, StarFieldRenderer<STStarField>::new);
 			});
 		}
 		

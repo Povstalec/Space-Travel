@@ -1,0 +1,42 @@
+{
+	"dust_clouds": { "min":  150, "max": 300 },
+	
+	"stars": { "min":  4000, "max": 8000 },
+	"clump_stars_in_center": true,
+	
+	"diameter": { "min": 58000, "max": 120000 },
+	"x_stretch": { "min": 0.25, "max": 1.0 },
+	"y_stretch": { "min": 0.25, "max": 1.0 },
+	"z_stretch": { "min": 0.25, "max": 1.0 },
+
+	"star_info":
+	[
+		{ "star_info": "spacetravel:main_sequence_distribution", "weight": 1 }
+	],
+	"dust_cloud_info":
+	[
+		{ "dust_cloud_info": "spacetravel:colors/blue_green_distribution", "weight": 1 },
+		{ "dust_cloud_info": "spacetravel:colors/red_blue_distribution", "weight": 1 },
+		{ "dust_cloud_info": "spacetravel:colors/red_yellow_distribution", "weight": 1 },
+		{ "dust_cloud_info": "spacetravel:colors/white_blue_distribution", "weight": 1 },
+		{ "dust_cloud_info": "spacetravel:colors/white_yellow_distribution", "weight": 1 }
+	],
+	
+	"instant_child_parameters":
+	[
+		{
+			"count": { "min": 0, "max": 3 },
+			"parameters":
+			[
+				{ "parameters": "spacetravel:star/blue_giant", "weight": 1, "position": { "min": { "ly": 0 }, "max": { "ly": 2000 } } }
+			]
+		},
+		{
+			"count": { "min": 1, "max": 3 },
+			"parameters":
+			[
+				{ "parameters": "spacetravel:star/yellow_dwarf", "weight": 1, "position": { "min": { "ly": 0 }, "max": { "ly": 8000 } } }
+			]
+		}
+	]
+}

@@ -8,9 +8,11 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
 import net.povstalec.spacetravel.common.space.DimensionObject;
+import net.povstalec.spacetravel.common.space.GenerationObject;
 import net.povstalec.spacetravel.common.space.MassObject;
 import net.povstalec.spacetravel.common.util.DimensionUtil;
 import net.povstalec.stellarview.api.common.space_objects.OrbitingObject;
+import net.povstalec.stellarview.api.common.space_objects.SpaceObject;
 import net.povstalec.stellarview.api.common.space_objects.TexturedObject;
 import net.povstalec.stellarview.api.common.space_objects.resourcepack.Planet;
 import net.povstalec.stellarview.common.util.AxisRotation;
@@ -22,8 +24,11 @@ import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Optional;
 
-public class STPlanet extends Planet implements MassObject, DimensionObject
+public class STPlanet extends Planet implements MassObject, GenerationObject, DimensionObject
 {
+	@Nullable
+	protected ResourceLocation generationParameters;
+	
 	@Nullable
 	protected Mass mass;
 	@Nullable
@@ -68,6 +73,35 @@ public class STPlanet extends Planet implements MassObject, DimensionObject
 	}
 	
 	//============================================================================================
+	//*****************************************Geeration******************************************
+	//============================================================================================
+	
+	@Override
+	@Nullable
+	public ResourceLocation getGenerationParameters()
+	{
+		return generationParameters;
+	}
+	
+	@Override
+	public void setGenerationParameters(ResourceLocation generationParameters)
+	{
+		this.generationParameters = generationParameters;
+	}
+	
+	@Override
+	public long generationSeed()
+	{
+		return this.getCoords().hashCode();
+	}
+	
+	@Override
+	public SpaceObject generationParent()
+	{
+		return this;
+	}
+	
+	//============================================================================================
 	//*************************************Saving and Loading*************************************
 	//============================================================================================
 	
@@ -78,6 +112,9 @@ public class STPlanet extends Planet implements MassObject, DimensionObject
 		
 		if(mass != null)
 			tag.put(MASS, mass.serializeNBT());
+		
+		if(generationParameters != null)
+			tag.putString(GENERATION_PARAMETERS, generationParameters.toString());
 		
 		if(dimension != null)
 			tag.putString(DIMENSION, dimension().location().toString());
@@ -95,6 +132,9 @@ public class STPlanet extends Planet implements MassObject, DimensionObject
 			this.mass = new Mass();
 			this.mass.deserializeNBT(tag.getCompound(MASS));
 		}
+		
+		if(tag.contains(GENERATION_PARAMETERS))
+			this.generationParameters = new ResourceLocation(tag.getString(GENERATION_PARAMETERS));
 		
 		if(tag.contains(DIMENSION))
 			dimension = DimensionUtil.stringToDimension(tag.getString(DIMENSION));
