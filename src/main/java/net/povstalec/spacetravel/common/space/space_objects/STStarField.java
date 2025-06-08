@@ -23,42 +23,39 @@ public class STStarField extends StarField implements GenerationObject
 	protected ResourceLocation generationParameters;
 	
 	public static final Codec<STStarField> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-			ResourceLocation.CODEC.optionalFieldOf("parent").forGetter(STStarField::getParentLocation),
-			Codec.either(SpaceCoords.CODEC, StellarCoordinates.Equatorial.CODEC).fieldOf("coords").forGetter(object -> Either.left(object.getCoords())),
-			AxisRotation.CODEC.fieldOf("axis_rotation").forGetter(STStarField::getAxisRotation),
+			ResourceLocation.CODEC.optionalFieldOf(PARENT_LOCATION).forGetter(STStarField::getParentLocation),
+			Codec.either(SpaceCoords.CODEC, StellarCoordinates.Equatorial.CODEC).fieldOf(COORDS).forGetter(object -> Either.left(object.getCoords())),
+			AxisRotation.CODEC.fieldOf(AXIS_ROTATION).forGetter(STStarField::getAxisRotation),
 			
-			Codec.intRange(0, 4000).optionalFieldOf("dust_clouds", 0).forGetter(STStarField::getDustClouds),
-			ResourceLocation.CODEC.optionalFieldOf("dust_cloud_info").forGetter(starField -> Optional.ofNullable(starField.dustCloudInfo)),
-			ResourceLocation.CODEC.optionalFieldOf("dust_cloud_texture", DEFAULT_DUST_CLOUD_TEXTURE).forGetter(STStarField::getDustCloudTexture),
+			Codec.intRange(0, 4000).optionalFieldOf(DUST_CLOUDS, 0).forGetter(STStarField::getDustClouds),
+			ResourceLocation.CODEC.optionalFieldOf(DUST_CLOUD_INFO).forGetter(starField -> Optional.ofNullable(starField.dustCloudInfo)),
+			ResourceLocation.CODEC.optionalFieldOf(DUST_CLOUD_TEXTURE, DEFAULT_DUST_CLOUD_TEXTURE).forGetter(STStarField::getDustCloudTexture),
+			Codec.BOOL.optionalFieldOf(CLUMP_DUST_CLOUDS_IN_CENTER, true).forGetter(STStarField::clumpDustCloudsInCenter),
+			Stretch.CODEC.optionalFieldOf(DUST_CLOUD_STRETCH, Stretch.DEFAULT_STRETCH).forGetter(STStarField::dustCloudStretch),
 			
-			ResourceLocation.CODEC.optionalFieldOf("star_info").forGetter(starField -> Optional.ofNullable(starField.starInfo)),
-			ResourceLocation.CODEC.optionalFieldOf("star_texture", DEFAULT_STAR_TEXTURE).forGetter(starField -> starField.starTexture),
-			Codec.LONG.fieldOf("seed").forGetter(STStarField::getSeed),
-			Codec.INT.fieldOf("diameter_ly").forGetter(STStarField::getDiameter),
+			Codec.intRange(0, 30000).fieldOf(STARS).forGetter(StarField::getStars),
+			ResourceLocation.CODEC.optionalFieldOf(STAR_INFO).forGetter(starField -> Optional.ofNullable(starField.starInfo)),
+			ResourceLocation.CODEC.optionalFieldOf(STAR_TEXTURE, DEFAULT_STAR_TEXTURE).forGetter(starField -> starField.starTexture),
+			Codec.BOOL.optionalFieldOf(CLUMP_STARS_IN_CENTER, true).forGetter(STStarField::clumpStarsInCenter),
+			Stretch.CODEC.optionalFieldOf(STAR_STRETCH, Stretch.DEFAULT_STRETCH).forGetter(STStarField::starStretch),
 			
-			Codec.intRange(0, 30000).fieldOf("stars").forGetter(STStarField::getStars),
-			Codec.BOOL.optionalFieldOf("clump_stars_in_center", true).forGetter(STStarField::clumpStarsInCenter),
-			
-			Codec.DOUBLE.optionalFieldOf("x_stretch", 1.0).forGetter(STStarField::xStretch),
-			Codec.DOUBLE.optionalFieldOf("y_stretch", 1.0).forGetter(STStarField::yStretch),
-			Codec.DOUBLE.optionalFieldOf("z_stretch", 1.0).forGetter(STStarField::zStretch),
-			
-			SpiralArm.CODEC.listOf().optionalFieldOf("spiral_arms", new ArrayList<SpiralArm>()).forGetter(starField -> starField.spiralArms)
+			Codec.LONG.fieldOf(SEED).forGetter(STStarField::getSeed),
+			Codec.INT.fieldOf(DIAMETER_LY).forGetter(STStarField::getDiameter),
+			SpiralArm.CODEC.listOf().optionalFieldOf(SPIRAL_ARMS, new ArrayList<SpiralArm>()).forGetter(starField -> starField.spiralArms)
 	).apply(instance, STStarField::new));
 	
 	public STStarField() {}
 	
 	public STStarField(Optional<ResourceLocation> parent, Either<SpaceCoords, StellarCoordinates.Equatorial> coords, AxisRotation axisRotation,
-					   int dustClouds, Optional<ResourceLocation> dustCloudInfo, ResourceLocation dustCloudTexture,
-					   Optional<ResourceLocation> starInfo, ResourceLocation starTexture,
-					   long seed, int diameter, int numberOfStars, boolean clumpStarsInCenter,
-					   double xStretch, double yStretch, double zStretch, List<SpiralArm> spiralArms)
+					   int dustClouds, Optional<ResourceLocation> dustCloudInfo, ResourceLocation dustCloudTexture, boolean clumpDustCloudsInCenter, Stretch dustCloudStretch,
+					   int stars, Optional<ResourceLocation> starInfo, ResourceLocation starTexture, boolean clumpStarsInCenter, Stretch starStretch,
+					   long seed, int diameter, List<SpiralArm> spiralArms)
 	{
-		super(parent, coords, axisRotation, dustClouds, dustCloudInfo, dustCloudTexture, starInfo, starTexture, seed, diameter, numberOfStars, clumpStarsInCenter, xStretch, yStretch, zStretch, spiralArms);
+		super(parent, coords, axisRotation, dustClouds, dustCloudInfo, dustCloudTexture, clumpDustCloudsInCenter, dustCloudStretch, stars, starInfo, starTexture, clumpStarsInCenter, starStretch, seed, diameter, spiralArms);
 	}
 	
 	//============================================================================================
-	//*****************************************Geeration******************************************
+	//*****************************************Generation*****************************************
 	//============================================================================================
 	
 	@Override

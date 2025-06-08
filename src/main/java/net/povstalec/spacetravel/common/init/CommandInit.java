@@ -8,6 +8,7 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 
+import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
@@ -15,13 +16,23 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.RelativeMovement;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.povstalec.spacetravel.SpaceTravel;
 import net.povstalec.spacetravel.common.capabilities.SpaceshipCapability;
 import net.povstalec.spacetravel.common.capabilities.SpaceshipCapabilityProvider;
-import net.povstalec.spacetravel.common.config.SpaceRegionCommonConfig;
+import net.povstalec.spacetravel.common.data.Multiverse;
+import net.povstalec.spacetravel.common.space.DimensionObject;
+import net.povstalec.spacetravel.common.space.STSpaceRegion;
+import net.povstalec.spacetravel.common.space.Universe;
+import net.povstalec.spacetravel.common.space.space_objects.STPlanet;
 import net.povstalec.spacetravel.common.util.DimensionUtil;
+import net.povstalec.stellarview.api.common.SpaceRegion;
+
+import java.util.Optional;
 
 public class CommandInit
 {
@@ -73,6 +84,9 @@ public class CommandInit
 						.then(Commands.literal("pos")
 								.then(Commands.literal("get").executes(CommandInit::getSpaceshipPos)))));
 		
+		dispatcher.register(Commands.literal(SpaceTravel.MODID)
+				.then(Commands.literal("beamDown").executes(CommandInit::beamDown)));
+		
 		// Client commands
 		dispatcher.register(Commands.literal(SpaceTravel.MODID)
 				.then(Commands.literal("render")
@@ -106,17 +120,12 @@ public class CommandInit
 	private static int getSpaceshipPos(CommandContext<CommandSourceStack> context) throws CommandSyntaxException
 	{
 		ServerLevel level = context.getSource().getLevel();
+		LazyOptional<SpaceshipCapability> spaceshipCapability = level.getCapability(SpaceshipCapabilityProvider.SPACESHIP);
 		
-		if(level != null)
+		spaceshipCapability.ifPresent(cap ->
 		{
-			LazyOptional<SpaceshipCapability> spaceshipCapability = level.getCapability(SpaceshipCapabilityProvider.SPACESHIP);
-			
-			spaceshipCapability.ifPresent(cap ->
-			{
-				if(cap != null)
-					context.getSource().sendSuccess(() -> Component.literal(cap.spaceship.getSpaceCoords().toString()), false); //TODO Translation
-			});
-		}
+			context.getSource().sendSuccess(() -> Component.literal(cap.spaceship.getSpaceCoords().toString()), false); //TODO Translation
+		});
 		
 		return Command.SINGLE_SUCCESS;
 	}
@@ -126,11 +135,12 @@ public class CommandInit
 		ServerPlayer player = context.getSource().getPlayer();
 		ServerLevel level = context.getSource().getLevel();
 
-		if(player != null && level != null)
+		if(player != null)
 		{
-			SpaceTravel.updatePlayerRenderer(level, player);
-			
-			context.getSource().sendSuccess(() -> Component.literal("Reloaded renderer"), false); //TODO Translation
+			if(SpaceTravel.updatePlayerRenderer(level, player))
+				context.getSource().sendSuccess(() -> Component.literal("Reloaded renderer").withStyle(ChatFormatting.AQUA), false); //TODO Translation
+			else
+				context.getSource().sendSuccess(() -> Component.literal("Renderer reload failed").withStyle(ChatFormatting.DARK_RED), false); //TODO Translation
 		}
 		
 		return Command.SINGLE_SUCCESS;
@@ -142,20 +152,15 @@ public class CommandInit
 		int xAxis = IntegerArgumentType.getInteger(context, "x_axis");
 		int yAxis = IntegerArgumentType.getInteger(context, "y_axis");
 		int zAxis = IntegerArgumentType.getInteger(context, "z_axis");
+		LazyOptional<SpaceshipCapability> spaceshipCapability = level.getCapability(SpaceshipCapabilityProvider.SPACESHIP);
 		
-		if(level != null)
+		spaceshipCapability.ifPresent(cap ->
 		{
-			LazyOptional<SpaceshipCapability> spaceshipCapability = level.getCapability(SpaceshipCapabilityProvider.SPACESHIP);
-			
-			spaceshipCapability.ifPresent(cap -> 
-			{
-				if(cap != null)
-					cap.spaceship.setSpeed(xAxis, yAxis, zAxis);
-				context.getSource().sendSuccess(() -> Component.literal("Set velocity → vx="+cap.spaceship.getxAxisSpeed()+
-						"ly/t, vy="+cap.spaceship.getyAxisSpeed()+
-						"ly/t, vz="+cap.spaceship.getzAxisSpeed()+"ly/t"), false); //TODO Translation
-			});
-		}
+			cap.spaceship.setSpeed(xAxis, yAxis, zAxis);
+			context.getSource().sendSuccess(() -> Component.literal("Set velocity → vx="+cap.spaceship.getxAxisSpeed()+
+					"ly/t, vy="+cap.spaceship.getyAxisSpeed()+
+					"ly/t, vz="+cap.spaceship.getzAxisSpeed()+"ly/t"), false); //TODO Translation
+		});
 		
 		return Command.SINGLE_SUCCESS;
 	}
@@ -166,23 +171,18 @@ public class CommandInit
 		int xAxis = IntegerArgumentType.getInteger(context, "x_axis");
 		int yAxis = IntegerArgumentType.getInteger(context, "y_axis");
 		int zAxis = IntegerArgumentType.getInteger(context, "z_axis");
-
-		if(level != null)
+		LazyOptional<SpaceshipCapability> spaceshipCapability = level.getCapability(SpaceshipCapabilityProvider.SPACESHIP);
+		
+		spaceshipCapability.ifPresent(cap ->
 		{
-			LazyOptional<SpaceshipCapability> spaceshipCapability = level.getCapability(SpaceshipCapabilityProvider.SPACESHIP);
-
-			spaceshipCapability.ifPresent(cap ->
-			{
-				if(cap != null)
-					cap.spaceship.setSpeed(cap.spaceship.getxAxisSpeed()+xAxis,
-							cap.spaceship.getyAxisSpeed()+yAxis,
-							cap.spaceship.getzAxisSpeed()+zAxis);
-				context.getSource().sendSuccess(() -> Component.literal("Added velocity vx="+xAxis+"ly/t, vy="+yAxis+"ly/t, vz="+zAxis+
-						"ly/t → vx="+cap.spaceship.getxAxisSpeed()+
-						"ly/t, vy="+cap.spaceship.getyAxisSpeed()+
-						"ly/t, vz="+cap.spaceship.getzAxisSpeed()+"ly/t"), false); //TODO Translation
-			});
-		}
+			cap.spaceship.setSpeed(cap.spaceship.getxAxisSpeed()+xAxis,
+					cap.spaceship.getyAxisSpeed()+yAxis,
+					cap.spaceship.getzAxisSpeed()+zAxis);
+			context.getSource().sendSuccess(() -> Component.literal("Added velocity vx="+xAxis+"ly/t, vy="+yAxis+"ly/t, vz="+zAxis+
+					"ly/t → vx="+cap.spaceship.getxAxisSpeed()+
+					"ly/t, vy="+cap.spaceship.getyAxisSpeed()+
+					"ly/t, vz="+cap.spaceship.getzAxisSpeed()+"ly/t"), false); //TODO Translation
+		});
 
 		return Command.SINGLE_SUCCESS;
 	}
@@ -190,19 +190,14 @@ public class CommandInit
 	private static int getSpaceshipSpeed(CommandContext<CommandSourceStack> context) throws CommandSyntaxException
 	{
 		ServerLevel level = context.getSource().getLevel();
-
-		if(level != null)
+		LazyOptional<SpaceshipCapability> spaceshipCapability = level.getCapability(SpaceshipCapabilityProvider.SPACESHIP);
+		
+		spaceshipCapability.ifPresent(cap ->
 		{
-			LazyOptional<SpaceshipCapability> spaceshipCapability = level.getCapability(SpaceshipCapabilityProvider.SPACESHIP);
-
-			spaceshipCapability.ifPresent(cap ->
-			{
-				if(cap != null)
-					context.getSource().sendSuccess(() -> Component.literal("vx="+cap.spaceship.getxAxisSpeed()+
-							"ly/t, vy="+cap.spaceship.getyAxisSpeed()+
-							"ly/t, vz="+cap.spaceship.getzAxisSpeed()+"ly/t"), false); //TODO Translation
-			});
-		}
+			context.getSource().sendSuccess(() -> Component.literal("vx="+cap.spaceship.getxAxisSpeed()+
+					"ly/t, vy="+cap.spaceship.getyAxisSpeed()+
+					"ly/t, vz="+cap.spaceship.getzAxisSpeed()+"ly/t"), false); //TODO Translation
+		});
 
 		return Command.SINGLE_SUCCESS;
 	}
@@ -213,20 +208,15 @@ public class CommandInit
 		double xAxis = DoubleArgumentType.getDouble(context, "x_axis");
 		double yAxis = DoubleArgumentType.getDouble(context, "y_axis");
 		double zAxis = DoubleArgumentType.getDouble(context, "z_axis");
+		LazyOptional<SpaceshipCapability> spaceshipCapability = level.getCapability(SpaceshipCapabilityProvider.SPACESHIP);
 		
-		if(level != null)
+		spaceshipCapability.ifPresent(cap ->
 		{
-			LazyOptional<SpaceshipCapability> spaceshipCapability = level.getCapability(SpaceshipCapabilityProvider.SPACESHIP);
-			
-			spaceshipCapability.ifPresent(cap -> 
-			{
-				if(cap != null)
-					cap.spaceship.rotate(xAxis, yAxis, zAxis);
-				context.getSource().sendSuccess(() -> Component.literal("Set rotation → xRot="+cap.spaceship.getxAxisRotation()+
-						"deg/t, yRot="+cap.spaceship.getyAxisRotation()+
-						"deg/t, zRot="+cap.spaceship.getzAxisRotation()+"deg/t"), false); //TODO Translation
-			});
-		}
+			cap.spaceship.rotate(xAxis, yAxis, zAxis);
+			context.getSource().sendSuccess(() -> Component.literal("Set rotation → xRot="+cap.spaceship.getxAxisRotation()+
+					"deg/t, yRot="+cap.spaceship.getyAxisRotation()+
+					"deg/t, zRot="+cap.spaceship.getzAxisRotation()+"deg/t"), false); //TODO Translation
+		});
 		
 		return Command.SINGLE_SUCCESS;
 	}
@@ -237,23 +227,18 @@ public class CommandInit
 		double xAxis = DoubleArgumentType.getDouble(context, "x_axis");
 		double yAxis = DoubleArgumentType.getDouble(context, "y_axis");
 		double zAxis = DoubleArgumentType.getDouble(context, "z_axis");
-
-		if(level != null)
+		LazyOptional<SpaceshipCapability> spaceshipCapability = level.getCapability(SpaceshipCapabilityProvider.SPACESHIP);
+		
+		spaceshipCapability.ifPresent(cap ->
 		{
-			LazyOptional<SpaceshipCapability> spaceshipCapability = level.getCapability(SpaceshipCapabilityProvider.SPACESHIP);
-
-			spaceshipCapability.ifPresent(cap ->
-			{
-				if(cap != null)
-					cap.spaceship.rotate(cap.spaceship.getxAxisRotation()+xAxis,
-							cap.spaceship.getyAxisRotation()+yAxis,
-							cap.spaceship.getzAxisRotation()+zAxis);
-				context.getSource().sendSuccess(() -> Component.literal("Added rotation xRot="+xAxis+"deg/t, yRot="+yAxis+"deg/t, zRot="+zAxis+
-						"deg/t → xRot="+cap.spaceship.getxAxisRotation()+
-						"deg/t, yRot="+cap.spaceship.getyAxisRotation()+
-						"deg/t, zRot="+cap.spaceship.getzAxisRotation()+"deg/t"), false); //TODO Translation
-			});
-		}
+			cap.spaceship.rotate(cap.spaceship.getxAxisRotation()+xAxis,
+					cap.spaceship.getyAxisRotation()+yAxis,
+					cap.spaceship.getzAxisRotation()+zAxis);
+			context.getSource().sendSuccess(() -> Component.literal("Added rotation xRot="+xAxis+"deg/t, yRot="+yAxis+"deg/t, zRot="+zAxis+
+					"deg/t → xRot="+cap.spaceship.getxAxisRotation()+
+					"deg/t, yRot="+cap.spaceship.getyAxisRotation()+
+					"deg/t, zRot="+cap.spaceship.getzAxisRotation()+"deg/t"), false); //TODO Translation
+		});
 
 		return Command.SINGLE_SUCCESS;
 	}
@@ -261,19 +246,14 @@ public class CommandInit
 	private static int getSpaceshipRotation(CommandContext<CommandSourceStack> context) throws CommandSyntaxException
 	{
 		ServerLevel level = context.getSource().getLevel();
-
-		if(level != null)
+		LazyOptional<SpaceshipCapability> spaceshipCapability = level.getCapability(SpaceshipCapabilityProvider.SPACESHIP);
+		
+		spaceshipCapability.ifPresent(cap ->
 		{
-			LazyOptional<SpaceshipCapability> spaceshipCapability = level.getCapability(SpaceshipCapabilityProvider.SPACESHIP);
-
-			spaceshipCapability.ifPresent(cap ->
-			{
-				if(cap != null)
-					context.getSource().sendSuccess(() -> Component.literal("xRot="+cap.spaceship.getxAxisRotation()+
-							"deg/t, yRot="+cap.spaceship.getyAxisRotation()+
-							"deg/t, zRot="+cap.spaceship.getzAxisRotation()+"deg/t"), false); //TODO Translation
-			});
-		}
+			context.getSource().sendSuccess(() -> Component.literal("xRot="+cap.spaceship.getxAxisRotation()+
+					"deg/t, yRot="+cap.spaceship.getyAxisRotation()+
+					"deg/t, zRot="+cap.spaceship.getzAxisRotation()+"deg/t"), false); //TODO Translation
+		});
 
 		return Command.SINGLE_SUCCESS;
 	}
@@ -281,20 +261,43 @@ public class CommandInit
 	private static int freezeSpaceship(CommandContext<CommandSourceStack> context) throws CommandSyntaxException
 	{
 		ServerLevel level = context.getSource().getLevel();
-
-		if(level != null)
+		LazyOptional<SpaceshipCapability> spaceshipCapability = level.getCapability(SpaceshipCapabilityProvider.SPACESHIP);
+		
+		spaceshipCapability.ifPresent(cap ->
 		{
-			LazyOptional<SpaceshipCapability> spaceshipCapability = level.getCapability(SpaceshipCapabilityProvider.SPACESHIP);
+			cap.spaceship.setSpeed(0, 0, 0);
+			cap.spaceship.rotate(0,0,0);
+			context.getSource().sendSuccess(() -> Component.literal("Cancelled all velocity and rotation!"), false); //TODO Translation
+		});
 
-			spaceshipCapability.ifPresent(cap ->
+		return Command.SINGLE_SUCCESS;
+	}
+	
+	private static int beamDown(CommandContext<CommandSourceStack> context) throws CommandSyntaxException
+	{
+		Player player = context.getSource().getPlayer();
+		ServerLevel level = context.getSource().getLevel();
+		Optional<Universe> universe = Multiverse.get(level).getUniverse(Multiverse.PRIME_UNIVERSE);
+		LazyOptional<SpaceshipCapability> spaceshipCapability = level.getCapability(SpaceshipCapabilityProvider.SPACESHIP);
+		
+		spaceshipCapability.ifPresent(cap ->
+		{
+			if(player != null && universe.isPresent())
 			{
-				if(cap != null)
-					cap.spaceship.setSpeed(0, 0, 0);
-					cap.spaceship.rotate(0,0,0);
-					context.getSource().sendSuccess(() -> Component.literal("Cancelled all velocity and rotation!"), false); //TODO Translation
-			});
-		}
-
+				STSpaceRegion region = universe.get().getRegionAt(new SpaceRegion.RegionPos(cap.spaceship.getSpaceCoords()), false);
+				DimensionObject dimensionObject = (DimensionObject) region.findClosest(cap.spaceship.getSpaceCoords(), spaceObject -> spaceObject instanceof DimensionObject dimObject && dimObject.hasSurface());
+				if(dimensionObject != null)
+				{
+					ServerLevel dimensionLevel = dimensionObject.getLevel(level.getServer(), true);
+					if(dimensionLevel != null)
+						player.teleportTo(dimensionLevel,
+								player.getX(), dimensionLevel.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, player.getOnPos().getX(), player.getOnPos().getZ()),
+								player.getZ(), RelativeMovement.ALL,
+								player.getYRot(), player.getXRot());
+				}
+			}
+		});
+		
 		return Command.SINGLE_SUCCESS;
 	}
 }

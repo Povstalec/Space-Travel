@@ -28,5 +28,8 @@ public class SpaceObjectParameterRegistry
 		return SPACE_OBJECT_TEMPLATES.get(resourceLocation);
 	}
 	
-	
+	public static void reset()
+	{
+		SPACE_OBJECT_TEMPLATES.clear();
+	}
 }

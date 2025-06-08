@@ -181,6 +181,8 @@ public class StarFieldParameters extends SpaceObjectParameters<STStarField>
 		double xStretch = xStretchRange.nextDouble(random);
 		double yStretch = yStretchRange.nextDouble(random);
 		double zStretch = zStretchRange.nextDouble(random);
+		StarField.Stretch starStretch = new StarField.Stretch(xStretch, yStretch, zStretch);
+		StarField.Stretch dustCloudStretch = new StarField.Stretch(xStretch, yStretch, zStretch); //TODO Separate Dust Cloud Stretch
 		
 		int numberOfArms = numberOfArmsRange.nextInt(random);
 		double degrees = 360D / numberOfArms;
@@ -193,8 +195,8 @@ public class StarFieldParameters extends SpaceObjectParameters<STStarField>
 		}
 		
 		STStarField starField = new STStarField(Optional.empty(), Either.left(spaceCoords), axisRotation,
-				dustClouds, Optional.ofNullable(randomDustCloudInfo(random)), dustCloudTexture,
-				Optional.ofNullable(randomStarInfo(random)), starTexture, seed, diameter, stars, clumpStarsInCenter, xStretch, yStretch, zStretch, arms);
+				dustClouds, Optional.ofNullable(randomDustCloudInfo(random)), dustCloudTexture, true/*TODO clumpDustCloudsInCenter*/, dustCloudStretch,
+				stars, Optional.ofNullable(randomStarInfo(random)), starTexture, clumpStarsInCenter, starStretch, seed, diameter, arms);
 		
 		generateChildrenWithParent(starField, starField.getSeed());
 		

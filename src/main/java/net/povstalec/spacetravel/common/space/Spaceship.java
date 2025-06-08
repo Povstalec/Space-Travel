@@ -102,6 +102,7 @@ public class Spaceship extends ViewObject
 			{
 				STSpaceRegion spaceRegion = newSpaceRegions.get(regionPos);
 				loadedSpaceRegions.put(regionPos, spaceRegion);
+				spaceRegion.load(level.getServer()); // Loads additional information for all the loadable objects
 				PacketHandlerInit.sendPacketToDimension(level.dimension(), new ClientBoundSpaceRegionLoadPacket(spaceRegion));
 			}
 			

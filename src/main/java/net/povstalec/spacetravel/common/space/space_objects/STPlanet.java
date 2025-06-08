@@ -3,13 +3,17 @@ package net.povstalec.spacetravel.common.space.space_objects;
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
-import net.povstalec.spacetravel.common.space.DimensionObject;
-import net.povstalec.spacetravel.common.space.GenerationObject;
-import net.povstalec.spacetravel.common.space.MassObject;
+import net.povstalec.spacetravel.SpaceTravel;
+import net.povstalec.spacetravel.common.capabilities.ViewObjectCapabilityProvider;
+import net.povstalec.spacetravel.common.space.*;
+import net.povstalec.spacetravel.common.space.generation.parameters.WorldGenInfo;
 import net.povstalec.spacetravel.common.util.DimensionUtil;
 import net.povstalec.stellarview.api.common.space_objects.OrbitingObject;
 import net.povstalec.stellarview.api.common.space_objects.SpaceObject;
@@ -23,9 +27,14 @@ import net.povstalec.stellarview.common.util.TextureLayer;
 import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
-public class STPlanet extends Planet implements MassObject, GenerationObject, DimensionObject
+public class STPlanet extends Planet implements MassObject, GenerationObject, DimensionObject, LoadableObject
 {
+	public static final String WORLDGEN_INFO = "worldgen_info";
+	
+	protected boolean isLoaded = false;
+	
 	@Nullable
 	protected ResourceLocation generationParameters;
 	
@@ -33,6 +42,8 @@ public class STPlanet extends Planet implements MassObject, GenerationObject, Di
 	protected Mass mass;
 	@Nullable
 	protected ResourceKey<Level> dimension;
+	@Nullable
+	protected WorldGenInfo worldGenInfo;
 	
 	public static final Codec<STPlanet> CODEC = RecordCodecBuilder.create(instance -> instance.group(
 			ResourceLocation.CODEC.optionalFieldOf(PARENT_LOCATION).forGetter(STPlanet::getParentLocation),
@@ -44,19 +55,21 @@ public class STPlanet extends Planet implements MassObject, GenerationObject, Di
 			FadeOutHandler.CODEC.optionalFieldOf(FADE_OUT_HANDLER, FadeOutHandler.DEFAULT_PLANET_HANDLER).forGetter(STPlanet::getFadeOutHandler),
 			
 			Mass.CODEC.optionalFieldOf(MASS).forGetter(planet -> Optional.ofNullable(planet.mass)),
-			Level.RESOURCE_KEY_CODEC.optionalFieldOf(DIMENSION).forGetter(planet -> Optional.ofNullable(planet.dimension))
+			Level.RESOURCE_KEY_CODEC.optionalFieldOf(DIMENSION).forGetter(planet -> Optional.ofNullable(planet.dimension)),
+			WorldGenInfo.CODEC.optionalFieldOf(WORLDGEN_INFO).forGetter(planet -> Optional.ofNullable(planet.worldGenInfo))
 	).apply(instance, STPlanet::new));
 	
 	public STPlanet() {}
 	
 	public STPlanet(Optional<ResourceLocation> parent, Either<SpaceCoords, StellarCoordinates.Equatorial> coords, AxisRotation axisRotation,
 					Optional<OrbitingObject.OrbitInfo> orbitInfo,List<TextureLayer> textureLayers, TexturedObject.FadeOutHandler fadeOutHandler,
-					Optional<Mass> mass, Optional<ResourceKey<Level>> dimension)
+					Optional<Mass> mass, Optional<ResourceKey<Level>> dimension, Optional<WorldGenInfo> worldGenInfo)
 	{
 		super(parent, coords, axisRotation, orbitInfo, textureLayers, fadeOutHandler);
 		
 		this.mass = mass.orElse(null);
 		this.dimension = dimension.orElse(null);
+		this.worldGenInfo = worldGenInfo.orElse(null);
 	}
 	
 	@Nullable
@@ -66,18 +79,26 @@ public class STPlanet extends Planet implements MassObject, GenerationObject, Di
 		return mass;
 	}
 	
+	@Nullable
 	@Override
 	public ResourceKey<Level> dimension()
 	{
 		return dimension;
 	}
 	
+	@Nullable
+	@Override
+	public WorldGenInfo worldGenInfo()
+	{
+		return worldGenInfo;
+	}
+	
 	//============================================================================================
-	//*****************************************Geeration******************************************
+	//*****************************************Generation*****************************************
 	//============================================================================================
 	
-	@Override
 	@Nullable
+	@Override
 	public ResourceLocation getGenerationParameters()
 	{
 		return generationParameters;
@@ -102,8 +123,81 @@ public class STPlanet extends Planet implements MassObject, GenerationObject, Di
 	}
 	
 	//============================================================================================
+	//******************************************Dimension*****************************************
+	//============================================================================================
+	
+	@Override
+	public boolean hasSurface()
+	{
+		return dimension() != null || worldGenInfo() != null;
+	}
+	
+	@Nullable
+	@Override
+	public ServerLevel generateWorld(MinecraftServer server)
+	{
+		if(worldGenInfo() == null)
+			return null;
+		
+		if(dimension() == null)
+			this.dimension = ResourceKey.create(Registries.DIMENSION, new ResourceLocation(SpaceTravel.MODID, UUID.randomUUID().toString()));
+		
+		ServerLevel level = DimensionUtil.createWorld(server, dimension(), worldGenInfo().biomes(), worldGenInfo().settings());
+		
+		load(server);
+		return level;
+	}
+	
+	@Nullable
+	@Override
+	public ServerLevel getLevel(MinecraftServer server, boolean generate)
+	{
+		if(!generate)
+		{
+			if(dimension() != null)
+				return server.getLevel(dimension());
+			else
+				return null;
+		}
+		else
+		{
+			ServerLevel level = server.getLevel(dimension());
+			if(level != null)
+				return level;
+			else
+				return generateWorld(server);
+		}
+	}
+	
+	//============================================================================================
 	//*************************************Saving and Loading*************************************
 	//============================================================================================
+	
+	@Override
+	public boolean isLoaded()
+	{
+		return this.isLoaded;
+	}
+	
+	@Override
+	public void load(MinecraftServer server)
+	{
+		if(dimension() == null)
+			return;
+		
+		ServerLevel level = server.getLevel(dimension());
+		if(level != null)
+		{
+			level.getCapability(ViewObjectCapabilityProvider.VIEW_OBJECT).ifPresent(cap ->
+			{
+				if(cap.viewObject() == null)
+				{
+					cap.setViewObject(this);
+					this.isLoaded = true;
+				}
+			});
+		}
+	}
 	
 	@Override
 	public CompoundTag serializeNBT()

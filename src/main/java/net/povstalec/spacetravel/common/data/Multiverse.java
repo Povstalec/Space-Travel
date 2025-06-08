@@ -19,6 +19,7 @@ import net.povstalec.spacetravel.common.space.Universe;
 import net.povstalec.spacetravel.common.space.generation.SpaceObjectParameterRegistry;
 import net.povstalec.spacetravel.common.space.generation.parameters.StarFieldParameters;
 import net.povstalec.spacetravel.common.space.generation.parameters.StarParameters;
+import net.povstalec.spacetravel.common.space.space_objects.STPlanet;
 import net.povstalec.spacetravel.common.space.space_objects.STStar;
 import net.povstalec.spacetravel.common.space.space_objects.STStarField;
 import net.povstalec.stellarview.api.common.space_objects.SpaceObject;
@@ -58,6 +59,7 @@ public class Multiverse extends SavedData
 		
 		registerUniverses(server);
 		
+		SpaceObjectParameterRegistry.reset();
 		registerStarFieldParameters(server);
 		registerStarParameters(server);
 		
@@ -65,6 +67,7 @@ public class Multiverse extends SavedData
 		registerStars(server);
 		registerBlackHoles(server);
 		registerNebulae(server);
+		registerPlanets(server);
 		
 		prepareUniverses();
 		
@@ -219,7 +222,25 @@ public class Multiverse extends SavedData
 			
 			addObjectToAllUniverses(location, nebula);
 		});
-		SpaceTravel.LOGGER.info("Black Holes registered");
+		SpaceTravel.LOGGER.info("Nebulae registered");
+	}
+	
+	public void registerPlanets(MinecraftServer server)
+	{
+		final RegistryAccess registries = server.registryAccess();
+		final Registry<STPlanet> planetRegistry = registries.registryOrThrow(SpaceObjectRegistry.PLANET_REGISTRY_KEY);
+		
+		Set<Map.Entry<ResourceKey<STPlanet>, STPlanet>> planetSet = planetRegistry.entrySet();
+		planetSet.forEach((planetEntry) ->
+		{
+			STPlanet planet = planetEntry.getValue();
+			ResourceLocation location = planetEntry.getKey().location().withPath("planet/" + planetEntry.getKey().location().getPath());
+			
+			planet.setResourceLocation(location);
+			
+			addObjectToAllUniverses(location, planet);
+		});
+		SpaceTravel.LOGGER.info("Planets registered");
 	}
 
 	//============================================================================================

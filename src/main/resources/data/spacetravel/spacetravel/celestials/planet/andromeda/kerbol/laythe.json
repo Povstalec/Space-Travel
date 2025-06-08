@@ -1,0 +1,100 @@
+{
+	"parent": "spacetravel:planet/andromeda/kerbol/jool",
+	"coords": { "x": {"ly": 0}, "y": {"ly": 0}, "z": {"ly": 0} },
+	"axis_rotation": { "x_axis": 0, "y_axis": 0, "z_axis": 0 },
+	"orbit_info":
+	{
+		"apoapsis": 27184,
+		"periapsis": 27184,
+		"orbital_period": { "ticks": 52080 },
+		"argument_of_periapsis": 0,
+		"inclination": 0,
+		"longtitude_of_ascending_node": 0,
+		"epoch_mean_anomaly": 0
+	},
+	"texture_layers":
+	[
+		
+		{
+			"texture": "stellarview:textures/environment/halo_template.png",
+			"rgba": {"red": 255, "green": 255, "blue": 255, "alpha": 255},
+			"blend": true,
+			"size": 3389500,
+			"min_size": 1.0,
+			"clamp_at_min_size": true,
+			"rotation": 0,
+			"uv": { "flip_uv": false }
+		},
+		{
+			"texture": "spacetravel:textures/environment/planet/kerbol/laythe.png",
+			"rgba": {"red": 255, "green": 255, "blue": 255, "alpha": 255},
+			"blend": false,
+			"size": 3389500,
+			"min_size": 0.5,
+			"clamp_at_min_size": true,
+			"rotation": -64.81,
+			"uv": { "flip_uv": false }
+		}
+	],
+	
+	"dimension": "spacetravel:laythe",
+	"worldgen_info":
+	{
+		"noise_settings": "spacetravel:lifeless_ocean",
+		"biomes":
+		[
+			{
+				"biome": "spacetravel:planet/lifeless_ocean",
+				"parameters":
+				{
+					"temperature": 1,
+					"humidity": [0.5, 2],
+					"continentalness": 0,
+					"erosion": 0,
+					"weirdness": 0,
+					"depth": 0,
+					"offset": 0
+				}
+			},
+			{
+				"biome": "minecraft:beach",
+				"parameters":
+				{
+					"temperature": 0,
+					"humidity": [-2, -0.85],
+					"continentalness": [1.5, 2],
+					"erosion": 0,
+					"weirdness": 0,
+					"depth": 0,
+					"offset": 0
+				}
+			},
+			{
+				"biome": "minecraft:plains",
+				"parameters":
+				{
+					"temperature": -0.5,
+					"humidity": [-2, -0.8],
+					"continentalness": [1.25, 2],
+					"erosion": 0,
+					"weirdness": 0.15,
+					"depth": 0,
+					"offset": 0
+				}
+			},
+			{
+				"biome": "minecraft:forest",
+				"parameters":
+				{
+					"temperature": -0.7,
+					"humidity": [-2, -0.85],
+					"continentalness": [1.2, 2],
+					"erosion": 0,
+					"weirdness": 0,
+					"depth": 0,
+					"offset": 0
+				}
+			}
+		]
+	}
+}

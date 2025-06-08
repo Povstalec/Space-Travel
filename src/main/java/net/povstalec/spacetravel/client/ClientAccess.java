@@ -8,8 +8,10 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
+import net.povstalec.spacetravel.client.render.level.PlanetSpecialEffects;
 import net.povstalec.spacetravel.client.render.level.SpaceShipSpecialEffects;
 import net.povstalec.spacetravel.common.init.SpaceObjectRegistry;
+import net.povstalec.spacetravel.common.space.DimensionObject;
 import net.povstalec.spacetravel.common.space.STSpaceRegion;
 import net.povstalec.stellarview.api.common.SpaceRegion;
 import net.povstalec.stellarview.api.common.space_objects.SpaceObject;
@@ -17,6 +19,7 @@ import net.povstalec.stellarview.client.SpaceObjectRenderers;
 import net.povstalec.stellarview.client.render.SpaceRegionRenderer;
 import net.povstalec.stellarview.client.render.SpaceRenderer;
 import net.povstalec.stellarview.client.render.space_objects.SpaceObjectRenderer;
+import net.povstalec.stellarview.client.render.space_objects.ViewObjectRenderer;
 
 public class ClientAccess
 {
@@ -87,7 +90,7 @@ public class ClientAccess
 		SpaceRenderer.removeSpaceRegion(spaceRegionPos);
     }
 	
-	private static void deserializeObjectsRecursive(SpaceObjectRenderer parent, CompoundTag tag)
+	private static SpaceObjectRenderer<?> deserializeObjectsRecursive(SpaceObjectRenderer<?> parent, CompoundTag tag)
 	{
 		String objectTypeString = tag.getString(SpaceObjectRegistry.OBJECT_TYPE);
 		
@@ -98,11 +101,12 @@ public class ClientAccess
 			
 			if(spaceObject != null)
 			{
-				SpaceObjectRenderer renderer = SpaceObjectRenderers.constructObjectRenderer(spaceObject);
+				SpaceObjectRenderer<?> renderer = SpaceObjectRenderers.constructObjectRenderer(spaceObject);
 				if(renderer != null)
 				{
 					renderer.setupSpaceObject(null);
-					parent.addChildRaw(renderer);
+					if(parent != null)
+						parent.addChildRaw(renderer);
 					
 					if(tag.contains(STSpaceRegion.CHILDREN))
 					{
@@ -112,9 +116,17 @@ public class ClientAccess
 							deserializeObjectsRecursive(renderer, childrenTag.getCompound(childId));
 						}
 					}
+					
+					// Add View Centers of appropriate objects
+					if(spaceObject instanceof DimensionObject dimensionObject && dimensionObject.dimension() != null && renderer instanceof ViewObjectRenderer<?> viewObjectRenderer)
+						PlanetSpecialEffects.createPlanetViewCenter(dimensionObject.dimension().location(), viewObjectRenderer);
+					
+					return renderer;
 				}
 			}
 		}
+		
+		return null;
 	}
 	
 	public static void setupClientSpaceRegion(SpaceRegionRenderer spaceRegion, CompoundTag tag)
@@ -122,31 +134,9 @@ public class ClientAccess
 		for(String regionChildId : tag.getAllKeys())
 		{
 			CompoundTag childTag = tag.getCompound(regionChildId);
-			String objectTypeString = childTag.getString(SpaceObjectRegistry.OBJECT_TYPE);
-			
-			if(objectTypeString != null && ResourceLocation.isValidResourceLocation(objectTypeString))
-			{
-				ResourceLocation objectType = new ResourceLocation(objectTypeString);
-				SpaceObject spaceObject = deserialize(objectType, childTag);
-				if(spaceObject != null)
-				{
-					SpaceObjectRenderer renderer = SpaceObjectRenderers.constructObjectRenderer(spaceObject);
-					if(renderer != null)
-					{
-						renderer.setupSpaceObject(null);
-						spaceRegion.addChild(renderer);
-						
-						if(childTag.contains(STSpaceRegion.CHILDREN))
-						{
-							CompoundTag childrenTag = childTag.getCompound(STSpaceRegion.CHILDREN);
-							for(String childId : childrenTag.getAllKeys())
-							{
-								deserializeObjectsRecursive(renderer, childrenTag.getCompound(childId));
-							}
-						}
-					}
-				}
-			}
+			SpaceObjectRenderer<?> renderer = deserializeObjectsRecursive(null, childTag);
+			if(renderer != null)
+				spaceRegion.addChild(renderer);
 		}
 	}
 	

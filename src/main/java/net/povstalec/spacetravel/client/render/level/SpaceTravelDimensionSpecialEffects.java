@@ -17,6 +17,7 @@ import net.povstalec.spacetravel.SpaceTravel;
 public class SpaceTravelDimensionSpecialEffects extends DimensionSpecialEffects
 {
     public static final ResourceLocation SPACE_EFFECTS = new ResourceLocation(SpaceTravel.MODID, "space_effects");
+	public static final ResourceLocation PLANET_EFFECTS = new ResourceLocation(SpaceTravel.MODID, "planet_effects");
     
 	public SpaceTravelDimensionSpecialEffects(float cloudLevel, boolean hasGround, SkyType skyType,
             boolean forceBrightLightmap, boolean constantAmbientLight)
@@ -60,5 +61,6 @@ public class SpaceTravelDimensionSpecialEffects extends DimensionSpecialEffects
 	public static void register(RegisterDimensionSpecialEffectsEvent event)
 	{
 		event.register(SpaceTravelDimensionSpecialEffects.SPACE_EFFECTS, new SpaceShipSpecialEffects());
+		event.register(SpaceTravelDimensionSpecialEffects.PLANET_EFFECTS, new PlanetSpecialEffects());
 	}
 }

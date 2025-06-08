@@ -54,7 +54,8 @@ public class SpaceChunkGenerator extends ChunkGenerator
     public void createReferences(WorldGenLevel pLevel, StructureManager pStructureManager, ChunkAccess pChunk){}
 
     @Override
-    public Codec<SpaceChunkGenerator> codec() {
+    public Codec<SpaceChunkGenerator> codec()
+    {
         return CODEC;
     }
 
@@ -88,7 +89,7 @@ public class SpaceChunkGenerator extends ChunkGenerator
     @Override
     public int getMinY()
     {
-        return 0;
+        return -64;
     }
 
     @Override
@@ -100,11 +101,6 @@ public class SpaceChunkGenerator extends ChunkGenerator
     @Override
     public NoiseColumn getBaseColumn(int p_223028_, int p_223029_, LevelHeightAccessor level, RandomState p_223031_)
     {
-        BlockState[] states = new BlockState[level.getHeight()];
-        for(int i = 0; i < states.length; ++i){
-            states[i] = Blocks.AIR.defaultBlockState();
-        }
-
         return new NoiseColumn(0, new BlockState[0]);
     }
 

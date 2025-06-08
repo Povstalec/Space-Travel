@@ -1,9 +1,14 @@
 package net.povstalec.spacetravel.common.space;
 
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Queue;
 import java.util.Random;
+import java.util.function.Predicate;
 
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.MinecraftServer;
 import net.povstalec.spacetravel.common.config.SpaceRegionCommonConfig;
 import net.povstalec.spacetravel.common.init.SpaceObjectRegistry;
 import net.povstalec.spacetravel.common.space.generation.parameters.SpaceObjectParameters;
@@ -11,6 +16,7 @@ import net.povstalec.stellarview.api.common.SpaceRegion;
 import net.povstalec.stellarview.api.common.space_objects.SpaceObject;
 import net.povstalec.stellarview.common.util.AxisRotation;
 import net.povstalec.stellarview.common.util.SpaceCoords;
+import org.jetbrains.annotations.Nullable;
 
 public final class STSpaceRegion extends SpaceRegion
 {
@@ -91,6 +97,61 @@ public final class STSpaceRegion extends SpaceRegion
 		}
 		
 		return spaceRegion;
+	}
+	
+	
+	
+	private void loadObjectRecursive(MinecraftServer server, SpaceObject spaceObject)
+	{
+		if(spaceObject instanceof LoadableObject loadableObject)
+		{
+			loadableObject.load(server);
+		}
+		
+		for(SpaceObject child : spaceObject.getChildren())
+		{
+			loadObjectRecursive(server, child);
+		}
+	}
+	
+	/**
+	 * Loads all loadable objects in the region
+	 * @param server
+	 */
+	public void load(MinecraftServer server)
+	{
+		for(SpaceObject child : getChildren())
+		{
+			loadObjectRecursive(server, child);
+		}
+	}
+	
+	@Nullable
+	public SpaceObject findClosest(SpaceCoords coords, Predicate<SpaceObject> filter)
+	{
+		SpaceObject closest = null;
+		double closestDistSqr = -1;
+		
+		Queue<SpaceObject> queue = new LinkedList<>();
+		queue.addAll(getChildren());
+		
+		while(!queue.isEmpty())
+		{
+			SpaceObject front = queue.remove();
+			queue.addAll(front.getChildren());
+			
+			if(filter.test(front))
+			{
+				double distSqr = front.getCoords().distanceSquared(coords);
+				if((closestDistSqr == -1 || distSqr < closestDistSqr))
+				{
+					closest = front;
+					closestDistSqr = distSqr;
+				}
+			}
+		}
+		
+		return closest;
 	}
 	
 	//============================================================================================

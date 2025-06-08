@@ -8,6 +8,8 @@ import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.registries.DataPackRegistryEvent;
+import net.povstalec.spacetravel.common.capabilities.ViewObjectCapability;
+import net.povstalec.spacetravel.common.capabilities.ViewObjectCapabilityProvider;
 import net.povstalec.spacetravel.common.config.SpaceTravelConfig;
 import net.povstalec.spacetravel.common.init.SpaceObjectRegistry;
 import net.povstalec.spacetravel.common.space.STSpaceRegion;
@@ -133,26 +135,31 @@ public class SpaceTravel
 		}
 	}
 	
-	public static void updatePlayerRenderer(Level level, ServerPlayer player)
+	public static boolean updatePlayerRenderer(Level level, ServerPlayer player)
 	{
-		LazyOptional<SpaceshipCapability> spaceshipCapability = level.getCapability(SpaceshipCapabilityProvider.SPACESHIP);
+		LazyOptional<ViewObjectCapability> viewObjectCapability = level.getCapability(ViewObjectCapabilityProvider.VIEW_OBJECT);
 		
-		spaceshipCapability.ifPresent(cap -> 
+		if(!viewObjectCapability.isPresent())
+			return false;
+		
+		viewObjectCapability.ifPresent(cap ->
 		{
-			if(cap != null)
+			if(cap.viewObject() != null)
 			{
 				Optional<Universe> universe = Multiverse.get(level).getUniverse(Multiverse.PRIME_UNIVERSE); //TODO There can be other universes
 				
 				if(universe.isPresent())
 				{
-					PacketHandlerInit.sendToPlayer(player, new ClientBoundRenderCenterUpdatePacket(new Spaceship())); //TODO Get coords from somewhere
+					PacketHandlerInit.sendToPlayer(player, new ClientBoundRenderCenterUpdatePacket(cap.viewObject())); //TODO Get coords from somewhere
 					PacketHandlerInit.sendToPlayer(player, new ClientBoundSpaceRegionClearPacket());
-					for(Map.Entry<SpaceRegion.RegionPos, STSpaceRegion> spaceRegionEntry : universe.get().getRegionsAt(new SpaceRegion.RegionPos(cap.spaceship.getSpaceCoords()), STSpaceRegion.SPACE_REGION_LOAD_DISTANCE, true).entrySet())
+					for(Map.Entry<SpaceRegion.RegionPos, STSpaceRegion> spaceRegionEntry : universe.get().getRegionsAt(new SpaceRegion.RegionPos(cap.viewObject().getCoords()), STSpaceRegion.SPACE_REGION_LOAD_DISTANCE, true).entrySet())
 					{
 						PacketHandlerInit.sendToPlayer(player, new ClientBoundSpaceRegionLoadPacket(spaceRegionEntry.getValue()));
 					}
 				}
 			}
 		});
+		
+		return true;
 	}
 }

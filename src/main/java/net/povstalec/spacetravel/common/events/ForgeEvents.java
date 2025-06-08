@@ -16,8 +16,14 @@ import net.minecraftforge.fml.common.Mod;
 import net.povstalec.spacetravel.SpaceTravel;
 import net.povstalec.spacetravel.common.capabilities.SpaceshipCapability;
 import net.povstalec.spacetravel.common.capabilities.SpaceshipCapabilityProvider;
+import net.povstalec.spacetravel.common.capabilities.ViewObjectCapability;
+import net.povstalec.spacetravel.common.capabilities.ViewObjectCapabilityProvider;
 import net.povstalec.spacetravel.common.data.Multiverse;
 import net.povstalec.spacetravel.common.init.WorldGenInit;
+import net.povstalec.spacetravel.common.space.Spaceship;
+import net.povstalec.spacetravel.common.space.Universe;
+
+import java.util.Optional;
 
 @Mod.EventBusSubscriber(modid = SpaceTravel.MODID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class ForgeEvents
@@ -36,15 +42,7 @@ public class ForgeEvents
 		Level level = event.level;
 		
 		if(event.phase.equals(TickEvent.Phase.START) && level != null && !level.isClientSide())
-		{
-			LazyOptional<SpaceshipCapability> spaceshipCapability = level.getCapability(SpaceshipCapabilityProvider.SPACESHIP);
-			
-			spaceshipCapability.ifPresent(cap -> 
-			{
-				if(cap != null)
-					cap.spaceship.tick((ServerLevel) level);
-			});
-		}
+			level.getCapability(SpaceshipCapabilityProvider.SPACESHIP).ifPresent(cap -> cap.spaceship.tick((ServerLevel) level));
 	}
 	
 	@SubscribeEvent
@@ -53,13 +51,20 @@ public class ForgeEvents
 		ResourceLocation location = event.getObject().dimensionTypeId().location();
 		
 		if(location.equals(WorldGenInit.SPACE_TYPE.location()))
-		    event.addCapability(new ResourceLocation(SpaceTravel.MODID, "spaceship"), new SpaceshipCapabilityProvider());
+		{
+			Spaceship spaceship = new Spaceship();
+			event.addCapability(new ResourceLocation(SpaceTravel.MODID, "spaceship"), new SpaceshipCapabilityProvider(spaceship));
+			event.addCapability(new ResourceLocation(SpaceTravel.MODID, "view_object"), new ViewObjectCapabilityProvider(spaceship));
+		}
+		else if(location.equals(WorldGenInit.PLANET_TYPE.location()))
+			event.addCapability(new ResourceLocation(SpaceTravel.MODID, "view_object"), new ViewObjectCapabilityProvider(null));
 	}
 	
 	@SubscribeEvent
 	public static void onRegisterCapabilities(RegisterCapabilitiesEvent event)
 	{
 		event.register(SpaceshipCapability.class);
+		event.register(ViewObjectCapability.class);
 	}
 	
 	@SubscribeEvent
@@ -67,8 +72,15 @@ public class ForgeEvents
 	{
 		ServerPlayer player = (ServerPlayer) event.getEntity();
 		
-		if(player != null && player.level() == null)
+		if(player == null)
 			return;
+		
+		Optional<Universe> universe = Multiverse.get(player.level()).getUniverse(Multiverse.PRIME_UNIVERSE);
+		universe.ifPresent(value -> player.level().getCapability(ViewObjectCapabilityProvider.VIEW_OBJECT).ifPresent(cap ->
+		{
+			if(cap.viewObject() == null)
+				cap.loadRegion(player.getServer(), value);
+		}));
 		
 		SpaceTravel.updatePlayerRenderer(player.level(), player);
 	}
@@ -78,11 +90,19 @@ public class ForgeEvents
 	{
 		ServerPlayer player = (ServerPlayer) event.getEntity();
 		
-		if(player != null && player.level() == null)
+		if(player == null)
 			return;
 		
 		MinecraftServer server = player.level().getServer();
+		Optional<Universe> universe = Multiverse.get(player.level()).getUniverse(Multiverse.PRIME_UNIVERSE);
+		universe.ifPresent(value -> player.level().getCapability(ViewObjectCapabilityProvider.VIEW_OBJECT).ifPresent(cap ->
+		{
+			if(cap.viewObject() == null)
+				cap.loadRegion(player.getServer(), value);
+		}));
 		
-		SpaceTravel.updatePlayerRenderer(server.getLevel(event.getTo()), player);
+		ServerLevel newLevel = server.getLevel(event.getTo());
+		if(newLevel != null)
+			SpaceTravel.updatePlayerRenderer(newLevel, player);
 	}
 }

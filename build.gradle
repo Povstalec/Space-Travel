@@ -145,7 +145,7 @@ dependencies {
     // http://www.gradle.org/docs/current/userguide/artifact_dependencies_tutorial.html
     // http://www.gradle.org/docs/current/userguide/dependency_management.html
 
-    implementation(fg.deobf("blank:Stellar-View-${minecraft_version}:${stellarview_version}"))
+    implementation(fg.deobf("blank:Stellar-View-${minecraft_version}:${stellarview_version}-Forge"))
 }
 
 // This block of code expands all declared replace properties in the specified resource targets.

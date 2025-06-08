@@ -10,8 +10,12 @@ public class SpaceshipCapability
 {
 	public static final String SPACESHIP = "spaceship";
 	
-	public Spaceship spaceship = new Spaceship();
+	public Spaceship spaceship;
 	
+	public SpaceshipCapability(Spaceship spaceship)
+	{
+		this.spaceship = spaceship;
+	}
 	
 	public void saveData(CompoundTag tag)
 	{

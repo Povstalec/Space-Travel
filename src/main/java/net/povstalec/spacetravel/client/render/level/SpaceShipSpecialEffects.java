@@ -47,7 +47,7 @@ public class SpaceShipSpecialEffects extends SpaceTravelDimensionSpecialEffects
 		public SpaceshipViewCenter()
 		{
 			super(Optional.empty(), Optional.empty(), new AxisRotation(), 0, DayBlending.DAY_BLENDING, ViewCenter.DayBlending.SUN_DAY_BLENDING,
-					Optional.empty(), Optional.empty(), false, false, true, true, 0);
+					Optional.empty(), Optional.empty(), false, false, true, true, true, 0);
 		}
 		
 		@Override
@@ -58,8 +58,8 @@ public class SpaceShipSpecialEffects extends SpaceTravelDimensionSpecialEffects
 			
 			coords = viewObject.spaceCoords();
 			this.ticks = level.getGameTime();
-			this.starBrightness = 1F;//StarLike.getStarBrightness(this, level, camera, partialTicks);
-			this.dustCloudBrightness = 0.5F;//GeneralConfig.dust_clouds.get() ? StarField.dustCloudBrightness(this, level, camera, partialTicks) : 0.0F;
+			this.starBrightness = 1F;
+			this.dustCloudBrightness = 1F;
 			
 			stack.pushPose();
 			

@@ -62,8 +62,7 @@ public class Universe implements INBTSerializable<CompoundTag>
 			this.childrenWeight += childTemplate.weight();
 		}
 		
-		if(seed.isPresent())
-			this.seed = seed.get();
+		this.seed = seed.orElse(null);
 		
 		for(Area area : forceSavedRegions)
 		{
@@ -146,7 +145,7 @@ public class Universe implements INBTSerializable<CompoundTag>
 	public STSpaceRegion getRegionAt(SpaceRegion.RegionPos pos, boolean generate)
 	{
 		if(!generate)
-			return spaceRegions.computeIfAbsent(pos, position -> new STSpaceRegion(pos));
+			return spaceRegions.computeIfAbsent(pos, position -> new STSpaceRegion(position));
 		else
 			return spaceRegions.computeIfAbsent(pos, position -> STSpaceRegion.generateRegion(this, position, getSeed())); // TODO Handle seeds
 	}
@@ -213,6 +212,19 @@ public class Universe implements INBTSerializable<CompoundTag>
 			SpaceTravel.LOGGER.error("Universe " + this.toString() + " already contains " + spaceObject.toString());
 	}
 	
+	private void findObjectParent(SpaceObject spaceObject)
+	{
+		for(Map.Entry<ResourceLocation, SpaceObject> parentEntry : spaceObjects.entrySet())
+		{
+			if(parentEntry.getKey().equals(spaceObject.getParentLocation().get()))
+			{
+				parentEntry.getValue().addChild(spaceObject);
+				return;
+			}
+		}
+		SpaceTravel.LOGGER.error("Failed to find parent for " + spaceObject.toString());
+	}
+	
 	public void prepareObjects()
 	{
 		for(Map.Entry<ResourceLocation, SpaceObject> spaceObjectEntry : spaceObjects.entrySet())
@@ -224,19 +236,7 @@ public class Universe implements INBTSerializable<CompoundTag>
 			
 			// Handle parents
 			if(spaceObject.getParentLocation().isPresent())
-			{
-				for(Map.Entry<ResourceLocation, SpaceObject> parentEntry : spaceObjects.entrySet())
-				{
-					if(parentEntry.getKey().equals(spaceObject.getParentLocation().get()))
-					{
-						parentEntry.getValue().addChild(spaceObject);
-						break;
-					}
-				}
-				
-				if(!spaceObject.getParent().isPresent())
-					SpaceTravel.LOGGER.error("Failed to find parent for " + spaceObject.toString());
-			}
+				findObjectParent(spaceObject);
 			else
 				addToRegion(spaceObjectEntry.getValue());
 		}

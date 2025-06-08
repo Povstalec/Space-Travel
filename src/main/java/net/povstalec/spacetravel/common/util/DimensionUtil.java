@@ -13,6 +13,7 @@ import javax.annotation.Nullable;
 import com.mojang.serialization.Lifecycle;
 
 import net.minecraft.Util;
+import net.minecraft.core.Holder;
 import net.minecraft.core.MappedRegistry;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
@@ -24,8 +25,13 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.progress.ChunkProgressListener;
 import net.minecraft.world.RandomSequences;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.biome.Climate;
+import net.minecraft.world.level.biome.MultiNoiseBiomeSource;
 import net.minecraft.world.level.border.BorderChangeListener;
 import net.minecraft.world.level.dimension.LevelStem;
+import net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator;
+import net.minecraft.world.level.levelgen.NoiseGeneratorSettings;
 import net.minecraft.world.level.storage.DerivedLevelData;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import net.minecraft.world.level.storage.WorldData;
@@ -150,60 +156,60 @@ public class DimensionUtil
         PacketHandlerInit.sendPacketToAll(new ClientBoundDimensionUpdatePacket(Set.of(levelKey), true));
         return newLevel;
     }
-
-
-    public static ServerLevel createSpaceship(MinecraftServer server, ResourceLocation dimLoc)
+    
+    public static ServerLevel createAndRegisterLevel(MinecraftServer server, ResourceKey<Level> dimension, Supplier<LevelStem> dimensionFactory)
     {
-        ServerLevel level = createAndRegisterLevel(server, server.forgeGetWorldMap(), ResourceKey.create(Registries.DIMENSION, dimLoc), () -> createSpaceshipStem(server));
-
-        return level;
+        return createAndRegisterLevel(server, server.forgeGetWorldMap(), dimension, dimensionFactory);
+    }
+    
+    public static ServerLevel createAndRegisterLevel(MinecraftServer server, ResourceLocation dimensionLocation, Supplier<LevelStem> dimensionFactory)
+    {
+        return createAndRegisterLevel(server, server.forgeGetWorldMap(), ResourceKey.create(Registries.DIMENSION, dimensionLocation), dimensionFactory);
+    }
+    
+    
+    
+    public static ServerLevel createSpaceship(MinecraftServer server, ResourceLocation dimensionLocation)
+    {
+        return createAndRegisterLevel(server, dimensionLocation, () -> createSpaceshipStem(server));
     }
 
     public static ServerLevel createSpaceship(MinecraftServer server, String name)
     {
-        return createSpaceship(server, new ResourceLocation(SpaceTravel.MODID, name));
+        return createAndRegisterLevel(server, new ResourceLocation(SpaceTravel.MODID, name), () -> createSpaceshipStem(server));
     }
-
+    
     public static ServerLevel createSpaceship(MinecraftServer server)
     {
         return createSpaceship(server, UUID.randomUUID().toString());
     }
     
-    //TODO
-    /*public static ServerLevel createPlanet(MinecraftServer server, Map.Entry<String, SpaceObject.Serializable> planet)
+    
+    
+    public static ServerLevel createWorld(MinecraftServer server, ResourceKey<Level> dimension, Climate.ParameterList<Holder<Biome>> biomes,
+                                          ResourceKey<NoiseGeneratorSettings> noiseGeneratorSettings)
     {
-        ServerLevel level = createAndRegisterLevel(server, server.forgeGetWorldMap(), ResourceKey.create(Registries.DIMENSION, ResourceLocation.tryParse(planet.getKey())), () -> createPlanetStem(server, planet.getValue()));
-
-        return level;
-    }*/
-
+        return createAndRegisterLevel(server, server.forgeGetWorldMap(), dimension, () -> createSurfaceStem(server, biomes, noiseGeneratorSettings));
+    }
+    
+    
+    
     public static LevelStem createSpaceshipStem(MinecraftServer server)
     {
         RegistryAccess registries = server.registryAccess();
-
-        LevelStem stem = new LevelStem(registries.registryOrThrow(Registries.DIMENSION_TYPE).getHolderOrThrow(WorldGenInit.SPACE_TYPE),
-                new SpaceChunkGenerator(
-                        registries.registryOrThrow(Registries.BIOME).asLookup()
-                ));
-
-        return stem;
+        
+        return new LevelStem(registries.registryOrThrow(Registries.DIMENSION_TYPE).getHolderOrThrow(WorldGenInit.SPACE_TYPE),
+                new SpaceChunkGenerator(registries.registryOrThrow(Registries.BIOME).asLookup()));
     }
-
-    //TODO
-    /*public static LevelStem createPlanetStem(MinecraftServer server, SpaceObject.Serializable planet)
+    
+    public static LevelStem createSurfaceStem(MinecraftServer server, Climate.ParameterList<Holder<Biome>> biomes, ResourceKey<NoiseGeneratorSettings> noiseGeneratorSettings)
     {
         RegistryAccess registries = server.registryAccess();
-
-        MultiNoiseBiomeSource multiSource = MultiNoiseBiomeSource.createFromList(planet.getSurface().getSecond());
-
-        LevelStem stem =
-                new LevelStem(
-                   registries.registryOrThrow(Registries.DIMENSION_TYPE).getHolderOrThrow(WorldGenInit.PLANET_TYPE),
-                new NoiseBasedChunkGenerator(multiSource,
-                   registries.registryOrThrow(Registries.NOISE_SETTINGS).getHolderOrThrow(planet.getSurface().getFirst())));
-
-        return stem;
-    }*/
+        MultiNoiseBiomeSource multiSource = MultiNoiseBiomeSource.createFromList(biomes);
+        
+        return new LevelStem(registries.registryOrThrow(Registries.DIMENSION_TYPE).getHolderOrThrow(WorldGenInit.PLANET_TYPE),
+                new NoiseBasedChunkGenerator(multiSource, registries.registryOrThrow(Registries.NOISE_SETTINGS).getHolderOrThrow(noiseGeneratorSettings)));
+    }
     
     public static ResourceKey<Level> stringToDimension(String dimensionString)
     {
