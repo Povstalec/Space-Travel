@@ -28,6 +28,7 @@ import net.povstalec.stellarview.api.common.space_objects.resourcepack.BlackHole
 import net.povstalec.stellarview.api.common.space_objects.resourcepack.Nebula;
 import net.povstalec.stellarview.api.common.space_objects.resourcepack.Star;
 import net.povstalec.stellarview.api.common.space_objects.resourcepack.StarField;
+import org.jetbrains.annotations.Nullable;
 
 public class Multiverse extends SavedData
 {
@@ -95,12 +96,10 @@ public class Multiverse extends SavedData
 		SpaceTravel.LOGGER.info("Universes registered");
 	}
 	
-	public Optional<Universe> getUniverse(ResourceLocation location)
+	@Nullable
+	public Universe getUniverse(ResourceLocation location)
 	{
-		if(!universes.containsKey(location))
-			return Optional.empty();
-		
-		return Optional.of(universes.get(location));
+		return universes.get(location);
 	}
 	
 	private void prepareUniverses()

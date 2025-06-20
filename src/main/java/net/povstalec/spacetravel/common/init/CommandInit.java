@@ -87,7 +87,7 @@ public class CommandInit
 	{
 		MinecraftServer server = context.getSource().getServer();
 		
-		DimensionUtil.createSpaceship(server);
+		DimensionUtil.createRandomSpaceship(server, SpaceTravel.MODID);
 		context.getSource().sendSuccess(() -> Component.literal("Created a new Dimension"), false); //TODO Translation
 		
 		return Command.SINGLE_SUCCESS;
@@ -100,7 +100,7 @@ public class CommandInit
 		
 		if(ResourceLocation.isValidPath(name)) // TODO Check for existing dimensions
 		{
-			DimensionUtil.createSpaceship(server, name);
+			DimensionUtil.createSpaceship(server, SpaceTravel.MODID, name);
 			context.getSource().sendSuccess(() -> Component.literal("Created a new Dimension"), false); //TODO Translation
 		}
 		

@@ -147,13 +147,13 @@ public class SpaceTravel
 		{
 			if(cap.viewObject() != null)
 			{
-				Optional<Universe> universe = Multiverse.get(level).getUniverse(Multiverse.PRIME_UNIVERSE); //TODO There can be other universes
+				Universe universe = Multiverse.get(level).getUniverse(Multiverse.PRIME_UNIVERSE); //TODO There can be other universes
 				
-				if(universe.isPresent())
+				if(universe != null)
 				{
 					PacketHandlerInit.sendToPlayer(player, new ClientBoundRenderCenterUpdatePacket(cap.viewObject())); //TODO Get coords from somewhere
 					PacketHandlerInit.sendToPlayer(player, new ClientBoundSpaceRegionClearPacket());
-					for(Map.Entry<SpaceRegion.RegionPos, STSpaceRegion> spaceRegionEntry : universe.get().getRegionsAt(new SpaceRegion.RegionPos(cap.viewObject().getCoords()), STSpaceRegion.SPACE_REGION_LOAD_DISTANCE, true).entrySet())
+					for(Map.Entry<SpaceRegion.RegionPos, STSpaceRegion> spaceRegionEntry : universe.getRegionsAt(new SpaceRegion.RegionPos(cap.viewObject().getCoords()), STSpaceRegion.SPACE_REGION_LOAD_DISTANCE, true).entrySet())
 					{
 						PacketHandlerInit.sendToPlayer(player, new ClientBoundSpaceRegionLoadPacket(spaceRegionEntry.getValue()));
 					}

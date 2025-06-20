@@ -120,10 +120,10 @@ public class Spaceship extends ViewObject
 	@Nullable
 	private Map<SpaceRegion.RegionPos, STSpaceRegion> newSpaceRegions(MinecraftServer server, SpaceRegion.RegionPos spaceRegionPos)
 	{
-		Optional<Universe> universe = Multiverse.get(server).getUniverse(Multiverse.PRIME_UNIVERSE);
+		Universe universe = Multiverse.get(server).getUniverse(Multiverse.PRIME_UNIVERSE);
 		
-		if(universe.isPresent())
-			return universe.get().getRegionsAt(spaceRegionPos, STSpaceRegion.SPACE_REGION_LOAD_DISTANCE, true);
+		if(universe != null)
+			return universe.getRegionsAt(spaceRegionPos, STSpaceRegion.SPACE_REGION_LOAD_DISTANCE, true);
 		
 		return null;
 	}
@@ -182,10 +182,10 @@ public class Spaceship extends ViewObject
 	
 	public void beamDown(Player player, ServerLevel level)
 	{
-		Optional<Universe> universe = Multiverse.get(level).getUniverse(Multiverse.PRIME_UNIVERSE);
-		if(player != null && universe.isPresent())
+		Universe universe = Multiverse.get(level).getUniverse(Multiverse.PRIME_UNIVERSE);
+		if(player != null && universe != null)
 		{
-			STSpaceRegion region = universe.get().getRegionAt(new SpaceRegion.RegionPos(getSpaceCoords()), false);
+			STSpaceRegion region = universe.getRegionAt(new SpaceRegion.RegionPos(getSpaceCoords()), false);
 			DimensionObject dimensionObject = (DimensionObject) region.findClosest(getSpaceCoords(), spaceObject -> spaceObject instanceof DimensionObject dimObject && dimObject.hasSurface());
 			if(dimensionObject != null)
 			{

@@ -4,11 +4,16 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.common.ForgeMod;
 import net.minecraftforge.common.capabilities.RegisterCapabilitiesEvent;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
 import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.server.ServerStartingEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -44,6 +49,24 @@ public class ForgeEvents
 		if(event.phase.equals(TickEvent.Phase.START) && level != null && !level.isClientSide())
 			level.getCapability(SpaceshipCapabilityProvider.SPACESHIP).ifPresent(cap -> cap.spaceship.tick((ServerLevel) level));
 	}
+	@SubscribeEvent
+	public static void onLivingTick(LivingEvent.LivingTickEvent event)
+	{
+		LivingEntity entity = event.getEntity();
+		Level level = entity.level();
+		
+		if (!level.dimensionTypeId().location().equals(WorldGenInit.SPACE_TYPE.location()))
+			return;
+		
+		if(entity instanceof Player player && player.getAbilities().flying)
+			return;
+		
+		Vec3 movementVector = entity.getDeltaMovement();
+		entity.setDeltaMovement(movementVector.x(), movementVector.y() + entity.getAttribute(ForgeMod.ENTITY_GRAVITY.get()).getValue() - 0.005, movementVector.z());
+		if(entity.isShiftKeyDown())
+			entity.setDeltaMovement(movementVector.x(), movementVector.y() + entity.getAttribute(ForgeMod.ENTITY_GRAVITY.get()).getValue() - 0.02, movementVector.z());
+		entity.fallDistance = 0;
+	}
 	
 	@SubscribeEvent
 	public static void attachLevelCapabilies(AttachCapabilitiesEvent<Level> event)
@@ -75,12 +98,15 @@ public class ForgeEvents
 		if(player == null)
 			return;
 		
-		Optional<Universe> universe = Multiverse.get(player.level()).getUniverse(Multiverse.PRIME_UNIVERSE);
-		universe.ifPresent(value -> player.level().getCapability(ViewObjectCapabilityProvider.VIEW_OBJECT).ifPresent(cap ->
+		Universe universe = Multiverse.get(player.level()).getUniverse(Multiverse.PRIME_UNIVERSE);
+		if(universe != null)
 		{
-			if(cap.viewObject() == null)
-				cap.loadRegion(player.getServer(), value);
-		}));
+			player.level().getCapability(ViewObjectCapabilityProvider.VIEW_OBJECT).ifPresent(cap ->
+			{
+				if(cap.viewObject() == null)
+					cap.loadRegion(player.getServer(), universe);
+			});
+		}
 		
 		SpaceTravel.updatePlayerRenderer(player.level(), player);
 	}
@@ -94,12 +120,15 @@ public class ForgeEvents
 			return;
 		
 		MinecraftServer server = player.level().getServer();
-		Optional<Universe> universe = Multiverse.get(player.level()).getUniverse(Multiverse.PRIME_UNIVERSE);
-		universe.ifPresent(value -> player.level().getCapability(ViewObjectCapabilityProvider.VIEW_OBJECT).ifPresent(cap ->
+		Universe universe = Multiverse.get(player.level()).getUniverse(Multiverse.PRIME_UNIVERSE);
+		if(universe != null)
 		{
-			if(cap.viewObject() == null)
-				cap.loadRegion(player.getServer(), value);
-		}));
+			player.level().getCapability(ViewObjectCapabilityProvider.VIEW_OBJECT).ifPresent(cap ->
+			{
+				if(cap.viewObject() == null)
+					cap.loadRegion(player.getServer(), universe);
+			});
+		}
 		
 		ServerLevel newLevel = server.getLevel(event.getTo());
 		if(newLevel != null)

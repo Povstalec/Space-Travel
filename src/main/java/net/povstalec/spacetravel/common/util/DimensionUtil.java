@@ -174,14 +174,14 @@ public class DimensionUtil
         return createAndRegisterLevel(server, dimensionLocation, () -> createSpaceshipStem(server));
     }
 
-    public static ServerLevel createSpaceship(MinecraftServer server, String name)
+    public static ServerLevel createSpaceship(MinecraftServer server, String namespace, String name)
     {
-        return createAndRegisterLevel(server, new ResourceLocation(SpaceTravel.MODID, name), () -> createSpaceshipStem(server));
+        return createAndRegisterLevel(server, new ResourceLocation(namespace, name), () -> createSpaceshipStem(server));
     }
     
-    public static ServerLevel createSpaceship(MinecraftServer server)
+    public static ServerLevel createRandomSpaceship(MinecraftServer server, String namespace)
     {
-        return createSpaceship(server, UUID.randomUUID().toString());
+        return createSpaceship(server, namespace, UUID.randomUUID().toString());
     }
     
     
