@@ -19,6 +19,7 @@ import net.povstalec.spacetravel.common.space.Universe;
 import net.povstalec.spacetravel.common.space.generation.SpaceObjectParameterRegistry;
 import net.povstalec.spacetravel.common.space.generation.parameters.StarFieldParameters;
 import net.povstalec.spacetravel.common.space.generation.parameters.StarParameters;
+import net.povstalec.spacetravel.common.space.space_objects.STMoon;
 import net.povstalec.spacetravel.common.space.space_objects.STPlanet;
 import net.povstalec.spacetravel.common.space.space_objects.STStar;
 import net.povstalec.spacetravel.common.space.space_objects.STStarField;
@@ -68,6 +69,7 @@ public class Multiverse extends SavedData
 		registerBlackHoles(server);
 		registerNebulae(server);
 		registerPlanets(server);
+		registerMoons(server);
 		
 		prepareUniverses();
 		
@@ -241,6 +243,24 @@ public class Multiverse extends SavedData
 			addObjectToAllUniverses(location, planet);
 		});
 		SpaceTravel.LOGGER.info("Planets registered");
+	}
+	
+	public void registerMoons(MinecraftServer server)
+	{
+		final RegistryAccess registries = server.registryAccess();
+		final Registry<STMoon> planetRegistry = registries.registryOrThrow(SpaceObjectRegistry.MOON_REGISTRY_KEY);
+		
+		Set<Map.Entry<ResourceKey<STMoon>, STMoon>> moonSet = planetRegistry.entrySet();
+		moonSet.forEach((moonEntry) ->
+		{
+			STMoon moon = moonEntry.getValue();
+			ResourceLocation location = moonEntry.getKey().location().withPath("moon/" + moonEntry.getKey().location().getPath());
+			
+			moon.setResourceLocation(location);
+			
+			addObjectToAllUniverses(location, moon);
+		});
+		SpaceTravel.LOGGER.info("Moons registered");
 	}
 
 	//============================================================================================

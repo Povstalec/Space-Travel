@@ -31,7 +31,10 @@ public abstract class OrbitingObjectParameters<T extends OrbitingObject> extends
 	
 	public T generate(Random random, long seed, SpaceCoords spaceCoords, AxisRotation axisRotation)
 	{
-		return generateOrbiting(random, seed, spaceCoords, axisRotation, null);
+		if(orbitParameters == null)
+			return generateOrbiting(random, seed, spaceCoords, axisRotation, null);
+		else
+			return generateOrbiting(random, seed, spaceCoords, axisRotation, orbitParameters.randomOrbitInfo(random));
 	}
 	
 	
@@ -82,7 +85,7 @@ public abstract class OrbitingObjectParameters<T extends OrbitingObject> extends
 		public static final Codec<OrbitParameters> CODEC = RecordCodecBuilder.create(instance -> instance.group(
 				SpaceTravelParameters.FloatRange.POSITIVE_RANGE_CODEC.fieldOf(OrbitingObject.OrbitInfo.APOAPSIS).forGetter(parameters -> parameters.apoapsis),
 				SpaceTravelParameters.FloatRange.POSITIVE_RANGE_CODEC.fieldOf(OrbitingObject.OrbitInfo.PERIAPSIS).forGetter(parameters -> parameters.periapsis),
-				Codec.floatRange(0F, Float.MAX_VALUE).fieldOf(OrbitingObject.OrbitInfo.ORBIT_CLAMP_DISTANCE).forGetter(parameters -> parameters.orbitClampDistance),
+				Codec.floatRange(0F, Float.MAX_VALUE).optionalFieldOf(OrbitingObject.OrbitInfo.ORBIT_CLAMP_DISTANCE, 0F).forGetter(parameters -> parameters.orbitClampDistance),
 				
 				OrbitalPeriodParameters.CODEC.fieldOf(OrbitingObject.OrbitInfo.ORBITAL_PERIOD).forGetter(parameters -> parameters.orbitalPeriod),
 				

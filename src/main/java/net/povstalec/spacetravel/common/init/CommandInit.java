@@ -16,23 +16,13 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.entity.RelativeMovement;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.povstalec.spacetravel.SpaceTravel;
 import net.povstalec.spacetravel.common.capabilities.SpaceshipCapability;
 import net.povstalec.spacetravel.common.capabilities.SpaceshipCapabilityProvider;
-import net.povstalec.spacetravel.common.data.Multiverse;
-import net.povstalec.spacetravel.common.space.DimensionObject;
-import net.povstalec.spacetravel.common.space.STSpaceRegion;
-import net.povstalec.spacetravel.common.space.Universe;
-import net.povstalec.spacetravel.common.space.space_objects.STPlanet;
 import net.povstalec.spacetravel.common.util.DimensionUtil;
-import net.povstalec.stellarview.api.common.SpaceRegion;
-
-import java.util.Optional;
 
 public class CommandInit
 {
@@ -46,8 +36,8 @@ public class CommandInit
 		//Dev commands
 		dispatcher.register(Commands.literal(SpaceTravel.MODID)
 				.then(Commands.literal("dimension")
-					.then(Commands.literal("create").executes(CommandInit::createRandomDimension)
-							.then(Commands.argument("name", StringArgumentType.word()).executes(CommandInit::createNamedDimension))))
+					.then(Commands.literal("create").executes(CommandInit::createRandomSpaceshipDimension)
+							.then(Commands.argument("name", StringArgumentType.word()).executes(CommandInit::createNamedSpaceshipDimension))))
 				.requires(commandSourceStack -> commandSourceStack.hasPermission(2)));
 		
 		dispatcher.register(Commands.literal(SpaceTravel.MODID)
@@ -93,7 +83,7 @@ public class CommandInit
 					.then(Commands.literal("reload").executes(CommandInit::reloadRenderer))));
 	}
 	
-	private static int createRandomDimension(CommandContext<CommandSourceStack> context) throws CommandSyntaxException
+	private static int createRandomSpaceshipDimension(CommandContext<CommandSourceStack> context) throws CommandSyntaxException
 	{
 		MinecraftServer server = context.getSource().getServer();
 		
@@ -103,7 +93,7 @@ public class CommandInit
 		return Command.SINGLE_SUCCESS;
 	}
 	
-	private static int createNamedDimension(CommandContext<CommandSourceStack> context) throws CommandSyntaxException
+	private static int createNamedSpaceshipDimension(CommandContext<CommandSourceStack> context) throws CommandSyntaxException
 	{
 		MinecraftServer server = context.getSource().getServer();
 		String name = StringArgumentType.getString(context, "name");
@@ -277,26 +267,9 @@ public class CommandInit
 	{
 		Player player = context.getSource().getPlayer();
 		ServerLevel level = context.getSource().getLevel();
-		Optional<Universe> universe = Multiverse.get(level).getUniverse(Multiverse.PRIME_UNIVERSE);
 		LazyOptional<SpaceshipCapability> spaceshipCapability = level.getCapability(SpaceshipCapabilityProvider.SPACESHIP);
 		
-		spaceshipCapability.ifPresent(cap ->
-		{
-			if(player != null && universe.isPresent())
-			{
-				STSpaceRegion region = universe.get().getRegionAt(new SpaceRegion.RegionPos(cap.spaceship.getSpaceCoords()), false);
-				DimensionObject dimensionObject = (DimensionObject) region.findClosest(cap.spaceship.getSpaceCoords(), spaceObject -> spaceObject instanceof DimensionObject dimObject && dimObject.hasSurface());
-				if(dimensionObject != null)
-				{
-					ServerLevel dimensionLevel = dimensionObject.getLevel(level.getServer(), true);
-					if(dimensionLevel != null)
-						player.teleportTo(dimensionLevel,
-								player.getX(), dimensionLevel.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, player.getOnPos().getX(), player.getOnPos().getZ()),
-								player.getZ(), RelativeMovement.ALL,
-								player.getYRot(), player.getXRot());
-				}
-			}
-		});
+		spaceshipCapability.ifPresent(cap -> cap.spaceship.beamDown(player, level));
 		
 		return Command.SINGLE_SUCCESS;
 	}

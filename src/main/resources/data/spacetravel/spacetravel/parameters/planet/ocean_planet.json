@@ -1,20 +1,6 @@
 {
-	"parent": "spacetravel:planet/andromeda/kerbol/jool",
-	"coords": { "x": {"ly": 0}, "y": {"ly": 0}, "z": {"ly": 0} },
-	"axis_rotation": { "x_axis": 0, "y_axis": 0, "z_axis": 0 },
-	"orbit_info":
-	{
-		"apoapsis": 27184,
-		"periapsis": 27184,
-		"orbital_period": { "ticks": 52080 },
-		"argument_of_periapsis": 0,
-		"inclination": 0,
-		"longtitude_of_ascending_node": 0,
-		"epoch_mean_anomaly": 0
-	},
 	"texture_layers":
 	[
-		
 		{
 			"texture": "stellarview:textures/environment/halo_template.png",
 			"rgba": {"red": 255, "green": 255, "blue": 255, "alpha": 255},
@@ -37,7 +23,22 @@
 		}
 	],
 	
-	"dimension": "spacetravel:laythe",
+	"orbit_parameters":
+	{
+		"apoapsis": { "min": 50000000, "max": 200000000 },
+		"periapsis": { "min": 50000000, "max": 200000000 },
+		"orbital_period":
+		{
+			"ticks": { "min": 100000000, "max": 1000000000 },
+			"orbits": { "min": 1, "max": 1 },
+			"synodic": true
+		},
+		"argument_of_periapsis": { "min": 0, "max": 360 },
+		"inclination": { "min": 0, "max": 40 },
+		"longtitude_of_ascending_node": { "min": 0, "max": 360 },
+		"epoch_mean_anomaly": { "min": 0, "max": 360 }
+	},
+	
 	"worldgen_info":
 	{
 		"noise_settings": "spacetravel:lifeless_ocean",

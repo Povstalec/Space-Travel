@@ -4,6 +4,7 @@ import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.povstalec.spacetravel.SpaceTravel;
+import net.povstalec.spacetravel.common.space.space_objects.STMoon;
 import net.povstalec.spacetravel.common.space.space_objects.STPlanet;
 import net.povstalec.spacetravel.common.space.space_objects.STStar;
 import net.povstalec.spacetravel.common.space.space_objects.STStarField;
@@ -25,7 +26,7 @@ public class SpaceObjectRegistry
 	public static final ResourceLocation STAR_FIELD_LOCATION = new ResourceLocation(SpaceTravel.MODID, "celestials/star_field");
 	
 	public static final ResourceKey<Registry<STPlanet>> PLANET_REGISTRY_KEY = ResourceKey.createRegistryKey(PLANET_LOCATION);
-	public static final ResourceKey<Registry<Moon>> MOON_REGISTRY_KEY = ResourceKey.createRegistryKey(MOON_LOCATION);
+	public static final ResourceKey<Registry<STMoon>> MOON_REGISTRY_KEY = ResourceKey.createRegistryKey(MOON_LOCATION);
 	public static final ResourceKey<Registry<STStar>> STAR_REGISTRY_KEY = ResourceKey.createRegistryKey(STAR_LOCATION);
 	public static final ResourceKey<Registry<BlackHole>> BLACK_HOLE_REGISTRY_KEY = ResourceKey.createRegistryKey(BLACK_HOLE_LOCATION);
 	public static final ResourceKey<Registry<Nebula>> NEBULA_REGISTRY_KEY = ResourceKey.createRegistryKey(NEBULA_LOCATION);

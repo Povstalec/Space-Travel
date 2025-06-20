@@ -13,6 +13,9 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.RelativeMovement;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.levelgen.Heightmap;
 import net.povstalec.spacetravel.SpaceTravel;
 import net.povstalec.spacetravel.common.data.Multiverse;
 import net.povstalec.spacetravel.common.init.PacketHandlerInit;
@@ -175,6 +178,25 @@ public class Spaceship extends ViewObject
 		travel(level);
 		
 		PacketHandlerInit.sendPacketToDimension(level.dimension(), new ClientBoundSpaceshipUpdatePacket(this));
+	}
+	
+	public void beamDown(Player player, ServerLevel level)
+	{
+		Optional<Universe> universe = Multiverse.get(level).getUniverse(Multiverse.PRIME_UNIVERSE);
+		if(player != null && universe.isPresent())
+		{
+			STSpaceRegion region = universe.get().getRegionAt(new SpaceRegion.RegionPos(getSpaceCoords()), false);
+			DimensionObject dimensionObject = (DimensionObject) region.findClosest(getSpaceCoords(), spaceObject -> spaceObject instanceof DimensionObject dimObject && dimObject.hasSurface());
+			if(dimensionObject != null)
+			{
+				ServerLevel dimensionLevel = dimensionObject.getLevel(level.getServer(), true);
+				if(dimensionLevel != null)
+					player.teleportTo(dimensionLevel,
+							player.getX(), dimensionLevel.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, player.getOnPos().getX(), player.getOnPos().getZ()),
+							player.getZ(), RelativeMovement.ALL,
+							player.getYRot(), player.getXRot());
+			}
+		}
 	}
 	
 	public void updateClientSpaceship()
