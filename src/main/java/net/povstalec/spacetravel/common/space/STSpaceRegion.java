@@ -1,7 +1,6 @@
 package net.povstalec.spacetravel.common.space;
 
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Queue;
 import java.util.Random;
 import java.util.function.Predicate;
@@ -10,7 +9,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.povstalec.spacetravel.common.config.SpaceRegionCommonConfig;
-import net.povstalec.spacetravel.common.init.SpaceObjectRegistry;
+import net.povstalec.spacetravel.common.init.SpaceObjectInit;
 import net.povstalec.spacetravel.common.space.generation.parameters.SpaceObjectParameters;
 import net.povstalec.stellarview.api.common.SpaceRegion;
 import net.povstalec.stellarview.api.common.space_objects.SpaceObject;
@@ -162,11 +161,11 @@ public final class STSpaceRegion extends SpaceRegion
 	{
 		CompoundTag objectTag = object.serializeNBT();
 		
-		ResourceLocation typeLocation = SpaceObjectRegistry.getResourceLocation(object);
+		ResourceLocation typeLocation = SpaceObjectInit.getResourceLocation(object);
 		if(typeLocation == null)
 			return null;
 		
-		objectTag.putString(SpaceObjectRegistry.OBJECT_TYPE, typeLocation.toString());
+		objectTag.putString(SpaceObjectInit.OBJECT_TYPE, typeLocation.toString());
 		
 		CompoundTag childrenTag = new CompoundTag();
 		int i = 0;
@@ -184,14 +183,14 @@ public final class STSpaceRegion extends SpaceRegion
 	
 	private static SpaceObject deserializeSpaceObject(CompoundTag tag)
 	{
-		if(!tag.contains(SpaceObjectRegistry.OBJECT_TYPE))
+		if(!tag.contains(SpaceObjectInit.OBJECT_TYPE))
 			return null;
 		
-		ResourceLocation typeLocation = ResourceLocation.tryParse(tag.getString(SpaceObjectRegistry.OBJECT_TYPE));
+		ResourceLocation typeLocation = ResourceLocation.tryParse(tag.getString(SpaceObjectInit.OBJECT_TYPE));
 		if(typeLocation == null)
 			return null;
 		
-		SpaceObject object = SpaceObjectRegistry.constructObject(typeLocation);
+		SpaceObject object = SpaceObjectInit.constructObject(typeLocation);
 		
 		if(object == null)
 			return null;

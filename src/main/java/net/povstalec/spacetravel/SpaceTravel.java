@@ -1,9 +1,7 @@
 package net.povstalec.spacetravel;
 
 import java.util.Map;
-import java.util.Optional;
 
-import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
@@ -11,7 +9,7 @@ import net.minecraftforge.registries.DataPackRegistryEvent;
 import net.povstalec.spacetravel.common.capabilities.ViewObjectCapability;
 import net.povstalec.spacetravel.common.capabilities.ViewObjectCapabilityProvider;
 import net.povstalec.spacetravel.common.config.SpaceTravelConfig;
-import net.povstalec.spacetravel.common.init.SpaceObjectRegistry;
+import net.povstalec.spacetravel.common.init.SpaceObjectInit;
 import net.povstalec.spacetravel.common.space.STSpaceRegion;
 import net.povstalec.spacetravel.common.space.generation.parameters.PlanetParameters;
 import net.povstalec.spacetravel.common.space.generation.parameters.StarFieldParameters;
@@ -69,12 +67,12 @@ public class SpaceTravel
 			event.dataPackRegistry(StarParameters.REGISTRY_KEY, StarParameters.CODEC, StarParameters.CODEC);
 			event.dataPackRegistry(PlanetParameters.REGISTRY_KEY, PlanetParameters.CODEC, PlanetParameters.CODEC);
 			
-			event.dataPackRegistry(SpaceObjectRegistry.PLANET_REGISTRY_KEY, STPlanet.CODEC, STPlanet.CODEC);
-			event.dataPackRegistry(SpaceObjectRegistry.MOON_REGISTRY_KEY, STMoon.CODEC, STMoon.CODEC);
-			event.dataPackRegistry(SpaceObjectRegistry.STAR_REGISTRY_KEY, STStar.CODEC, STStar.CODEC);
-			event.dataPackRegistry(SpaceObjectRegistry.BLACK_HOLE_REGISTRY_KEY, BlackHole.CODEC, BlackHole.CODEC);
-			event.dataPackRegistry(SpaceObjectRegistry.NEBULA_REGISTRY_KEY, Nebula.CODEC, Nebula.CODEC);
-			event.dataPackRegistry(SpaceObjectRegistry.STAR_FIELD_REGISTRY_KEY, STStarField.CODEC, STStarField.CODEC);
+			event.dataPackRegistry(SpaceObjectInit.PLANET_REGISTRY_KEY, STPlanet.CODEC, STPlanet.CODEC);
+			event.dataPackRegistry(SpaceObjectInit.MOON_REGISTRY_KEY, STMoon.CODEC, STMoon.CODEC);
+			event.dataPackRegistry(SpaceObjectInit.STAR_REGISTRY_KEY, STStar.CODEC, STStar.CODEC);
+			event.dataPackRegistry(SpaceObjectInit.BLACK_HOLE_REGISTRY_KEY, BlackHole.CODEC, BlackHole.CODEC);
+			event.dataPackRegistry(SpaceObjectInit.NEBULA_REGISTRY_KEY, Nebula.CODEC, Nebula.CODEC);
+			event.dataPackRegistry(SpaceObjectInit.STAR_FIELD_REGISTRY_KEY, STStarField.CODEC, STStarField.CODEC);
 		});
 		
 		modEventBus.addListener(this::commonSetup);
@@ -94,12 +92,7 @@ public class SpaceTravel
     	{
             PacketHandlerInit.register();
 			
-			SpaceObjectRegistry.register(new ResourceLocation(SpaceTravel.MODID, "planet"), STPlanet.class, STPlanet::new);
-			SpaceObjectRegistry.register(new ResourceLocation(SpaceTravel.MODID, "moon"), STMoon.class, STMoon::new);
-			SpaceObjectRegistry.register(new ResourceLocation(SpaceTravel.MODID, "star"), STStar.class, STStar::new);
-			SpaceObjectRegistry.register(new ResourceLocation(SpaceTravel.MODID, "black_hole"), BlackHole.class, BlackHole::new);
-			SpaceObjectRegistry.register(new ResourceLocation(SpaceTravel.MODID, "nebula"), Nebula.class, Nebula::new);
-			SpaceObjectRegistry.register(new ResourceLocation(SpaceTravel.MODID, "star_field"), STStarField.class, STStarField::new);
+			SpaceObjectInit.register();
     	});
 	}
 	

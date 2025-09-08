@@ -10,7 +10,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
 import net.povstalec.spacetravel.client.render.level.PlanetSpecialEffects;
 import net.povstalec.spacetravel.client.render.level.SpaceShipSpecialEffects;
-import net.povstalec.spacetravel.common.init.SpaceObjectRegistry;
+import net.povstalec.spacetravel.common.init.SpaceObjectInit;
 import net.povstalec.spacetravel.common.space.DimensionObject;
 import net.povstalec.spacetravel.common.space.STSpaceRegion;
 import net.povstalec.stellarview.api.common.SpaceRegion;
@@ -92,7 +92,7 @@ public class ClientAccess
 	
 	private static SpaceObjectRenderer<?> deserializeObjectsRecursive(SpaceObjectRenderer<?> parent, CompoundTag tag)
 	{
-		String objectTypeString = tag.getString(SpaceObjectRegistry.OBJECT_TYPE);
+		String objectTypeString = tag.getString(SpaceObjectInit.OBJECT_TYPE);
 		
 		if(objectTypeString != null && ResourceLocation.isValidResourceLocation(objectTypeString))
 		{
@@ -142,7 +142,7 @@ public class ClientAccess
 	
 	private static SpaceObject deserialize(ResourceLocation typeLocation, CompoundTag tag)
 	{
-		SpaceObject spaceObject = SpaceObjectRegistry.constructObject(typeLocation);
+		SpaceObject spaceObject = SpaceObjectInit.constructObject(typeLocation);
 		if(spaceObject != null)
 		{
 			spaceObject.deserializeNBT(tag);

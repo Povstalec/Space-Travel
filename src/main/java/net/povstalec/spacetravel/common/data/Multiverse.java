@@ -14,7 +14,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.level.storage.DimensionDataStorage;
 import net.povstalec.spacetravel.SpaceTravel;
-import net.povstalec.spacetravel.common.init.SpaceObjectRegistry;
+import net.povstalec.spacetravel.common.init.SpaceObjectInit;
 import net.povstalec.spacetravel.common.space.Universe;
 import net.povstalec.spacetravel.common.space.generation.SpaceObjectParameterRegistry;
 import net.povstalec.spacetravel.common.space.generation.parameters.StarFieldParameters;
@@ -26,8 +26,6 @@ import net.povstalec.spacetravel.common.space.space_objects.STStarField;
 import net.povstalec.stellarview.api.common.space_objects.SpaceObject;
 import net.povstalec.stellarview.api.common.space_objects.resourcepack.BlackHole;
 import net.povstalec.stellarview.api.common.space_objects.resourcepack.Nebula;
-import net.povstalec.stellarview.api.common.space_objects.resourcepack.Star;
-import net.povstalec.stellarview.api.common.space_objects.resourcepack.StarField;
 import org.jetbrains.annotations.Nullable;
 
 public class Multiverse extends SavedData
@@ -157,7 +155,7 @@ public class Multiverse extends SavedData
 	public void registerStarFields(MinecraftServer server)
 	{
 		final RegistryAccess registries = server.registryAccess();
-		final Registry<STStarField> starFieldRegistry = registries.registryOrThrow(SpaceObjectRegistry.STAR_FIELD_REGISTRY_KEY);
+		final Registry<STStarField> starFieldRegistry = registries.registryOrThrow(SpaceObjectInit.STAR_FIELD_REGISTRY_KEY);
 		
 		Set<Map.Entry<ResourceKey<STStarField>, STStarField>> starFieldSet = starFieldRegistry.entrySet();
 		starFieldSet.forEach((starFieldEntry) ->
@@ -175,7 +173,7 @@ public class Multiverse extends SavedData
 	public void registerStars(MinecraftServer server)
 	{
 		final RegistryAccess registries = server.registryAccess();
-		final Registry<STStar> starRegistry = registries.registryOrThrow(SpaceObjectRegistry.STAR_REGISTRY_KEY);
+		final Registry<STStar> starRegistry = registries.registryOrThrow(SpaceObjectInit.STAR_REGISTRY_KEY);
 		
 		Set<Map.Entry<ResourceKey<STStar>, STStar>> starSet = starRegistry.entrySet();
 		starSet.forEach((starEntry) ->
@@ -193,7 +191,7 @@ public class Multiverse extends SavedData
 	public void registerBlackHoles(MinecraftServer server)
 	{
 		final RegistryAccess registries = server.registryAccess();
-		final Registry<BlackHole> starRegistry = registries.registryOrThrow(SpaceObjectRegistry.BLACK_HOLE_REGISTRY_KEY);
+		final Registry<BlackHole> starRegistry = registries.registryOrThrow(SpaceObjectInit.BLACK_HOLE_REGISTRY_KEY);
 		
 		Set<Map.Entry<ResourceKey<BlackHole>, BlackHole>> blackHoleSet = starRegistry.entrySet();
 		blackHoleSet.forEach((blackHoleEntry) ->
@@ -211,7 +209,7 @@ public class Multiverse extends SavedData
 	public void registerNebulae(MinecraftServer server)
 	{
 		final RegistryAccess registries = server.registryAccess();
-		final Registry<Nebula> starRegistry = registries.registryOrThrow(SpaceObjectRegistry.NEBULA_REGISTRY_KEY);
+		final Registry<Nebula> starRegistry = registries.registryOrThrow(SpaceObjectInit.NEBULA_REGISTRY_KEY);
 		
 		Set<Map.Entry<ResourceKey<Nebula>, Nebula>> nebulaSet = starRegistry.entrySet();
 		nebulaSet.forEach((nebulaEntry) ->
@@ -229,7 +227,7 @@ public class Multiverse extends SavedData
 	public void registerPlanets(MinecraftServer server)
 	{
 		final RegistryAccess registries = server.registryAccess();
-		final Registry<STPlanet> planetRegistry = registries.registryOrThrow(SpaceObjectRegistry.PLANET_REGISTRY_KEY);
+		final Registry<STPlanet> planetRegistry = registries.registryOrThrow(SpaceObjectInit.PLANET_REGISTRY_KEY);
 		
 		Set<Map.Entry<ResourceKey<STPlanet>, STPlanet>> planetSet = planetRegistry.entrySet();
 		planetSet.forEach((planetEntry) ->
@@ -247,7 +245,7 @@ public class Multiverse extends SavedData
 	public void registerMoons(MinecraftServer server)
 	{
 		final RegistryAccess registries = server.registryAccess();
-		final Registry<STMoon> planetRegistry = registries.registryOrThrow(SpaceObjectRegistry.MOON_REGISTRY_KEY);
+		final Registry<STMoon> planetRegistry = registries.registryOrThrow(SpaceObjectInit.MOON_REGISTRY_KEY);
 		
 		Set<Map.Entry<ResourceKey<STMoon>, STMoon>> moonSet = planetRegistry.entrySet();
 		moonSet.forEach((moonEntry) ->

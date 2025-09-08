@@ -14,7 +14,7 @@ import net.povstalec.stellarview.api.common.space_objects.resourcepack.*;
 import javax.annotation.Nullable;
 import java.util.HashMap;
 
-public class SpaceObjectRegistry
+public class SpaceObjectInit
 {
 	public static final String OBJECT_TYPE = "object_type";
 	
@@ -62,6 +62,18 @@ public class SpaceObjectRegistry
 			return LOCATIONS.get(object.getClass());
 		
 		return null;
+	}
+	
+	
+	
+	public static void register()
+	{
+		register(new ResourceLocation(SpaceTravel.MODID, "planet"), STPlanet.class, STPlanet::new);
+		register(new ResourceLocation(SpaceTravel.MODID, "moon"), STMoon.class, STMoon::new);
+		register(new ResourceLocation(SpaceTravel.MODID, "star"), STStar.class, STStar::new);
+		register(new ResourceLocation(SpaceTravel.MODID, "black_hole"), BlackHole.class, BlackHole::new);
+		register(new ResourceLocation(SpaceTravel.MODID, "nebula"), Nebula.class, Nebula::new);
+		register(new ResourceLocation(SpaceTravel.MODID, "star_field"), STStarField.class, STStarField::new);
 	}
 	
 	
