@@ -14,6 +14,7 @@ import net.povstalec.spacetravel.common.space.Spaceship;
 import net.povstalec.stellarview.client.render.level.util.StellarViewFogEffects;
 import net.povstalec.stellarview.client.resourcepack.ViewCenter;
 import net.povstalec.stellarview.client.resourcepack.effects.MeteorEffect;
+import net.povstalec.stellarview.common.config.GeneralConfig;
 import net.povstalec.stellarview.common.util.AxisRotation;
 import org.joml.Matrix4f;
 
@@ -59,7 +60,7 @@ public class SpaceShipSpecialEffects extends SpaceTravelDimensionSpecialEffects
 			coords = viewObject.spaceCoords();
 			this.ticks = level.getGameTime();
 			this.starBrightness = 1F;
-			this.dustCloudBrightness = 1F;
+			this.dustCloudBrightness = GeneralConfig.dust_clouds.get() ? 1F : 0F;
 			
 			stack.pushPose();
 			

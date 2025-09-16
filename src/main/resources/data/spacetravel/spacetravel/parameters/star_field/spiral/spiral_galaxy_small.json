@@ -1,5 +1,5 @@
 {
-	"dust_clouds": { "min":  60, "max": 80 },
+	"dust_clouds": { "min":  0, "max": 5 },
 	
 	"stars": { "min":  200, "max": 500 },
 	"clump_stars_in_center": true,
@@ -14,7 +14,7 @@
 	[
 		{
 			"weight": 1,
-			"dust_clouds": { "min": 30, "max": 50 },
+			"dust_clouds": { "min": 10, "max": 30 },
 			"stars": { "min": 150, "max": 600 },
 			"clump_stars_in_center": true,
 			"arm_rotation_offset": { "min": 0, "max": 0 },

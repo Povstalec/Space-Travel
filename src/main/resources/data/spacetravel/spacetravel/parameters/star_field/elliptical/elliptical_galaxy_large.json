@@ -1,5 +1,5 @@
 {
-	"dust_clouds": { "min":  250, "max": 500 },
+	"dust_clouds": { "min":  50, "max": 80 },
 	
 	"stars": { "min":  10000, "max": 20000 },
 	"clump_stars_in_center": true,
